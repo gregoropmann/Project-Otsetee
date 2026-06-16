@@ -96,4 +96,4 @@ https://www.tv3.ee/tv3telekanal/tv3-uudised/tv3-uudised-maasikate-suitsukala-voi
 
 https://youtu.be/2uNxruqqIjY?si=zWoea7epWUclG5KM
 
-© 2026 · Otsetee & Gregor Opmann <opmanngregor@gmail.com, https://gregoropmann.github.io/aboutme/ >
+© 2026 · Otsetee & [Gregor Opmann](https://gregoropmann.github.io/aboutme/)
