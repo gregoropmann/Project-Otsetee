@@ -42,7 +42,7 @@ dramatically improving public traffic safety.
 ### Brand Strategy &amp; Meaning
 The app leverages a strategic linguistic double-meaning for the local Estonian market:
 1. Otsetee: Represents a direct shortcut from the farm/forest to the commuter.
-2. Osta-tee: Acts as an immediate behavioral trigger meaning &quot;buy on your route.&quot;
+2. Osta-tee: Acts as an immediate behavioral trigger meaning &quot;buy and make on your route.&quot;
 
 ### 2. Operational Workflow
 #### 2.1 The Merchant Interface (The &quot;Pop-Up&quot; Stall)
