@@ -18,6 +18,7 @@
             --summer-cream: #FAF8F5;
             --text-charcoal: #2C2A29;
             --card-white: #FFFFFF;
+            --danger-red: #D9534F;
         }
 
         * {
@@ -120,6 +121,29 @@
             z-index: 1;
         }
 
+        /* Otsinguriba kaardi kohal */
+        .search-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 80px; /* Jtab ruumi zoomi nuppudele mobiilis */
+            max-width: 360px;
+            z-index: 1000;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 1rem;
+            color: var(--text-charcoal);
+            outline: none;
+        }
+
         /* Kohandatud mobiilisõbralikud suunamisnupud */
         .custom-zoom-controls {
             position: absolute;
@@ -198,8 +222,56 @@
         }
 
         .btn-danger {
-            background-color: #D9534F;
+            background-color: var(--danger-red);
             color: white;
+        }
+
+        /* Kohandatud teavituste süsteem (Toast / Modal) */
+        .notification-container {
+            position: absolute;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            z-index: 1001;
+            width: calc(100% - 32px);
+            max-width: 360px;
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .notification-container.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .notification-text {
+            font-size: 0.95rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .notif-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -220,6 +292,10 @@
     </div>
 
     <div id="map-view" class="view">
+        <div class="search-container">
+            <input type="text" id="location-search" class="search-bar" placeholder="Otsi asukohta või teeotsa..." onkeypress="handleSearch(event)">
+        </div>
+
         <div id="map-container"></div>
         
         <div class="custom-zoom-controls">
@@ -235,6 +311,11 @@
         </div>
     </div>
 
+    <div id="app-notification" class="notification-container">
+        <div id="notification-content" class="notification-text">Teavitus</div>
+        <div id="notification-buttons" class="notification-actions"></div>
+    </div>
+
     <script>
         let map;
         let activeMarker = null;
@@ -242,31 +323,85 @@
         let geoWatchId = null;
         let isSelling = false;
 
-        // Globaalsed GPS riistvara seaded
         const geoOptions = {
             enableHighAccuracy: true,
             timeout: 15000,
             maximumAge: 0
         };
 
-        // KÄIVITUS: Kontrollime localStorage olekuid kohe kui leht laeb
+        // UI: Funktsioon kohandatud pop-up teavituste kuvamiseks
+        function showNotification(message, duration = 3500, actions = null) {
+            const container = document.getElementById('app-notification');
+            const content = document.getElementById('notification-content');
+            const btnArea = document.getElementById('notification-buttons');
+            
+            content.innerHTML = message;
+            btnArea.innerHTML = '';
+
+            if (actions && actions.length > 0) {
+                actions.forEach(action => {
+                    const btn = document.createElement('button');
+                    btn.className = `notif-btn ${action.className || ''}`;
+                    btn.innerText = action.text;
+                    btn.onclick = () => {
+                        action.callback();
+                        container.classList.remove('show');
+                    };
+                    btnArea.appendChild(btn);
+                });
+            }
+
+            container.classList.add('show');
+
+            // Kui tegemist on puhta infoga (nuppe pole), peidame selle automaatselt ära
+            if (!actions || actions.length === 0) {
+                setTimeout(() => {
+                    container.classList.remove('show');
+                }, duration);
+            }
+        }
+
+        // ASUKOHA OTSING: Integratsioon OpenStreetMap (Nominatim API) baasil
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const query = document.getElementById('location-search').value;
+                if (!query) return;
+
+                // Lisame automaatse Eesti konteksti otsingule kiiruse ja täpsuse tagamiseks
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Estonia')}&limit=1`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const lat = parseFloat(data[0].lat);
+                            const lon = parseFloat(data[0].lon);
+                            if (map) {
+                                map.setView([lat, lon], 14);
+                                showNotification(`Kuvatakse sihtkoht: <b>${data[0].display_name.split(',')[0]}</b>`);
+                            }
+                        } else {
+                            showNotification("Asukohta ei leitud. Proovi täpsemat nime.");
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        showNotification("Otsingutõrge. Kontrolli võrguühendust.");
+                    });
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const isLoggedIn = localStorage.getItem('otset_loggedin') === 'true';
             const wasSelling = localStorage.getItem('otset_selling') === 'true';
 
             if (isLoggedIn) {
-                // Kui oli sisselogitud, hüppame otse kaardile ilma vilkumiseta
                 switchView('map-view');
-                
-                // Kui müük oli pooleli, käivitame kohe uuesti automaatse jälgimise
                 if (wasSelling) {
                     console.log("Tuvastati aktiivne müügisessioon. Taastatakse GPS...");
-                    startGeoTracking(true); // true tähendab, et tegu on taastamisega (ei tee uut asukoha hüpet kui käsitsi muudetud)
+                    startGeoTracking(true);
                 }
             }
         });
 
-        // Vaadete vahetamise loogika
         function switchView(viewId) {
             document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -286,10 +421,10 @@
             console.log(`Logitakse sisse pakujaga: ${provider}`);
             localStorage.setItem('otset_loggedin', 'true');
             switchView('map-view');
+            showNotification(`Tere tulemast! Sisselogimine edukas kontoga: ${provider}`);
         }
 
         function handleLogout() {
-            // Puhastame kogu mälu väljalogimisel
             stopGeoTracking();
             localStorage.removeItem('otset_loggedin');
             localStorage.removeItem('otset_selling');
@@ -298,9 +433,7 @@
             switchView('login-view');
         }
 
-        // Kaardi algistamine Nõo ja Elva vahele
         function initMap() {
-            // Kui mälus on käsitsi salvestatud punkt, algistame kaardi sinna, muidu keskpunkti
             const savedLat = localStorage.getItem('otset_custom_lat');
             const savedLng = localStorage.getItem('otset_custom_lng');
             const centerPoint = (savedLat && savedLng) ? [parseFloat(savedLat), parseFloat(savedLng)] : [58.2522, 26.4719];
@@ -314,25 +447,22 @@
             }).addTo(map);
         }
 
-        // Suunamise funktsioonid
         function mapZoomIn() { if (map) map.zoomIn(); }
         function mapZoomOut() { if (map) map.zoomOut(); }
 
-        // Müügi alustamise ja lõpetamise lüliti (Toggle)
         function toggleMerchantStall() {
             if (!isSelling) {
                 startGeoTracking(false);
             } else {
                 stopGeoTracking();
-                alert("Müük lõpetatud. Sinu asukohapunkt on kaardilt eemaldatud.");
+                showNotification("Müük lõpetatud. Sinu asukohapunkt on kaardilt eemaldatud.");
             }
         }
 
-        // Aktiivse GPS voo käivitamine
         function startGeoTracking(isRestoring) {
             const actionBtn = document.getElementById('action-btn');
             if (!navigator.geolocation) {
-                alert("Sinu seade ei toeta GPS-teenuseid.");
+                showNotification("Sinu seade ei toeta GPS-teenuseid.");
                 return;
             }
 
@@ -343,79 +473,103 @@
                 (position) => {
                     let { latitude, longitude, accuracy } = position.coords;
                     
-                    // KORREKTSIOON: Tallinna IP-võrgu vea detekteerimine
-                    if (latitude > 59.0 && !localStorage.getItem('otset_custom_lat') && confirm("Süsteem tuvastas asukohaks Tallinna (IP-põhine võrguviga). Kas soovid kasutada kohalikku Nõo/Elva testasukohta?")) {
-                        latitude = 58.2522;
-                        longitude = 26.4719;
-                        accuracy = 15;
+                    // KORREKTSIOON: Tallinna IP-võrgu vea tuvastamine kohandatud dialoogiaknaga
+                    if (latitude > 59.0 && !localStorage.getItem('otset_custom_lat')) {
+                        showNotification(
+                            "Süsteem tuvastas asukohaks Tallinna (võrgu IP-viga). Kas soovid kasutada kohalikku Nõo/Elva testasukohta?",
+                            0, // Hoiab akna avatuna kuni otsuse tegemiseni
+                            [
+                                {
+                                    text: "Kasuta testasukohta",
+                                    className: "btn-primary",
+                                    callback: () => {
+                                        updateLocationProcess(58.2522, 26.4719, 15, isRestoring);
+                                    }
+                                },
+                                {
+                                    text: "Ei, jäta GPS",
+                                    className: "btn-accent",
+                                    callback: () => {
+                                        updateLocationProcess(latitude, longitude, accuracy, isRestoring);
+                                    }
+                                }
+                            ]
+                        );
+                        return;
                     }
 
-                    // Kui meil on mälus kasutaja poolt käsitsi lohistatud asukoht, eelistame seda brauseri kõikuvale GPS-ile üle värskenduse
-                    const savedLat = localStorage.getItem('otset_custom_lat');
-                    const savedLng = localStorage.getItem('otset_custom_lng');
-                    if (savedLat && savedLng) {
-                        latitude = parseFloat(savedLat);
-                        longitude = parseFloat(savedLng);
-                    }
-
-                    // Puhastame vanad kihid
-                    if (activeMarker) map.removeLayer(activeMarker);
-                    if (accuracyCircle) map.removeLayer(accuracyCircle);
-
-                    // Kui tegu on esmakordse käivitamisega (mitte taastamisega), suuname kaardi keskele
-                    if (!isRestoring) {
-                        map.setView([latitude, longitude], 15);
-                    }
-
-                    // Joonistame kihid uuesti
-                    accuracyCircle = L.circle([latitude, longitude], {
-                        radius: accuracy,
-                        color: 'rgba(79, 119, 170, 0.5)',
-                        fillColor: '#4F77AA',
-                        fillOpacity: 0.15,
-                        weight: 1.5
-                    }).addTo(map);
-
-                    activeMarker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
-                    
-                    activeMarker.bindPopup(`
-                        <b>Sinu Müügikoht on AKTIIVNE!</b><br>
-                        Täpsus: ±${Math.round(accuracy)}m.<br>
-                        <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on vales kohas, lohista see näpuga õigesse teeotsa!</span>
-                    `);
-                    
-                    if (!isRestoring) activeMarker.openPopup();
-
-                    // Kuulame lohistamist ja salvestame uue täpse asukoha localStorage'isse
-                    activeMarker.on('dragend', function(event) {
-                        const marker = event.target;
-                        const currentPos = marker.getLatLng();
-                        
-                        accuracyCircle.setLatLng(currentPos);
-                        
-                        localStorage.setItem('otset_custom_lat', currentPos.lat);
-                        localStorage.setItem('otset_custom_lng', currentPos.lng);
-                        console.log(`Uus punkt salvestatud mällu: ${currentPos.lat}, ${currentPos.lng}`);
-                    });
-
-                    // Märgime oleku aktiivseks nii programmis kui veebilehe mälus
-                    isSelling = true;
-                    localStorage.setItem('otset_selling', 'true');
-                    
-                    actionBtn.disabled = false;
-                    actionBtn.innerText = "Lõpeta Müük";
-                    actionBtn.className = "btn btn-danger";
+                    updateLocationProcess(latitude, longitude, accuracy, isRestoring);
                 },
                 (error) => {
                     actionBtn.disabled = false;
                     actionBtn.innerText = "Alusta Müüki";
                     console.error(error);
+                    showNotification("GPS asukoha määramine ebaõnnestus.");
                 },
                 geoOptions
             );
         }
 
-        // GPS voo sulgemine ja puhastamine
+        // Eraldatud abifunktsioon asukohapunkti uuendustsükli täitmiseks
+        function updateLocationProcess(lat, lng, accuracy, isRestoring) {
+            const actionBtn = document.getElementById('action-btn');
+            let finalLat = lat;
+            let finalLng = lng;
+
+            const savedLat = localStorage.getItem('otset_custom_lat');
+            const savedLng = localStorage.getItem('otset_custom_lng');
+            if (savedLat && savedLng) {
+                finalLat = parseFloat(savedLat);
+                finalLng = parseFloat(savedLng);
+            }
+
+            if (activeMarker) map.removeLayer(activeMarker);
+            if (accuracyCircle) map.removeLayer(accuracyCircle);
+
+            if (!isRestoring) {
+                map.setView([finalLat, finalLng], 15);
+            }
+
+            accuracyCircle = L.circle([finalLat, finalLng], {
+                radius: accuracy,
+                color: 'rgba(79, 119, 170, 0.5)',
+                fillColor: '#4F77AA',
+                fillOpacity: 0.15,
+                weight: 1.5
+            }).addTo(map);
+
+            activeMarker = L.marker([finalLat, finalLng], { draggable: true }).addTo(map);
+            
+            activeMarker.bindPopup(`
+                <b>Sinu Müügikoht on AKTIIVNE!</b><br>
+                Täpsus: ±${Math.round(accuracy)}m.<br>
+                <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on vales kohas, lohista see näpuga õigesse teeotsa!</span>
+            `);
+            
+            if (!isRestoring) {
+                activeMarker.openPopup();
+                showNotification("Müügikoht aktiveeritud! Sinu asukoht on nüüd ostjatele nähtav.");
+            }
+
+            activeMarker.on('dragend', function(event) {
+                const marker = event.target;
+                const currentPos = marker.getLatLng();
+                
+                accuracyCircle.setLatLng(currentPos);
+                
+                localStorage.setItem('otset_custom_lat', currentPos.lat);
+                localStorage.setItem('otset_custom_lng', currentPos.lng);
+                showNotification("Asukoht teeääres täpsustatud ja salvestatud!");
+            });
+
+            isSelling = true;
+            localStorage.setItem('otset_selling', 'true');
+            
+            actionBtn.disabled = false;
+            actionBtn.innerText = "Lõpeta Müük";
+            actionBtn.className = "btn btn-danger";
+        }
+
         function stopGeoTracking() {
             const actionBtn = document.getElementById('action-btn');
             
@@ -437,7 +591,6 @@
             }
         }
 
-        // Service Worker registratsioon PWA jaoks
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
