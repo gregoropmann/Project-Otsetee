@@ -35,7 +35,7 @@
             overflow: hidden;
         }
 
-        /* View Layer Management */
+        /* Vaadete haldus */
         .view {
             display: none;
             width: 100%;
@@ -50,21 +50,22 @@
             flex-direction: column;
         }
 
-        /* Screen 1: Login / Welcome Portal */
+        /* Sisselogimisvaade kauni põllu taustaga */
         #login-view {
             justify-content: center;
             align-items: center;
             padding: 20px;
             background-image: url("assets/pold.webp");
-            background-size: cover;       /* Makes sure the image covers the entire screen */
-            background-position: center;   /* Centers the image so it looks great on all devices */
-            background-repeat: no-repeat;  /* Prevents the image from tiling */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
+
         .login-card {
             background: var(--card-white);
             padding: 40px 30px;
             border-radius: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 380px;
             text-align: center;
@@ -111,7 +112,7 @@
             border: none;
         }
 
-        /* Screen 2: Map Dashboard */
+        /* Kaardivaade */
         #map-container {
             flex: 1;
             width: 100%;
@@ -119,7 +120,7 @@
             z-index: 1;
         }
 
-        /* Floating Controls Overlay */
+        /* Kaardi peal ujuv juhtpaneel */
         .map-overlay {
             position: absolute;
             bottom: 24px;
@@ -149,6 +150,7 @@
             font-weight: 700;
             cursor: pointer;
             text-align: center;
+            transition: background 0.2s, color 0.2s;
         }
 
         .btn-primary {
@@ -158,6 +160,12 @@
 
         .btn-accent {
             background-color: var(--wheat-gold);
+            color: white;
+        }
+
+        /* Punane ohutuunnetus nupule, kui müük on aktiivne */
+        .btn-danger {
+            background-color: #D9534F;
             color: white;
         }
     </style>
@@ -170,10 +178,10 @@
             <div class="brand-subtitle">Otsetee värske toiduni maanteel</div>
             
             <button class="oauth-btn" onclick="mockLogin('Google')">
-                <span>Continue with Google</span>
+                <span>Jätka Google kontoga</span>
             </button>
             <button class="oauth-btn apple" onclick="mockLogin('Apple')">
-                <span>Continue with Apple</span>
+                <span>Jätka Apple kontoga</span>
             </button>
         </div>
     </div>
@@ -183,7 +191,7 @@
         
         <div class="map-overlay">
             <div class="action-bar">
-                <button class="btn btn-accent" onclick="triggerMerchantStall()">Alusta Müüki</button>
+                <button id="action-btn" class="btn btn-accent" onclick="toggleMerchantStall()">Alusta Müüki</button>
                 <button class="btn btn-primary" onclick="switchView('login-view')">Logi välja</button>
             </div>
         </div>
@@ -192,13 +200,13 @@
     <script>
         let map;
         let activeMarker = null;
+        let isSelling = false;
 
-        // View Swapping Logic
+        // Vaadete vahetamise loogika
         function switchView(viewId) {
             document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
             
-            // Invalidate Leaflet sizing rules if loading the map view
             if (viewId === 'map-view') {
                 setTimeout(() => {
                     if (!map) {
@@ -210,62 +218,86 @@
             }
         }
 
-        // Mock OAuth Auth Flow for UI Testing
         function mockLogin(provider) {
-            console.log(`Authenticating token loop via ${provider}...`);
+            console.log(`Logitakse sisse pakujaga: ${provider}`);
             switchView('map-view');
         }
 
-        // Initialize Leaflet Map Centered around the Nõo / Elva area
+        // Kaardi algistamine Nõo ja Elva vahele
         function initMap() {
-            // Lat/Lon for center coordinates between Nõo and Elva
             map = L.map('map-container', {
-                zoomControl: false // Turning off to maximize clean space on mobile
+                zoomControl: false
             }).setView([58.2522, 26.4719], 12); 
 
-            // Pull beautiful open-source map graphics
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
         }
 
-        // Drop dynamic user location pin when seller hits "Alusta Müüki"
-        function triggerMerchantStall() {
-            if (!navigator.geolocation) {
-                alert("Sinu seade ei toeta GPS-teenuseid.");
-                return;
+        // Müügi alustamise ja lõpetamise lüliti (Toggle)
+        function toggleMerchantStall() {
+            const actionBtn = document.getElementById('action-btn');
+
+            if (!isSelling) {
+                // MÜÜGI ALUSTAMINE
+                if (!navigator.geolocation) {
+                    alert("Sinu seade ei toeta GPS-teenuseid.");
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        let { latitude, longitude } = position.coords;
+                        
+                        // KORREKTSIOON: Kui brauser arvab IP tõttu, et oled Tallinnas (Lat > 59), pakume Lõuna-Eesti testasukohta
+                        if (latitude > 59.0 && confirm("Süsteem tuvastas asukohaks Tallinna (IP-põhine võrguviga). Kas soovid kasutada kohalikku Nõo/Elva testasukohta?")) {
+                            latitude = 58.2522;
+                            longitude = 26.4719;
+                        }
+
+                        if (activeMarker) {
+                            map.removeLayer(activeMarker);
+                        }
+
+                        map.setView([latitude, longitude], 14);
+
+                        activeMarker = L.marker([latitude, longitude]).addTo(map)
+                            .bindPopup(`<b>Sinu Müügikoht!</b><br>Oled kaardil otset.ee kasutajatele nähtav.`)
+                            .openPopup();
+
+                        // Muuda nupu olekut
+                        isSelling = true;
+                        actionBtn.innerText = "Lõpeta Müük";
+                        actionBtn.className = "btn btn-danger"; 
+                    },
+                    (error) => {
+                        alert("Asukoha leidmine ebaõnnestus. Veendu, et asukohajagamise õigused on lubatud.");
+                        console.error(error);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                // MÜÜGI LÕPETAMINE
+                if (activeMarker) {
+                    map.removeLayer(activeMarker);
+                    activeMarker = null;
+                }
+                
+                // Taasta nupu algne olek
+                isSelling = false;
+                actionBtn.innerText = "Alusta Müüki";
+                actionBtn.className = "btn btn-accent"; 
+                
+                alert("Müük lõpetatud. Sinu asukohapunkt on kaardilt eemaldatud.");
             }
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    
-                    if (activeMarker) {
-                        map.removeLayer(activeMarker);
-                    }
-
-                    // Pan smoothly to merchant coordinates
-                    map.setView([latitude, longitude], 14);
-
-                    // Create dynamic map pin
-                    activeMarker = L.marker([latitude, longitude]).addTo(map)
-                        .bindPopup(`<b>Sinu Müügikoht!</b><br>Oled kaardil otset.ee kasutajatele nähtav.`)
-                        .openPopup();
-                },
-                (error) => {
-                    alert("Asukoha leidmine ebaõnnestus. Palun luba GPS õigused.");
-                    console.error(error);
-                },
-                { enableHighAccuracy: true }
-            );
         }
 
-        // Register Service Worker for PWA Offline Functionality
+        // Service Worker registratsioon PWA jaoks
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker Registered!', reg.scope))
-                    .catch(err => console.log('Service Worker Registration Failed', err));
+                    .then(reg => console.log('Service Worker edukalt registreeritud!', reg.scope))
+                    .catch(err => console.log('Service Worker tõrge:', err));
             });
         }
     </script>
