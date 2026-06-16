@@ -88,12 +88,18 @@ By pairing clean data logic with real-time hardware GPS location updates, the Ot
 ecosystem transforms unstructured roadside commerce into a synchronized, secure, and
 entirely lawful regional trade network.
 
-## Links
+## Links, the people are outraged.
 
 https://www.err.ee/1610056144/transpordiamet-on-kehtestanud-teeaarsetele-muugisiltidele-hulga-noudeid
 
 https://www.tv3.ee/tv3telekanal/tv3-uudised/tv3-uudised-maasikate-suitsukala-voi-laste-limonaadimuugi-silt-tee-aares-voib-tuua-kopsaka-trahvi/
 
 https://youtu.be/2uNxruqqIjY?si=zWoea7epWUclG5KM
+
+https://www.facebook.com/delfi.ee/posts/sildid-v%25C3%25B5ivad-hajutada-juhtide-t%25C3%25A4helepanu%25EF%25B8%258F/1435077828652659/
+
+https://arileht.delfi.ee/artikkel/120590879/vaikekaupmees-ei-tohi-reklaamsilte-niisama-tee-aarde-panna-loata-silt-voib-tuua-trahvi?fbclid=IwY2xjawSequVleHRuA2FlbQIxMQBicmlkETBpb0gzeFhFWThoT1Q1bDZWc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHvi13AUo7hbYBxtY1o0CLKTR7j1ALFqWyqiyleUcmOq_p49n8tNIAOCag-W__aem_O45-ORjw7yn_okVFoCa0lA
+
+https://www.facebook.com/tv3uudised/posts/maasikad-v%C3%A4rsked-kartulid-ja-suitsukala-suvel-on-tee%C3%A4%C3%A4red-t%C3%A4is-kutsuvaid-m%C3%BC%C3%BCgivi/973687065661596/
 
 © 2026 · Otsetee & [Gregor Opmann](https://gregoropmann.github.io/aboutme/)
