@@ -120,7 +120,41 @@
             z-index: 1;
         }
 
-        /* Kaardi peal ujuv juhtpaneel */
+        /* Kohandatud mobiilisõbralikud suuminupud */
+        .custom-zoom-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .zoom-btn {
+            width: 46px;
+            height: 46px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            border: none;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-charcoal);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .zoom-btn:active {
+            background: #EAEAEA;
+        }
+
+        /* Kaardi peal ujuv juhtpaneel alumises ääres */
         .map-overlay {
             position: absolute;
             bottom: 24px;
@@ -163,7 +197,6 @@
             color: white;
         }
 
-        /* Punane ohutuunnetus nupule, kui müük on aktiivne */
         .btn-danger {
             background-color: #D9534F;
             color: white;
@@ -188,6 +221,11 @@
 
     <div id="map-view" class="view">
         <div id="map-container"></div>
+        
+        <div class="custom-zoom-controls">
+            <button class="zoom-btn" onclick="mapZoomIn()">+</button>
+            <button class="zoom-btn" onclick="mapZoomOut()">−</button>
+        </div>
         
         <div class="map-overlay">
             <div class="action-bar">
@@ -226,12 +264,21 @@
         // Kaardi algistamine Nõo ja Elva vahele
         function initMap() {
             map = L.map('map-container', {
-                zoomControl: false
+                zoomControl: false // Peidame Leafleti vaikimisi nupud, et kasutada oma ilusaid nuppe
             }).setView([58.2522, 26.4719], 12); 
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
+        }
+
+        // Suunamise funktsioonid
+        function mapZoomIn() {
+            if (map) map.zoomIn();
+        }
+
+        function mapZoomOut() {
+            if (map) map.zoomOut();
         }
 
         // Müügi alustamise ja lõpetamise lüliti (Toggle)
