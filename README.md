@@ -88,6 +88,12 @@ By pairing clean data logic with real-time hardware GPS location updates, the Ot
 ecosystem transforms unstructured roadside commerce into a synchronized, secure, and
 entirely lawful regional trade network.
 
+## Links
 
+https://www.err.ee/1610056144/transpordiamet-on-kehtestanud-teeaarsetele-muugisiltidele-hulga-noudeid
 
-<p>&copy; 2026 · Otsetee & Gregor Opmann</p>
+https://www.tv3.ee/tv3telekanal/tv3-uudised/tv3-uudised-maasikate-suitsukala-voi-laste-limonaadimuugi-silt-tee-aares-voib-tuua-kopsaka-trahvi/
+
+https://youtu.be/2uNxruqqIjY?si=zWoea7epWUclG5KM
+
+<p>&copy; 2026 · Otsetee & [Gregor Opmann](https://gregoropmann.github.io/aboutme/)</p>
