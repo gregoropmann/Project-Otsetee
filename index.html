@@ -13,7 +13,6 @@
     <link rel="shortcut icon" href="assets/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Otsetee" />
-    <link rel="manifest" href="assets/site.webmanifest" />
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -45,7 +44,6 @@
             overflow: hidden;
         }
 
-        /* Vaadete haldus */
         .view {
             display: none;
             width: 100%;
@@ -60,22 +58,19 @@
             flex-direction: column;
         }
 
-        /* Sisselogimisvaade */
         #login-view {
             justify-content: center;
             align-items: center;
             padding: 20px;
-            background-image: url("assets/pold.webp");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url("assets/pold.webp") center/cover no-repeat;
+            background-color: var(--sinilill-blue);
         }
 
         .login-card {
             background: var(--card-white);
             padding: 40px 30px;
             border-radius: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             width: 100%;
             max-width: 380px;
             text-align: center;
@@ -139,7 +134,6 @@
         .divider:not(:empty)::before { margin-right: .25em; }
         .divider:not(:empty)::after { margin-left: .25em; }
 
-        /* Kaardivaade */
         #map-container {
             flex: 1;
             width: 100%;
@@ -153,7 +147,7 @@
             left: 20px;
             right: 80px;
             max-width: 360px;
-            z-index: 1000;
+            z-index: 1100;
         }
 
         .search-bar {
@@ -173,7 +167,7 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            z-index: 1000;
+            z-index: 1100;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -205,7 +199,7 @@
             bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 1000;
+            z-index: 1100;
             width: calc(100% - 32px);
             max-width: 400px;
         }
@@ -237,7 +231,6 @@
         .btn-danger { background-color: var(--danger-red); color: white; }
         .btn-success { background-color: var(--buyer-green); color: white; }
         
-        /* Tooteseaded vaade */
         #product-selection-view {
             background-color: var(--summer-cream);
             padding: 20px;
@@ -304,7 +297,7 @@
         .pricing-fields { display: flex; gap: 4px; }
 
         .price-num-input {
-            width: 60px;
+            width: 65px;
             padding: 6px;
             border: 1px solid #CCC;
             border-radius: 6px;
@@ -345,15 +338,15 @@
             padding: 16px 0;
             margin-top: auto;
             border-top: 1px solid rgba(0,0,0,0.05);
+            z-index: 10;
         }
 
-        /* Teavitused */
         .notification-container {
             position: absolute;
             top: 90px;
             left: 50%;
             transform: translateX(-50%) translateY(-20px);
-            z-index: 1001;
+            z-index: 2000;
             width: calc(100% - 32px);
             max-width: 360px;
             background: white;
@@ -378,7 +371,7 @@
         .notification-actions { display: flex; gap: 8px; justify-content: flex-end; }
         .notif-btn { padding: 10px 18px; border: none; border-radius: 10px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
         .preview-marker-icon { filter: hue-rotate(140deg) saturate(2); }
-        .nav-link-btn { display: inline-block; margin-top: 8px; padding: 8px 12px; background: #4285F4; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.8rem; text-align: center;}
+        .nav-link-btn { display: block; margin-top: 8px; padding: 10px 12px; background: #4285F4; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem; text-align: center;}
     </style>
 </head>
 <body>
@@ -446,9 +439,10 @@
         let activeMarker = null;
         let accuracyCircle = null;
         let previewMarker = null;
+        let buyerCircle = null;
         let geoWatchId = null;
         let isSelling = false;
-        let userRole = 'buyer'; // 'merchant' või 'buyer'
+        let userRole = 'buyer'; 
 
         const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
 
@@ -541,10 +535,8 @@
 
         function handleActionBarClick() {
             if (userRole === 'buyer') {
-                // Ostja režiimis toimib nupp kui "Minu Asukoht" leidja
                 findPassengerLocation();
             } else {
-                // Müüja režiimis kontrollib müügiputka olekut
                 if (isSelling) {
                     stopGeoTracking();
                     showNotification("Müük lõpetatud. Sinu asukohapunkt on kaardilt eemaldatud.");
@@ -565,8 +557,9 @@
                     const { latitude, longitude } = position.coords;
                     if (map) {
                         map.setView([latitude, longitude], 14);
-                        // Ajutine sinine ring ostja asukoha märkimiseks
-                        L.circle([latitude, longitude], { radius: 30, color: '#4CAF50', fillColor: '#4CAF50', fillOpacity: 0.4 }).addTo(map)
+                        if (buyerCircle) map.removeLayer(buyerCircle);
+                        
+                        buyerCircle = L.circle([latitude, longitude], { radius: 40, color: '#4CAF50', fillColor: '#4CAF50', fillOpacity: 0.4 }).addTo(map)
                             .bindPopup('Sinu asukoht').openPopup();
                     }
                 },
@@ -653,8 +646,7 @@
 
                                 previewMarker = L.marker([lat, lon], { icon: orangeIcon }).addTo(map);
                                 
-                                // Google Maps navigatsiooni link (töötab nii ostjale kui müüjale)
-                                const mapsLink = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+                                const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
                                 previewMarker.bindPopup(`
                                     <b>${placeName}</b><br>
                                     Koordinaadid: ${lat.toFixed(5)}, ${lon.toFixed(5)}<br>
@@ -716,7 +708,6 @@
             updateActionBarState();
             showNotification(`Sisselogimine edukas rollis: ${role === 'merchant' ? 'Müüja' : 'Ostja'}.`);
             
-            // Kui ostja logib sisse, leiame kohe tema asukoha
             if (role === 'buyer') { findPassengerLocation(); }
         }
 
@@ -728,6 +719,7 @@
             localStorage.removeItem('otset_custom_lat');
             localStorage.removeItem('otset_custom_lng');
             localStorage.removeItem('otset_active_products');
+            if (buyerCircle) { map.removeLayer(buyerCircle); buyerCircle = null; }
             switchView('login-view');
         }
 
@@ -739,13 +731,13 @@
             map = L.map('map-container', { zoomControl: false }).setView(centerPoint, 12); 
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
+                attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // TESTPUNKT: Lisame kaardile ühe näidismüüja punktikese, et Ostja näeks midagi sirvides
+            // TESTPUNKT: Näidismüüja
             const testLat = 58.2550, testLng = 26.4800;
             const testMarker = L.marker([testLat, testLng]).addTo(map);
-            const gMapsLink = `https://www.google.com/maps/dir/?api=1&destination=${testLat},${testLng}`;
+            const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${testLat},${testLng}`;
             testMarker.bindPopup(`
                 <b>Miku Mahetalu Müügikoht</b><br>
                 • Värske kartul (1.50 €/kg)<br>
@@ -758,7 +750,7 @@
         function mapZoomOut() { if (map) map.zoomOut(); }
 
         function startGeoTracking(isRestoring) {
-            if (userRole === 'buyer') return; // Ostja ei saa trackingut alustada
+            if (userRole === 'buyer') return; 
             
             const actionBtn = document.getElementById('action-btn');
             if (!navigator.geolocation) {
@@ -830,7 +822,7 @@
             
             const rawProducts = localStorage.getItem('otset_active_products');
             const prodListHTML = rawProducts ? JSON.parse(rawProducts).map(p => `• ${p}`).join('<br>') : 'Põllumajandustooted';
-            const gMapsLink = `https://www.google.com/maps/dir/?api=1&destination=${finalLat},${finalLng}`;
+            const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${finalLat},${finalLng}`;
 
             activeMarker.bindPopup(`
                 <div style="max-height:180px; overflow-y:auto; font-size:0.85rem;">
