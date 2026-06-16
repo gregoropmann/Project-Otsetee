@@ -26,7 +26,7 @@ Teeperved peavad jääma vabaks ja ohutuks. Siltide asemel saavad autojuhid kesk
 ## Otsetee missioon
 Me usume, et teeäärne kaubandus on Eesti maaelu ja suve pärl. Otsetee annab kohalikele tootjatele digitaalse hääle ja ostjatele mugava teejuhi, muutes samal ajal meie maanteed kõigi jaoks turvalisemaks. Me ühendame kohaliku toidu värskuse ja liikluse turvalisuse, luues nutika otsetee tootjalt tarbijani.
 
-
+--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ### 1. Core Concept &amp; Vision
 The Otsetee (or &quot;Osta-tee&quot;) application is designed to solve a critical, real-world conflict
