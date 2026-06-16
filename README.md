@@ -1,4 +1,4 @@
-![otset.ee on $290 — GoDaddy](FUNDING.yml)
+![otset.ee on $300 — GoDaddy](FUNDING.yml)
 
 # Projekt Otsetee: Nutikas ja ohutu tee värske toiduni
 
