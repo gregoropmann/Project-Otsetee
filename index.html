@@ -120,7 +120,7 @@
             z-index: 1;
         }
 
-        /* Kohandatud mobiilisõbralikud suuminupud */
+        /* Kohandatud mobiilisõbralikud suunamisnupud */
         .custom-zoom-controls {
             position: absolute;
             top: 20px;
@@ -238,6 +238,8 @@
     <script>
         let map;
         let activeMarker = null;
+        let accuracyCircle = null;
+        let geoWatchId = null;
         let isSelling = false;
 
         // Vaadete vahetamise loogika
@@ -264,7 +266,7 @@
         // Kaardi algistamine Nõo ja Elva vahele
         function initMap() {
             map = L.map('map-container', {
-                zoomControl: false // Peidame Leafleti vaikimisi nupud, et kasutada oma ilusaid nuppe
+                zoomControl: false
             }).setView([58.2522, 26.4719], 12); 
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -292,42 +294,96 @@
                     return;
                 }
 
-                navigator.geolocation.getCurrentPosition(
+                actionBtn.innerText = "Otsib asukohta...";
+                actionBtn.disabled = true;
+
+                // Riistvaralise GPS-i seaded maksimaalseks täpsuseks
+                const geoOptions = {
+                    enableHighAccuracy: true, // Sundsurve seadme sisse-ehitatud GPS kiibile
+                    timeout: 15000,           // Lubame telefonil asukohta otsida kuni 15 sekundit
+                    maximumAge: 0             // Keelame brauseril vanade vahemällu salvestatud punktide kasutamise
+                };
+
+                // Kasutame watchPosition-i, et asukoht reaalajas "paika loksuks"
+                geoWatchId = navigator.geolocation.watchPosition(
                     (position) => {
-                        let { latitude, longitude } = position.coords;
+                        let { latitude, longitude, accuracy } = position.coords;
                         
-                        // KORREKTSIOON: Kui brauser arvab IP tõttu, et oled Tallinnas (Lat > 59), pakume Lõuna-Eesti testasukohta
+                        // KORREKTSIOON: Tallinna IP-võrgu vea detekteerimine
                         if (latitude > 59.0 && confirm("Süsteem tuvastas asukohaks Tallinna (IP-põhine võrguviga). Kas soovid kasutada kohalikku Nõo/Elva testasukohta?")) {
                             latitude = 58.2522;
                             longitude = 26.4719;
+                            accuracy = 15; // Simuleerime head täpsust raadiuse ringi jaoks
                         }
 
-                        if (activeMarker) {
-                            map.removeLayer(activeMarker);
-                        }
+                        // Puhastame vanad kihid enne uue punkti joonistamist
+                        if (activeMarker) map.removeLayer(activeMarker);
+                        if (accuracyCircle) map.removeLayer(accuracyCircle);
 
-                        map.setView([latitude, longitude], 14);
+                        // Liigutame kaardi fookuse otse punktile
+                        map.setView([latitude, longitude], 15);
 
-                        activeMarker = L.marker([latitude, longitude]).addTo(map)
-                            .bindPopup(`<b>Sinu Müügikoht!</b><br>Oled kaardil otset.ee kasutajatele nähtav.`)
-                            .openPopup();
+                        // 1. Täpsuse ring (sinine halo) ümber nõela
+                        accuracyCircle = L.circle([latitude, longitude], {
+                            radius: accuracy,
+                            color: 'rgba(79, 119, 170, 0.5)',
+                            fillColor: '#4F77AA',
+                            fillOpacity: 0.15,
+                            weight: 1.5
+                        }).addTo(map);
 
-                        // Muuda nupu olekut
+                        // 2. Käsitsi lohistatav (draggable) kaardinõel juhuks kui GPS eksib
+                        activeMarker = L.marker([latitude, longitude], {
+                            draggable: true
+                        }).addTo(map);
+
+                        // Popup teavitusega lohistamise võimaluse kohta
+                        activeMarker.bindPopup(`
+                            <b>Sinu Müügikoht!</b><br>
+                            Täpsus: ±${Math.round(accuracy)}m.<br>
+                            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on vales kohas, lohista see näpuga õigesse teeotsa!</span>
+                        `).openPopup();
+
+                        // Kuulame, millal kasutaja lõpetab punkti käsitsi liigutamise
+                        activeMarker.on('dragend', function(event) {
+                            const marker = event.target;
+                            const currentPos = marker.getLatLng();
+                            
+                            // Nihutame ka täpsuse ringi uude käsitsi valitud kohta
+                            accuracyCircle.setLatLng(currentPos);
+                            
+                            console.log(`Uued täpsed koordinaadid (käsitsi nihutatud): ${currentPos.lat}, ${currentPos.lng}`);
+                            // Siia tuleb tulevikus andmebaasi (Supabase/Firebase) saatmise loogika
+                        });
+
+                        // Kui asukoht on leitud, avame nupu ja muudame oleku aktiivseks
                         isSelling = true;
+                        actionBtn.disabled = false;
                         actionBtn.innerText = "Lõpeta Müük";
-                        actionBtn.className = "btn btn-danger"; 
+                        actionBtn.className = "btn btn-danger";
                     },
                     (error) => {
-                        alert("Asukoha leidmine ebaõnnestus. Veendu, et asukohajagamise õigused on lubatud.");
+                        actionBtn.disabled = false;
+                        actionBtn.innerText = "Alusta Müüki";
+                        alert("Asukoha leidmine ebaõnnestus. Veendu, et seadmes on GPS sisse lülitatud ja õigused lubatud.");
                         console.error(error);
                     },
-                    { enableHighAccuracy: true, timeout: 10000 }
+                    geoOptions
                 );
+
             } else {
                 // MÜÜGI LÕPETAMINE
+                if (geoWatchId) {
+                    navigator.geolocation.clearWatch(geoWatchId);
+                    geoWatchId = null;
+                }
                 if (activeMarker) {
                     map.removeLayer(activeMarker);
                     activeMarker = null;
+                }
+                if (accuracyCircle) {
+                    map.removeLayer(accuracyCircle);
+                    accuracyCircle = null;
                 }
                 
                 // Taasta nupu algne olek
