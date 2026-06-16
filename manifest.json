@@ -1,1 +1,27 @@
-
+{
+  "name": "Otsetee - Värske toit maanteel",
+  "short_name": "Otsetee",
+  "description": "Nutikas ja ohutu tee värske toiduni otse tootjalt.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FAF8F5",
+  "theme-color": "#4F77AA",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
