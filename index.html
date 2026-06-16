@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>otset.ee</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4F77AA">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --sinilill-blue: #4F77AA;
+            --wheat-gold: #E5A93C;
+            --summer-cream: #FAF8F5;
+            --text-charcoal: #2C2A29;
+            --card-white: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--summer-cream);
+            color: var(--text-charcoal);
+            overflow: hidden;
+        }
+
+        /* View Layer Management */
+        .view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .view.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screen 1: Login / Welcome Portal */
+        #login-view {
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            /* Using a clean linear gradient to simulate the sky meeting the wheat field look */
+            background: linear-gradient(to bottom, #b9d1eb 0%, var(--summer-cream) 60%, #f7dfb0 100%);
+        }
+
+        .login-card {
+            background: var(--card-white);
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        .brand-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--sinilill-blue);
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .brand-subtitle {
+            font-size: 0.95rem;
+            color: #707070;
+            margin-bottom: 35px;
+        }
+
+        .oauth-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid #E0E0E0;
+            background: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            transition: background 0.2s;
+        }
+
+        .oauth-btn:hover {
+            background: #F9F9F9;
+        }
+
+        .oauth-btn.apple {
+            background: #000000;
+            color: white;
+            border: none;
+        }
+
+        /* Screen 2: Map Dashboard */
+        #map-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Floating Controls Overlay */
+        .map-overlay {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: calc(100% - 32px);
+            max-width: 400px;
+        }
+
+        .action-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 16px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--sinilill-blue);
+            color: white;
+        }
+
+        .btn-accent {
+            background-color: var(--wheat-gold);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-view" class="view active">
+        <div class="login-card">
+            <div class="brand-title">otset.ee</div>
+            <div class="brand-subtitle">Otsetee värske toiduni maanteel</div>
+            
+            <button class="oauth-btn" onclick="mockLogin('Google')">
+                <span>Continue with Google</span>
+            </button>
+            <button class="oauth-btn apple" onclick="mockLogin('Apple')">
+                <span>Continue with Apple</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="map-view" class="view">
+        <div id="map-container"></div>
+        
+        <div class="map-overlay">
+            <div class="action-bar">
+                <button class="btn btn-accent" onclick="triggerMerchantStall()">Alusta Müüki</button>
+                <button class="btn btn-primary" onclick="switchView('login-view')">Logi välja</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let activeMarker = null;
+
+        // View Swapping Logic
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            // Invalidate Leaflet sizing rules if loading the map view
+            if (viewId === 'map-view') {
+                setTimeout(() => {
+                    if (!map) {
+                        initMap();
+                    } else {
+                        map.invalidateSize();
+                    }
+                }, 100);
+            }
+        }
+
+        // Mock OAuth Auth Flow for UI Testing
+        function mockLogin(provider) {
+            console.log(`Authenticating token loop via ${provider}...`);
+            switchView('map-view');
+        }
+
+        // Initialize Leaflet Map Centered around the Nõo / Elva area
+        function initMap() {
+            // Lat/Lon for center coordinates between Nõo and Elva
+            map = L.map('map-container', {
+                zoomControl: false // Turning off to maximize clean space on mobile
+            }).setView([58.2522, 26.4719], 12); 
+
+            // Pull beautiful open-source map graphics
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        // Drop dynamic user location pin when seller hits "Alusta Müüki"
+        function triggerMerchantStall() {
+            if (!navigator.geolocation) {
+                alert("Sinu seade ei toeta GPS-teenuseid.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    
+                    if (activeMarker) {
+                        map.removeLayer(activeMarker);
+                    }
+
+                    // Pan smoothly to merchant coordinates
+                    map.setView([latitude, longitude], 14);
+
+                    // Create dynamic map pin
+                    activeMarker = L.marker([latitude, longitude]).addTo(map)
+                        .bindPopup(`<b>Sinu Müügikoht!</b><br>Oled kaardil otset.ee kasutajatele nähtav.`)
+                        .openPopup();
+                },
+                (error) => {
+                    alert("Asukoha leidmine ebaõnnestus. Palun luba GPS õigused.");
+                    console.error(error);
+                },
+                { enableHighAccuracy: true }
+            );
+        }
+
+        // Register Service Worker for PWA Offline Functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker Registered!', reg.scope))
+                    .catch(err => console.log('Service Worker Registration Failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
