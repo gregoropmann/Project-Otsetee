@@ -18,7 +18,7 @@ Projekt Otsetee sündis täpselt selle konflikti lahendamiseks. Meie eesmärk on
 Autojuhid ja kaasreisijad näevad teeäärseid müügipunkte otse rakendusest enne reaalset teeotsa. Ei mingeid ootamatuid pidurdamisi ega tähelepanu hajumist – vaid sujuv ja planeeritud peatuse tegemine.
 
 ### 0% Bürokraatiat talunikele:
-Müüjad ei pea taotlema lube ega ootama nädalaid. Nad saavad oma müügipunkti ja tooted (maasikad karbis, mesi purgis, kartul kiloga) märkida kaardile sekunditega – täpselt siis, kui kaup on valmis ja hooajaline müük algab.
+Müüjad ei pea taotlema lube ega ootama nädalaid. Nad saavad oma müügipunkti ja tooted (munad karbis, mesi purgis, kartul kiloga) märkida kaardile sekunditega – täpselt siis, kui kaup on valmis ja hooajaline müük algab.
 
 #### Kaitseme kõige nõrgemaid:
 Teeperved peavad jääma vabaks ja ohutuks. Siltide asemel saavad autojuhid keskenduda sellele, mis on teel tõeliselt tähtis – jalakäijatele, lastele ja jalgratturitele.
