@@ -55,9 +55,11 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            background: src="assets/pold.webp";
+            background-image: url("assets/pold.webp");
+            background-size: cover;       /* Makes sure the image covers the entire screen */
+            background-position: center;   /* Centers the image so it looks great on all devices */
+            background-repeat: no-repeat;  /* Prevents the image from tiling */
         }
-
         .login-card {
             background: var(--card-white);
             padding: 40px 30px;
