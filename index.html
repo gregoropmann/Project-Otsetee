@@ -210,10 +210,10 @@
             <div class="brand-title">otset.ee</div>
             <div class="brand-subtitle">Otsetee värske toiduni maanteel</div>
             
-            <button class="oauth-btn" onclick="mockLogin('Google')">
+            <button class="oauth-btn" onclick="handleLogin('Google')">
                 <span>Jätka Google kontoga</span>
             </button>
-            <button class="oauth-btn apple" onclick="mockLogin('Apple')">
+            <button class="oauth-btn apple" onclick="handleLogin('Apple')">
                 <span>Jätka Apple kontoga</span>
             </button>
         </div>
@@ -230,7 +230,7 @@
         <div class="map-overlay">
             <div class="action-bar">
                 <button id="action-btn" class="btn btn-accent" onclick="toggleMerchantStall()">Alusta Müüki</button>
-                <button class="btn btn-primary" onclick="switchView('login-view')">Logi välja</button>
+                <button class="btn btn-primary" onclick="handleLogout()">Logi välja</button>
             </div>
         </div>
     </div>
@@ -241,6 +241,30 @@
         let accuracyCircle = null;
         let geoWatchId = null;
         let isSelling = false;
+
+        // Globaalsed GPS riistvara seaded
+        const geoOptions = {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        };
+
+        // KÄIVITUS: Kontrollime localStorage olekuid kohe kui leht laeb
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('otset_loggedin') === 'true';
+            const wasSelling = localStorage.getItem('otset_selling') === 'true';
+
+            if (isLoggedIn) {
+                // Kui oli sisselogitud, hüppame otse kaardile ilma vilkumiseta
+                switchView('map-view');
+                
+                // Kui müük oli pooleli, käivitame kohe uuesti automaatse jälgimise
+                if (wasSelling) {
+                    console.log("Tuvastati aktiivne müügisessioon. Taastatakse GPS...");
+                    startGeoTracking(true); // true tähendab, et tegu on taastamisega (ei tee uut asukoha hüpet kui käsitsi muudetud)
+                }
+            }
+        });
 
         // Vaadete vahetamise loogika
         function switchView(viewId) {
@@ -258,16 +282,32 @@
             }
         }
 
-        function mockLogin(provider) {
+        function handleLogin(provider) {
             console.log(`Logitakse sisse pakujaga: ${provider}`);
+            localStorage.setItem('otset_loggedin', 'true');
             switchView('map-view');
+        }
+
+        function handleLogout() {
+            // Puhastame kogu mälu väljalogimisel
+            stopGeoTracking();
+            localStorage.removeItem('otset_loggedin');
+            localStorage.removeItem('otset_selling');
+            localStorage.removeItem('otset_custom_lat');
+            localStorage.removeItem('otset_custom_lng');
+            switchView('login-view');
         }
 
         // Kaardi algistamine Nõo ja Elva vahele
         function initMap() {
+            // Kui mälus on käsitsi salvestatud punkt, algistame kaardi sinna, muidu keskpunkti
+            const savedLat = localStorage.getItem('otset_custom_lat');
+            const savedLng = localStorage.getItem('otset_custom_lng');
+            const centerPoint = (savedLat && savedLng) ? [parseFloat(savedLat), parseFloat(savedLng)] : [58.2522, 26.4719];
+
             map = L.map('map-container', {
                 zoomControl: false
-            }).setView([58.2522, 26.4719], 12); 
+            }).setView(centerPoint, 12); 
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
@@ -275,123 +315,125 @@
         }
 
         // Suunamise funktsioonid
-        function mapZoomIn() {
-            if (map) map.zoomIn();
-        }
-
-        function mapZoomOut() {
-            if (map) map.zoomOut();
-        }
+        function mapZoomIn() { if (map) map.zoomIn(); }
+        function mapZoomOut() { if (map) map.zoomOut(); }
 
         // Müügi alustamise ja lõpetamise lüliti (Toggle)
         function toggleMerchantStall() {
-            const actionBtn = document.getElementById('action-btn');
-
             if (!isSelling) {
-                // MÜÜGI ALUSTAMINE
-                if (!navigator.geolocation) {
-                    alert("Sinu seade ei toeta GPS-teenuseid.");
-                    return;
-                }
-
-                actionBtn.innerText = "Otsib asukohta...";
-                actionBtn.disabled = true;
-
-                // Riistvaralise GPS-i seaded maksimaalseks täpsuseks
-                const geoOptions = {
-                    enableHighAccuracy: true, // Sundsurve seadme sisse-ehitatud GPS kiibile
-                    timeout: 15000,           // Lubame telefonil asukohta otsida kuni 15 sekundit
-                    maximumAge: 0             // Keelame brauseril vanade vahemällu salvestatud punktide kasutamise
-                };
-
-                // Kasutame watchPosition-i, et asukoht reaalajas "paika loksuks"
-                geoWatchId = navigator.geolocation.watchPosition(
-                    (position) => {
-                        let { latitude, longitude, accuracy } = position.coords;
-                        
-                        // KORREKTSIOON: Tallinna IP-võrgu vea detekteerimine
-                        if (latitude > 59.0 && confirm("Süsteem tuvastas asukohaks Tallinna (IP-põhine võrguviga). Kas soovid kasutada kohalikku Nõo/Elva testasukohta?")) {
-                            latitude = 58.2522;
-                            longitude = 26.4719;
-                            accuracy = 15; // Simuleerime head täpsust raadiuse ringi jaoks
-                        }
-
-                        // Puhastame vanad kihid enne uue punkti joonistamist
-                        if (activeMarker) map.removeLayer(activeMarker);
-                        if (accuracyCircle) map.removeLayer(accuracyCircle);
-
-                        // Liigutame kaardi fookuse otse punktile
-                        map.setView([latitude, longitude], 15);
-
-                        // 1. Täpsuse ring (sinine halo) ümber nõela
-                        accuracyCircle = L.circle([latitude, longitude], {
-                            radius: accuracy,
-                            color: 'rgba(79, 119, 170, 0.5)',
-                            fillColor: '#4F77AA',
-                            fillOpacity: 0.15,
-                            weight: 1.5
-                        }).addTo(map);
-
-                        // 2. Käsitsi lohistatav (draggable) kaardinõel juhuks kui GPS eksib
-                        activeMarker = L.marker([latitude, longitude], {
-                            draggable: true
-                        }).addTo(map);
-
-                        // Popup teavitusega lohistamise võimaluse kohta
-                        activeMarker.bindPopup(`
-                            <b>Sinu Müügikoht!</b><br>
-                            Täpsus: ±${Math.round(accuracy)}m.<br>
-                            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on vales kohas, lohista see näpuga õigesse teeotsa!</span>
-                        `).openPopup();
-
-                        // Kuulame, millal kasutaja lõpetab punkti käsitsi liigutamise
-                        activeMarker.on('dragend', function(event) {
-                            const marker = event.target;
-                            const currentPos = marker.getLatLng();
-                            
-                            // Nihutame ka täpsuse ringi uude käsitsi valitud kohta
-                            accuracyCircle.setLatLng(currentPos);
-                            
-                            console.log(`Uued täpsed koordinaadid (käsitsi nihutatud): ${currentPos.lat}, ${currentPos.lng}`);
-                            // Siia tuleb tulevikus andmebaasi (Supabase/Firebase) saatmise loogika
-                        });
-
-                        // Kui asukoht on leitud, avame nupu ja muudame oleku aktiivseks
-                        isSelling = true;
-                        actionBtn.disabled = false;
-                        actionBtn.innerText = "Lõpeta Müük";
-                        actionBtn.className = "btn btn-danger";
-                    },
-                    (error) => {
-                        actionBtn.disabled = false;
-                        actionBtn.innerText = "Alusta Müüki";
-                        alert("Asukoha leidmine ebaõnnestus. Veendu, et seadmes on GPS sisse lülitatud ja õigused lubatud.");
-                        console.error(error);
-                    },
-                    geoOptions
-                );
-
+                startGeoTracking(false);
             } else {
-                // MÜÜGI LÕPETAMINE
-                if (geoWatchId) {
-                    navigator.geolocation.clearWatch(geoWatchId);
-                    geoWatchId = null;
-                }
-                if (activeMarker) {
-                    map.removeLayer(activeMarker);
-                    activeMarker = null;
-                }
-                if (accuracyCircle) {
-                    map.removeLayer(accuracyCircle);
-                    accuracyCircle = null;
-                }
-                
-                // Taasta nupu algne olek
-                isSelling = false;
-                actionBtn.innerText = "Alusta Müüki";
-                actionBtn.className = "btn btn-accent"; 
-                
+                stopGeoTracking();
                 alert("Müük lõpetatud. Sinu asukohapunkt on kaardilt eemaldatud.");
+            }
+        }
+
+        // Aktiivse GPS voo käivitamine
+        function startGeoTracking(isRestoring) {
+            const actionBtn = document.getElementById('action-btn');
+            if (!navigator.geolocation) {
+                alert("Sinu seade ei toeta GPS-teenuseid.");
+                return;
+            }
+
+            actionBtn.innerText = "Otsib asukohta...";
+            actionBtn.disabled = true;
+
+            geoWatchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    let { latitude, longitude, accuracy } = position.coords;
+                    
+                    // KORREKTSIOON: Tallinna IP-võrgu vea detekteerimine
+                    if (latitude > 59.0 && !localStorage.getItem('otset_custom_lat') && confirm("Süsteem tuvastas asukohaks Tallinna (IP-põhine võrguviga). Kas soovid kasutada kohalikku Nõo/Elva testasukohta?")) {
+                        latitude = 58.2522;
+                        longitude = 26.4719;
+                        accuracy = 15;
+                    }
+
+                    // Kui meil on mälus kasutaja poolt käsitsi lohistatud asukoht, eelistame seda brauseri kõikuvale GPS-ile üle värskenduse
+                    const savedLat = localStorage.getItem('otset_custom_lat');
+                    const savedLng = localStorage.getItem('otset_custom_lng');
+                    if (savedLat && savedLng) {
+                        latitude = parseFloat(savedLat);
+                        longitude = parseFloat(savedLng);
+                    }
+
+                    // Puhastame vanad kihid
+                    if (activeMarker) map.removeLayer(activeMarker);
+                    if (accuracyCircle) map.removeLayer(accuracyCircle);
+
+                    // Kui tegu on esmakordse käivitamisega (mitte taastamisega), suuname kaardi keskele
+                    if (!isRestoring) {
+                        map.setView([latitude, longitude], 15);
+                    }
+
+                    // Joonistame kihid uuesti
+                    accuracyCircle = L.circle([latitude, longitude], {
+                        radius: accuracy,
+                        color: 'rgba(79, 119, 170, 0.5)',
+                        fillColor: '#4F77AA',
+                        fillOpacity: 0.15,
+                        weight: 1.5
+                    }).addTo(map);
+
+                    activeMarker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
+                    
+                    activeMarker.bindPopup(`
+                        <b>Sinu Müügikoht on AKTIIVNE!</b><br>
+                        Täpsus: ±${Math.round(accuracy)}m.<br>
+                        <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on vales kohas, lohista see näpuga õigesse teeotsa!</span>
+                    `);
+                    
+                    if (!isRestoring) activeMarker.openPopup();
+
+                    // Kuulame lohistamist ja salvestame uue täpse asukoha localStorage'isse
+                    activeMarker.on('dragend', function(event) {
+                        const marker = event.target;
+                        const currentPos = marker.getLatLng();
+                        
+                        accuracyCircle.setLatLng(currentPos);
+                        
+                        localStorage.setItem('otset_custom_lat', currentPos.lat);
+                        localStorage.setItem('otset_custom_lng', currentPos.lng);
+                        console.log(`Uus punkt salvestatud mällu: ${currentPos.lat}, ${currentPos.lng}`);
+                    });
+
+                    // Märgime oleku aktiivseks nii programmis kui veebilehe mälus
+                    isSelling = true;
+                    localStorage.setItem('otset_selling', 'true');
+                    
+                    actionBtn.disabled = false;
+                    actionBtn.innerText = "Lõpeta Müük";
+                    actionBtn.className = "btn btn-danger";
+                },
+                (error) => {
+                    actionBtn.disabled = false;
+                    actionBtn.innerText = "Alusta Müüki";
+                    console.error(error);
+                },
+                geoOptions
+            );
+        }
+
+        // GPS voo sulgemine ja puhastamine
+        function stopGeoTracking() {
+            const actionBtn = document.getElementById('action-btn');
+            
+            if (geoWatchId) {
+                navigator.geolocation.clearWatch(geoWatchId);
+                geoWatchId = null;
+            }
+            if (activeMarker) { map.removeLayer(activeMarker); activeMarker = null; }
+            if (accuracyCircle) { map.removeLayer(accuracyCircle); accuracyCircle = null; }
+            
+            isSelling = false;
+            localStorage.setItem('otset_selling', 'false');
+            localStorage.removeItem('otset_custom_lat');
+            localStorage.removeItem('otset_custom_lng');
+            
+            if (actionBtn) {
+                actionBtn.innerText = "Alusta Müüki";
+                actionBtn.className = "btn btn-accent";
             }
         }
 
