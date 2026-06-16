@@ -26,6 +26,7 @@
             --text-charcoal: #2C2A29;
             --card-white: #FFFFFF;
             --danger-red: #D9534F;
+            --border-gray: #EAEAEA;
         }
 
         * {
@@ -58,7 +59,7 @@
             flex-direction: column;
         }
 
-        /* Sisselogimisvaade kauni põllu taustaga */
+        /* Sisselogimisvaade */
         #login-view {
             justify-content: center;
             align-items: center;
@@ -128,7 +129,6 @@
             z-index: 1;
         }
 
-        /* Otsinguriba kaardi kohal */
         .search-container {
             position: absolute;
             top: 20px;
@@ -151,7 +151,6 @@
             outline: none;
         }
 
-        /* Kohandatud mobiilisõbralikud suunamisnupud */
         .custom-zoom-controls {
             position: absolute;
             top: 20px;
@@ -185,7 +184,6 @@
             background: #EAEAEA;
         }
 
-        /* Kaardi peal ujuv juhtpaneel alumises ääres */
         .map-overlay {
             position: absolute;
             bottom: 24px;
@@ -218,22 +216,137 @@
             transition: background 0.2s, color 0.2s;
         }
 
-        .btn-primary {
-            background-color: var(--sinilill-blue);
-            color: white;
+        .btn-primary { background-color: var(--sinilill-blue); color: white; }
+        .btn-accent { background-color: var(--wheat-gold); color: white; }
+        .btn-danger { background-color: var(--danger-red); color: white; }
+        
+        /* Tooteseaded / Inventory overlay vaade */
+        #product-selection-view {
+            background-color: var(--summer-cream);
+            padding: 20px;
+            overflow-y: auto;
+            height: 100%;
         }
 
-        .btn-accent {
-            background-color: var(--wheat-gold);
-            color: white;
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-charcoal);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .btn-danger {
-            background-color: var(--danger-red);
-            color: white;
+        .category-block {
+            margin-bottom: 24px;
         }
 
-        /* Kohandatud teavituste süsteem (Toast / Modal) */
+        .category-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--sinilill-blue);
+            margin-bottom: 12px;
+            border-bottom: 2px solid rgba(79, 119, 170, 0.15);
+            padding-bottom: 4px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+            gap: 12px;
+        }
+
+        .product-card {
+            background: var(--card-white);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.2s ease;
+        }
+
+        .product-card.selected {
+            border-color: var(--wheat-gold);
+            background: #FFFDF9;
+        }
+
+        .product-info {
+            margin-bottom: 10px;
+        }
+
+        .product-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-charcoal);
+        }
+
+        .price-input-group {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-gray);
+        }
+
+        .product-card.selected .price-input-group {
+            display: flex;
+        }
+
+        .pricing-fields {
+            display: flex;
+            gap: 4px;
+        }
+
+        .price-num-input {
+            width: 60px;
+            padding: 6px;
+            border: 1px solid #CCC;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .unit-select {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #CCC;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: white;
+        }
+
+        .select-toggle-btn {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #DDD;
+            background: #F5F5F5;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .product-card.selected .select-toggle-btn {
+            background: var(--wheat-gold);
+            color: white;
+            border-color: var(--wheat-gold);
+        }
+
+        .sticky-footer {
+            position: sticky;
+            bottom: 0;
+            background: var(--summer-cream);
+            padding: 16px 0;
+            margin-top: auto;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Kohandatud teavituste süsteem */
         .notification-container {
             position: absolute;
             top: 90px;
@@ -282,7 +395,6 @@
             transition: background 0.2s;
         }
 
-        /* Otsinguefekti oranž marker */
         .preview-marker-icon {
             filter: hue-rotate(140deg) saturate(2);
         }
@@ -318,9 +430,22 @@
         
         <div class="map-overlay">
             <div class="action-bar">
-                <button id="action-btn" class="btn btn-accent" onclick="toggleMerchantStall()">Alusta Müüki</button>
+                <button id="action-btn" class="btn btn-accent" onclick="openProductSelection()">Alusta Müüki</button>
                 <button class="btn btn-primary" onclick="handleLogout()">Logi välja</button>
             </div>
+        </div>
+    </div>
+
+    <div id="product-selection-view" class="view">
+        <div class="section-title">
+            <span>Vali müüdavad tooted</span>
+            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="switchView('map-view')">Tagasi</button>
+        </div>
+        
+        <div id="catalog-container"></div>
+
+        <div class="sticky-footer">
+            <button class="btn btn-accent" style="width: 100%;" onclick="confirmProductsAndStartGeo()">Kinnita tooted ja aktiveeri kaart</button>
         </div>
     </div>
 
@@ -333,7 +458,7 @@
         let map;
         let activeMarker = null;
         let accuracyCircle = null;
-        let previewMarker = null; // Ajutine marker otsingu jaoks
+        let previewMarker = null;
         let geoWatchId = null;
         let isSelling = false;
 
@@ -342,6 +467,140 @@
             timeout: 15000,
             maximumAge: 0
         };
+
+        // 50 kohalikku põllumajandustoodet kategooriates
+        const agriProducts = {
+            "Mesi ja Mesindustooted": [
+                "Õiemesi", "Kanarbikumesi", "Metsamezi", "Kärjemesi", "Taruvaik", "Suir"
+            ],
+            "Kala ja Kalatooted": [
+                "Suitsuangerjas", "Suitsulest", "Suitsurääbis", "Kuivatatud särg", "Värske koha", "Värske ahven", "Marineeritud silmud"
+            ],
+            "Marjad": [
+                "Metsmaasikad", "Aedmaasikad", "Vaarikad", "Mustikad", "Pohlad", "Jõhvikad", "Murakad", "Mustad sõstrad", "Punased sõstrad", "Tikrid"
+            ],
+            "Köögiviljad ja Juurikad": [
+                "Värske kartul", "Meresoolakurk", "Hapukurk", "Küüslauk", "Mugulsibul", "Peipsi sibul", "Porgand", "Pilvikud/Kukeseened", "Hernekaunad", "Tilli-rohelise kimp"
+            ],
+            "Puuviljad ja Marjaaiad": [
+                "Kodumaised õunad", "Ploomid", "Kirsid", "Hapukirsid", "Pirnid"
+            ],
+            "Piim, Juust ja Munad": [
+                "Maamunad", "Vutimunad", "Lehma toorpiim", "Ahjujuust", "Sõir", "Maavõi"
+            ],
+            "Küpsetised ja Omatoodang": [
+                "Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook"
+            ]
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCatalog();
+            const isLoggedIn = localStorage.getItem('otset_loggedin') === 'true';
+            const wasSelling = localStorage.getItem('otset_selling') === 'true';
+
+            if (isLoggedIn) {
+                switchView('map-view');
+                if (wasSelling) {
+                    isSelling = true;
+                    updateActionButtonState();
+                    setupWatchPosition(true);
+                }
+            }
+        });
+
+        function renderCatalog() {
+            const container = document.getElementById('catalog-container');
+            container.innerHTML = '';
+            let globalId = 0;
+
+            for (const [category, items] of Object.entries(agriProducts)) {
+                const block = document.createElement('div');
+                block.className = 'category-block';
+                
+                const title = document.createElement('div');
+                title.className = 'category-name';
+                title.innerText = category;
+                block.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'products-grid';
+
+                items.forEach(item => {
+                    globalId++;
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.id = `prod-card-${globalId}`;
+                    card.setAttribute('data-name', item);
+
+                    card.innerHTML = `
+                        <div class="product-info">
+                            <div class="product-label">${item}</div>
+                            <div class="price-input-group">
+                                <div class="pricing-fields">
+                                    <input type="number" step="0.1" value="5.0" class="price-num-input" id="price-num-${globalId}">
+                                    <select class="unit-select" id="unit-${globalId}">
+                                        <option value="kg">€/kg</option>
+                                        <option value="purk">€/purk</option>
+                                        <option value="tükk">€/tk</option>
+                                        <option value="pudel">€/pdl</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="select-toggle-btn" onclick="toggleProductSelect(${globalId})">Vali toode</button>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                block.appendChild(grid);
+                container.appendChild(block);
+            }
+        }
+
+        function toggleProductSelect(id) {
+            const card = document.getElementById(`prod-card-${id}`);
+            const btn = card.querySelector('.select-toggle-btn');
+            if (card.classList.contains('selected')) {
+                card.classList.remove('selected');
+                btn.innerText = "Vali toode";
+            } else {
+                card.classList.add('selected');
+                btn.innerText = "Valitud";
+            }
+        }
+
+        function openProductSelection() {
+            if (isSelling) {
+                stopGeoTracking();
+                showNotification("Müük lõpetatud. Sinu asukohapunkt on kaardilt eemaldatud.");
+            } else {
+                switchView('product-selection-view');
+            }
+        }
+
+        function confirmProductsAndStartGeo() {
+            const selectedElements = document.querySelectorAll('.product-card.selected');
+            if (selectedElements.length === 0) {
+                alert("Palun vali vähemalt üks toode, mida müüa!");
+                return;
+            }
+
+            let inventorySummary = [];
+            selectedElements.forEach(el => {
+                const id = el.id.replace('prod-card-', '');
+                const name = el.getAttribute('data-name');
+                const price = document.getElementById(`price-num-${id}`).value;
+                const unit = document.getElementById(`unit-${id}`).value;
+                inventorySummary.push(`${name} (${price} €/${unit})`);
+            });
+
+            localStorage.setItem('otset_active_products', JSON.stringify(inventorySummary));
+            
+            switchView('map-view');
+            
+            // Käivitab asukoha tracking protsessi alles pärast toodete valimist ja kinnitamist
+            startGeoTracking(false);
+        }
 
         function showNotification(message, duration = 3500, actions = null) {
             const container = document.getElementById('app-notification');
@@ -373,7 +632,7 @@
             }
         }
 
-        // ASUKOHA OTSING + KINNITAMINE
+        // Kohaotsing - EI pane müüki automaatselt käima
         function handleSearch(event) {
             if (event.key === 'Enter') {
                 const query = document.getElementById('location-search').value;
@@ -390,10 +649,8 @@
                             if (map) {
                                 map.setView([lat, lon], 18);
                                 
-                                // Puhastame vana eelvaate kui olemas
                                 if (previewMarker) map.removeLayer(previewMarker);
 
-                                // Loome silmapaistvama marker-ikooni eelvaate jaoks (oranžikas varjund)
                                 const orangeIcon = L.icon({
                                     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
                                     iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -408,30 +665,20 @@
                                 previewMarker = L.marker([lat, lon], { icon: orangeIcon }).addTo(map);
                                 previewMarker.bindPopup(`<b>Eelvaade:</b> ${placeName}`).openPopup();
 
-                                // Küsime popup süsteemiga kasutajalt kinnitust
                                 showNotification(
-                                    `Leiti koht: <b>${placeName}</b>.<br>Kas soovid müügikoha siia teepinnale lukustada?`,
+                                    `Leiti koht: <b>${placeName}</b>.<br>Kas soovid müügikoha siia teeotsa lukustada?`,
                                     0,
                                     [
                                         {
                                             text: "Jah, kinnita asukoht",
                                             className: "btn-accent",
                                             callback: () => {
-                                                // Eemaldame otsingu eelvaate
                                                 map.removeLayer(previewMarker);
                                                 previewMarker = null;
                                                 
-                                                // Salvestame valitud asukoha mällu
                                                 localStorage.setItem('otset_custom_lat', lat);
                                                 localStorage.setItem('otset_custom_lng', lon);
-                                                
-                                                // Kui jälgimine ei käi, paneme selle otse siit punktist käima
-                                                if (!isSelling) {
-                                                    startGeoTracking(false);
-                                                } else {
-                                                    // Kui müük juba käis, värskendame jooksvat markerit
-                                                    updateLocationProcess(lat, lon, 10, false);
-                                                }
+                                                showNotification("Asukoht salvestatud mällu. Müügi alustamiseks vajuta rohelist nuppu.");
                                             }
                                         },
                                         {
@@ -457,18 +704,6 @@
                     });
             }
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const isLoggedIn = localStorage.getItem('otset_loggedin') === 'true';
-            const wasSelling = localStorage.getItem('otset_selling') === 'true';
-
-            if (isLoggedIn) {
-                switchView('map-view');
-                if (wasSelling) {
-                    startGeoTracking(true);
-                }
-            }
-        });
 
         function switchView(viewId) {
             document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
@@ -497,6 +732,7 @@
             localStorage.removeItem('otset_selling');
             localStorage.removeItem('otset_custom_lat');
             localStorage.removeItem('otset_custom_lng');
+            localStorage.removeItem('otset_active_products');
             switchView('login-view');
         }
 
@@ -517,15 +753,6 @@
         function mapZoomIn() { if (map) map.zoomIn(); }
         function mapZoomOut() { if (map) map.zoomOut(); }
 
-        function toggleMerchantStall() {
-            if (!isSelling) {
-                startGeoTracking(false);
-            } else {
-                stopGeoTracking();
-                showNotification("Müük lõpetatud. Sinu asukohapunkt on kaardilt eemaldatud.");
-            }
-        }
-
         function startGeoTracking(isRestoring) {
             const actionBtn = document.getElementById('action-btn');
             if (!navigator.geolocation) {
@@ -536,14 +763,11 @@
             actionBtn.innerText = "Otsib asukohta...";
             actionBtn.disabled = true;
 
-            // Kui meil on mälus juba salvestatud kohandatud otsingu asukoht, laadime selle otse ilma GPS ootamiseta
             const savedLat = localStorage.getItem('otset_custom_lat');
             const savedLng = localStorage.getItem('otset_custom_lng');
             if (savedLat && savedLng) {
                 updateLocationProcess(parseFloat(savedLat), parseFloat(savedLng), 10, isRestoring);
-                
-                // Käivitame passiivse taustajälgimise juhuks, kui nad liiguvad
-                setupWatchPosition();
+                setupWatchPosition(isRestoring);
                 return;
             }
 
@@ -551,7 +775,6 @@
         }
 
         function setupWatchPosition(isRestoring) {
-            const actionBtn = document.getElementById('action-btn');
             geoWatchId = navigator.geolocation.watchPosition(
                 (position) => {
                     let { latitude, longitude, accuracy } = position.coords;
@@ -579,8 +802,8 @@
                     updateLocationProcess(latitude, longitude, accuracy, isRestoring);
                 },
                 (error) => {
-                    actionBtn.disabled = false;
-                    actionBtn.innerText = "Alusta Müüki";
+                    isSelling = false;
+                    updateActionButtonState();
                     console.error(error);
                     showNotification("GPS asukoha määramine ebaõnnestus.");
                 },
@@ -589,7 +812,6 @@
         }
 
         function updateLocationProcess(lat, lng, accuracy, isRestoring) {
-            const actionBtn = document.getElementById('action-btn');
             let finalLat = lat;
             let finalLng = lng;
 
@@ -617,21 +839,26 @@
 
             activeMarker = L.marker([finalLat, finalLng], { draggable: true }).addTo(map);
             
+            const rawProducts = localStorage.getItem('otset_active_products');
+            const prodListHTML = rawProducts ? JSON.parse(rawProducts).map(p => `• ${p}`).join('<br>') : 'Põllumajandustooted';
+
             activeMarker.bindPopup(`
-                <b>Sinu Müügikoht on AKTIIVNE!</b><br>
-                Täpsus: ±${Math.round(accuracy)}m.<br>
-                <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on vales kohas, lohista see näpuga õigesse teeotsa!</span>
+                <div style="max-height:150px; overflow-y:auto; font-size:0.85rem;">
+                    <b>Sinu Müügikoht on AKTIIVNE!</b><br>
+                    <span style="color:#222;font-weight:600;">Müüdavad tooted:</span><br>
+                    ${prodListHTML}<br><br>
+                    <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on vales kohas, lohista see näpuga õigesse teeotsa!</span>
+                </div>
             `);
             
             if (!isRestoring) {
                 activeMarker.openPopup();
-                showNotification("Müügikoht aktiivne ja kaardile kinnitatud!");
+                showNotification("Müügikoht aktiivne ja koos toodetega kaardile kantud!");
             }
 
             activeMarker.on('dragend', function(event) {
                 const marker = event.target;
                 const currentPos = marker.getLatLng();
-                
                 accuracyCircle.setLatLng(currentPos);
                 
                 localStorage.setItem('otset_custom_lat', currentPos.lat);
@@ -641,15 +868,24 @@
 
             isSelling = true;
             localStorage.setItem('otset_selling', 'true');
-            
-            actionBtn.disabled = false;
-            actionBtn.innerText = "Lõpeta Müük";
-            actionBtn.className = "btn btn-danger";
+            updateActionButtonState();
+        }
+
+        function updateActionButtonState() {
+            const actionBtn = document.getElementById('action-btn');
+            if (!actionBtn) return;
+            if (isSelling) {
+                actionBtn.disabled = false;
+                actionBtn.innerText = "Lõpeta Müük";
+                actionBtn.className = "btn btn-danger";
+            } else {
+                actionBtn.disabled = false;
+                actionBtn.innerText = "Alusta Müüki";
+                actionBtn.className = "btn btn-accent";
+            }
         }
 
         function stopGeoTracking() {
-            const actionBtn = document.getElementById('action-btn');
-            
             if (geoWatchId) {
                 navigator.geolocation.clearWatch(geoWatchId);
                 geoWatchId = null;
@@ -662,11 +898,9 @@
             localStorage.setItem('otset_selling', 'false');
             localStorage.removeItem('otset_custom_lat');
             localStorage.removeItem('otset_custom_lng');
+            localStorage.removeItem('otset_active_products');
             
-            if (actionBtn) {
-                actionBtn.innerText = "Alusta Müüki";
-                actionBtn.className = "btn btn-accent";
-            }
+            updateActionButtonState();
         }
 
         if ('serviceWorker' in navigator) {
