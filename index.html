@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Otset.ee</title>
-    <link rel="manifest" href="./manifest.json">
+    <link class="fluid" rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#4F77AA">
     <meta name="description" content="Otset.ee - Otsetee värske toiduni. Leia kaardilt kohalikud teeäärsed müüjad, värsked maamunad, mesi, marjad ja aiasaadused otse tootjalt.">
     <meta name="keywords" content="otsetee, kohalik toit, värsked munad, maamunad, mesi, otse tootjalt, omatoodang, teeäärne müük">
@@ -108,7 +108,7 @@
         <div id="notification-content" class="notification-text">Teavitus</div>
         <div id="notification-buttons" class="notification-actions"></div>
     </div>
-    <script type="module" src="app.js"></script>
+
     <div id="buyer-feedback-modal" class="view" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
         <div style="background: white; padding: 25px; border-radius: 16px; max-width: 320px; width: 85%; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-family: sans-serif;">
             <div id="feedback-step-1">
@@ -128,5 +128,7 @@
             </div>
         </div>
     </div>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
