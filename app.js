@@ -1032,3 +1032,66 @@ if (merchantMarkers[id]) {
         merchantData: data // UUS: Salvestab andmed markeri külge kohe loomisel
     }).addTo(map).bindPopup(popupContent);
 } */
+
+
+
+
+// REPORT
+let currentReportingMerchantId = null;
+let currentReportingMerchantName = null;
+
+window.reportMerchant = function(merchantId, merchantName) {
+    currentReportingMerchantId = merchantId;
+    currentReportingMerchantName = merchantName;
+    
+    const modal = document.getElementById('report-modal');
+    const title = document.getElementById('report-modal-title');
+    
+    if (!modal) return;
+    
+    // Seame pealkirja, et kasutaja teaks, kelle kohta raport käib
+    title.innerHTML = `Teata probleemist: <br><span style="color:#2C2A29; font-size:1rem;">${merchantName}</span>`;
+    
+    // Tühjendame vanad sisestused
+    document.getElementById('report-reason').value = '';
+    document.getElementById('report-contact').value = '';
+    
+    modal.style.display = 'flex';
+};
+
+window.closeReportModal = function() {
+    const modal = document.getElementById('report-modal');
+    if (modal) modal.style.display = 'none';
+};
+
+// Kui vajutatakse "Saada teade" nuppu
+document.getElementById('report-submit-btn').addEventListener('click', async () => {
+    const reason = document.getElementById('report-reason').value.trim();
+    const contact = document.getElementById('report-contact').value.trim();
+    
+    if (!reason) {
+        alert("Palun kirjuta lühidalt, mis on probleemiks!");
+        return;
+    }
+    
+    if (!db || !currentReportingMerchantId) return;
+    
+    try {
+        const reportId = `${currentReportingMerchantId}_${Date.now()}`;
+        
+        await setDoc(doc(db, "reports", reportId), {
+            merchantId: currentReportingMerchantId,
+            merchantName: currentReportingMerchantName,
+            reason: reason,
+            reporterContact: contact || "Pole lisatud",
+            reporterTimestamp: new Date().toISOString(),
+            status: "pending"
+        });
+        
+        closeReportModal();
+        showNotification("Aitäh! Sinu selgitus edastati arendajale ülevaatamiseks.");
+    } catch (e) {
+        console.error(e);
+        showNotification("Teate saatmine ebaõnnestus.");
+    }
+});
