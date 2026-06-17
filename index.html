@@ -434,7 +434,30 @@
         <div id="notification-buttons" class="notification-actions"></div>
     </div>
 
-    <script>
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBo648Em9A94sabAg0M-MXAlFUbXGjUr-Y",
+            authDomain: "otsetee-9e167.firebaseapp.com",
+            projectId: "otsetee-9e167",
+            storageBucket: "otsetee-9e167.firebasestorage.app",
+            messagingSenderId: "221378870886",
+            appId: "1:221378870886:web:e595d472deb904ef6437a7",
+            measurementId: "G-0VSYGL35JN"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Application variables
         let map;
         let activeMarker = null;
         let accuracyCircle = null;
@@ -456,21 +479,35 @@
             "Küpsetised ja Omatoodang": ["Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook"]
         };
 
+        // Track Auth status globally
         window.addEventListener('DOMContentLoaded', () => {
             renderCatalog();
-            const isLoggedIn = localStorage.getItem('otset_loggedin') === 'true';
-            userRole = localStorage.getItem('otset_role') || 'buyer';
-            const wasSelling = localStorage.getItem('otset_selling') === 'true';
-
-            if (isLoggedIn) {
-                switchView('map-view');
-                updateActionBarState();
-                if (userRole === 'merchant' && wasSelling) {
-                    isSelling = true;
+            
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    localStorage.setItem('otset_loggedin', 'true');
+                    userRole = localStorage.getItem('otset_role') || 'merchant';
+                    
+                    switchView('map-view');
                     updateActionBarState();
-                    setupWatchPosition(true);
+                    
+                    const wasSelling = localStorage.getItem('otset_selling') === 'true';
+                    if (userRole === 'merchant' && wasSelling) {
+                        isSelling = true;
+                        updateActionBarState();
+                        setupWatchPosition(true);
+                    }
+                } else {
+                    const isBuyer = localStorage.getItem('otset_role') === 'buyer';
+                    if (isBuyer) {
+                        userRole = 'buyer';
+                        switchView('map-view');
+                        updateActionBarState();
+                    } else {
+                        switchView('login-view');
+                    }
                 }
-            }
+            });
         });
 
         function renderCatalog() {
@@ -521,7 +558,7 @@
             }
         }
 
-        function toggleProductSelect(id) {
+        window.toggleProductSelect = function(id) {
             const card = document.getElementById(`prod-card-${id}`);
             const btn = card.querySelector('.select-toggle-btn');
             if (card.classList.contains('selected')) {
@@ -533,13 +570,13 @@
             }
         }
 
-        function handleActionBarClick() {
+        window.handleActionBarClick = function() {
             if (userRole === 'buyer') {
                 findPassengerLocation();
             } else {
                 if (isSelling) {
                     stopGeoTracking();
-                    showNotification("Müük lõpetatud. Sinu asukohapunkt on kaardilt eemaldatud.");
+                    showNotification("Müük lõpetatud. Sinu asukohapunkt on kaardilt eemaledatud.");
                 } else {
                     switchView('product-selection-view');
                 }
@@ -568,7 +605,7 @@
             );
         }
 
-        function confirmProductsAndStartGeo() {
+        window.confirmProductsAndStartGeo = function() {
             const selectedElements = document.querySelectorAll('.product-card.selected');
             if (selectedElements.length === 0) {
                 alert("Palun vali vähemalt üks toode, mida müüa!");
@@ -616,7 +653,7 @@
             }
         }
 
-        function handleSearch(event) {
+        window.handleSearch = function(event) {
             if (event.key === 'Enter') {
                 const query = document.getElementById('location-search').value;
                 if (!query) return;
@@ -700,18 +737,33 @@
             }
         }
 
-        function handleLogin(role, provider) {
+        window.handleLogin = async function(role, providerName) {
             userRole = role;
-            localStorage.setItem('otset_loggedin', 'true');
             localStorage.setItem('otset_role', role);
-            switchView('map-view');
-            updateActionBarState();
-            showNotification(`Sisselogimine edukas rollis: ${role === 'merchant' ? 'Müüja' : 'Ostja'}.`);
-            
-            if (role === 'buyer') { findPassengerLocation(); }
+
+            if (role === 'merchant') {
+                if (providerName === 'Google') {
+                    showNotification("Ühendun Google'iga...");
+                    try {
+                        const result = await signInWithPopup(auth, provider);
+                        showNotification(`Sisselogimine edukas! Tere, ${result.user.displayName}`);
+                    } catch (error) {
+                        console.error(error);
+                        showNotification("Google sisselogimine ebaõnnestus: " + error.message);
+                    }
+                } else if (providerName === 'Apple') {
+                    showNotification("Apple sisselogimine pole veel saadaval (vajab 99€/a arendajakontot).");
+                }
+            } else {
+                localStorage.setItem('otset_loggedin', 'true');
+                switchView('map-view');
+                updateActionBarState();
+                showNotification("Sisenesid Ostjana. Head sirvimist!");
+                findPassengerLocation();
+            }
         }
 
-        function handleLogout() {
+        window.handleLogout = async function() {
             stopGeoTracking();
             localStorage.removeItem('otset_loggedin');
             localStorage.removeItem('otset_selling');
@@ -720,6 +772,13 @@
             localStorage.removeItem('otset_custom_lng');
             localStorage.removeItem('otset_active_products');
             if (buyerCircle) { map.removeLayer(buyerCircle); buyerCircle = null; }
+            
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Viga väljalogimisel:", error);
+            }
+            
             switchView('login-view');
         }
 
@@ -734,7 +793,6 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // TESTPUNKT: Näidismüüja
             const testLat = 58.1789619, testLng = 26.4882339;
             const testMarker = L.marker([testLat, testLng]).addTo(map);
             const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${testLat},${testLng}`;
@@ -746,8 +804,8 @@
             `);
         }
 
-        function mapZoomIn() { if (map) map.zoomIn(); }
-        function mapZoomOut() { if (map) map.zoomOut(); }
+        window.mapZoomIn = function() { if (map) map.zoomIn(); }
+        window.mapZoomOut = function() { if (map) map.zoomOut(); }
 
         function startGeoTracking(isRestoring) {
             if (userRole === 'buyer') return; 
