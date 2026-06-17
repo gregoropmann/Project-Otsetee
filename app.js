@@ -23,7 +23,6 @@ let previewMarker = null;
 let buyerCircle = null;
 let geoWatchId = null;
 let isSelling = false;
-let isOutOfStock = false; 
 let userRole = 'buyer'; 
 let merchantMarkers = {}; 
 
@@ -107,7 +106,6 @@ window.addEventListener('DOMContentLoaded', () => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         isSelling = true;
-                        isOutOfStock = data.is_out_of_stock || false;
                         localStorage.setItem('otset_selling', 'true');
                         localStorage.setItem('otset_verified', data.verified ? 'true' : 'false');
                         if (data.lat && data.lng) {
@@ -206,13 +204,23 @@ function renderCatalog() {
         items.forEach(item => {
             globalId++;                    
             let isSelected = false;
+            let isItemOutOfStock = false;
             let savedPrice = "5.0";
             let savedUnit = "kg";
 
-            const matchedProduct = activeProductsList.find(p => p.startsWith(item));
+            // Otsime, kas see toode on juba nimekirjas (toode võib olla kas string või objekt uues loogikas)
+            const matchedProduct = activeProductsList.find(p => {
+                const text = (typeof p === 'object') ? p.name : p;
+                return text.startsWith(item);
+            });
+
             if (matchedProduct) {
                 isSelected = true;
-                const parts = matchedProduct.match(/\(([^)]+)\)/);
+                if (typeof matchedProduct === 'object') {
+                    isItemOutOfStock = matchedProduct.available === false;
+                }
+                const textStr = (typeof matchedProduct === 'object') ? matchedProduct.name : matchedProduct;
+                const parts = textStr.match(/\(([^)]+)\)/);
                 if (parts && parts[1]) {
                     const priceUnit = parts[1].replace(' €', '').split('/');
                     if (priceUnit[0]) savedPrice = priceUnit[0].trim();
@@ -221,7 +229,7 @@ function renderCatalog() {
             }
 
             const card = document.createElement('div');
-            card.className = `product-card ${isSelected ? 'selected' : ''}`;
+            card.className = `product-card ${isSelected ? 'selected' : ''} ${isItemOutOfStock ? 'out-of-stock-status' : ''}`;
             card.id = `prod-card-${globalId}`;
             card.setAttribute('data-name', item);
 
@@ -240,6 +248,10 @@ function renderCatalog() {
                             </select>
                         </div>
                     </div>
+                    <div class="stock-status-container" style="margin-top: 8px; display: ${isSelected ? 'flex' : 'none'};" id="stock-toggle-box-${globalId}">
+                        <input type="checkbox" class="stock-toggle-checkbox" id="stock-check-${globalId}" ${isItemOutOfStock ? 'checked' : ''} onchange="toggleItemStock(${globalId})">
+                        <label for="stock-check-${globalId}" style="color: #c62828; font-weight: 500;">Kaup hetkel otsas ❌</label>
+                    </div>
                 </div>
                 <button class="select-toggle-btn" onclick="toggleProductSelect(${globalId})">${isSelected ? 'Valitud' : 'Vali toode'}</button>
             `;
@@ -253,12 +265,29 @@ function renderCatalog() {
 window.toggleProductSelect = function(id) {
     const card = document.getElementById(`prod-card-${id}`);
     const btn = card.querySelector('.select-toggle-btn');
+    const stockBox = document.getElementById(`stock-toggle-box-${id}`);
+    
     if (card.classList.contains('selected')) {
         card.classList.remove('selected');
+        card.classList.remove('out-of-stock-status');
+        document.getElementById(`stock-check-${id}`).checked = false;
         btn.innerText = "Vali toode";
+        if (stockBox) stockBox.style.display = "none";
     } else {
         card.classList.add('selected');
         btn.innerText = "Valitud";
+        if (stockBox) stockBox.style.display = "flex";
+    }
+}
+
+// UUS funktsioon: Käivitub kui toote juures klikitakse "Kaup otsas" linnukest
+window.toggleItemStock = function(id) {
+    const card = document.getElementById(`prod-card-${id}`);
+    const isChecked = document.getElementById(`stock-check-${id}`).checked;
+    if (isChecked) {
+        card.classList.add('out-of-stock-status');
+    } else {
+        card.classList.remove('out-of-stock-status');
     }
 }
 
@@ -308,7 +337,13 @@ window.confirmProductsAndStartGeo = function() {
         const name = el.getAttribute('data-name');
         const price = document.getElementById(`price-num-${id}`).value;
         const unit = document.getElementById(`unit-${id}`).value;
-        inventorySummary.push(`${name} (${price} €/${unit})`);
+        const isItemOutOfStock = document.getElementById(`stock-check-${id}`).checked;
+        
+        // Salvestame objekti, kus on toote tekst ja selle kättesaadavus
+        inventorySummary.push({
+            name: `${name} (${price} €/${unit})`,
+            available: !isItemOutOfStock
+        });
     });
 
     const isPermanent = document.querySelector('input[name="sale_type"]:checked').value === 'permanent';
@@ -332,26 +367,6 @@ window.confirmProductsAndStartGeo = function() {
         }
     } else {
         startGeoTracking(false);
-    }
-}
-
-window.toggleStockState = async function() {
-    if (!auth.currentUser || !isSelling) return;
-    isOutOfStock = !isOutOfStock;   
-    try {
-        await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
-            is_out_of_stock: isOutOfStock
-        });
-        const savedLat = localStorage.getItem('otset_custom_lat');
-        const savedLng = localStorage.getItem('otset_custom_lng');
-        updateLocationProcess(parseFloat(savedLat), parseFloat(savedLng), 10, true);
-        if (isOutOfStock) {
-            showNotification("Märgitud: Kaup hetkel OTSAS. Marker muutus halliks.");
-        } else {
-            showNotification("Märgitud: Kaup jälle SAADAVAL!");
-        }
-    } catch(e) {
-        console.error(e);
     }
 }
 
@@ -472,7 +487,7 @@ window.handleLogin = async function(role, providerName) {
                 showNotification("Sisselogimine ebaõnnestus: " + error.message);
             }
         } else if (providerName === 'Apple') {
-            showNotification("Apple sisselogimine pole veel ühendatud.");
+            showNotification("Apple sisselogimine pole vielä ühendatud.");
         }
     } else {
         localStorage.setItem('otset_loggedin', 'true');
@@ -516,6 +531,21 @@ window.handleLogout = async function() {
     switchView('login-view');
 }
 
+// Abifunktsioon toodete ilusa teksti genereerimiseks ostja jaoks
+function buildProductsHTML(productsArray) {
+    if (!productsArray || productsArray.length === 0) return 'Tooted puuduvad';
+    return productsArray.map(p => {
+        // Toetame nii vana formaati (String) kui ka uut formaati (Objekt) tagasiühilduvuse jaoks
+        const name = (typeof p === 'object') ? p.name : p;
+        const isAvailable = (typeof p === 'object') ? (p.available !== false) : true;
+        
+        if (!isAvailable) {
+            return `<span style="text-decoration: line-through; color: #b71c1c; font-size:0.85rem;">• ${name} <b>(HETKEL OTSAS)</b></span>`;
+        }
+        return `• ${name}`;
+    }).join('<br>');
+}
+
 function initMap() {
     const savedLat = localStorage.getItem('otset_custom_lat');
     const savedLng = localStorage.getItem('otset_custom_lng');
@@ -538,8 +568,12 @@ function initMap() {
                     delete merchantMarkers[id];
                 }
             } else {
-                const prodHTML = data.products ? data.products.map(p => `• ${p}`).join('<br>') : 'Tooted puuduvad';
+                const prodHTML = buildProductsHTML(data.products);
                 const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}`;
+                
+                // Kui kõik tooted on otsas, võime panna halli markeri, muidu tavalise
+                const allOOS = data.products && data.products.length > 0 && data.products.every(p => typeof p === 'object' && p.available === false);
+                
                 let currentIcon = markerIcons.temporary;
                 let typeLabel = "<span style='color:green;font-weight:bold;'>VÄLKMÜÜK (Live kohapeal)</span>";
                 
@@ -549,20 +583,23 @@ function initMap() {
                 }
 
                 if (data.is_permanent) {
-                    if (data.is_out_of_stock) {
+                    if (allOOS) {
                         currentIcon = markerIcons.outofstock;
-                        typeLabel = "<span style='color:red;font-weight:bold;'>PÜSIKOHT (Kaup hetkel otsas!)</span>";
+                        typeLabel = "<span style='color:red;font-weight:bold;'>PÜSIKOHT (Kogu kaup otsas!)</span>";
                     } else {
                         currentIcon = markerIcons.permanent;
                         typeLabel = "<span style='color:blue;font-weight:bold;'>PÜSIKOHT (Avatud / Saadaval)</span>";
                     }
+                } else if (allOOS) {
+                    currentIcon = markerIcons.outofstock;
                 }
+
                 const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
                 const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
                 
                 let paymentLabel = "Sularaha ja Kaart 💵💳";
                 if (data.payment_type === 'cash') paymentLabel = "Ainult sularaha 💵";
-                if (data.payment_type === 'card') paymentLabel = "Ainult kaart 💳";
+                if (data.payment_type === 'card') paymentLabel = "Ainult kaart <code>💳</code>";
 
                 const popupContent = `
                     <div style="font-size:0.85rem; min-width:180px;">
@@ -664,16 +701,23 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     accuracyCircle = L.circle([finalLat, finalLng], {
         radius: accuracy, color: 'rgba(79, 119, 170, 0.5)', fillColor: '#4F77AA', fillOpacity: 0.15, weight: 1.5
     }).addTo(map);
-    let myIcon = markerIcons.temporary;
-    if(isPermanent) {
-        myIcon = isOutOfStock ? markerIcons.outofstock : markerIcons.permanent;
-    }
-    activeMarker = L.marker([finalLat, finalLng], { draggable: true, icon: myIcon }).addTo(map);
+
     const rawProducts = localStorage.getItem('otset_active_products');
     const parsedProducts = rawProducts ? JSON.parse(rawProducts) : [];
-    const prodListHTML = parsedProducts.map(p => `• ${p}`).join('<br>');
+
+    const allOOS = parsedProducts.length > 0 && parsedProducts.every(p => typeof p === 'object' && p.available === false);
+
+    let myIcon = markerIcons.temporary;
+    if(isPermanent) {
+        myIcon = allOOS ? markerIcons.outofstock : markerIcons.permanent;
+    } else if (allOOS) {
+        myIcon = markerIcons.outofstock;
+    }
+
+    activeMarker = L.marker([finalLat, finalLng], { draggable: true, icon: myIcon }).addTo(map);
+    const prodListHTML = buildProductsHTML(parsedProducts);
     const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${finalLat},${finalLng}`;
-    const activeText = isOutOfStock ? "<span style='color:red;'>AKTIIVNE (Kaup otsas!)</span>" : "<span style='color:green;'>AKTIIVNE (Müük käib)</span>";
+    const activeText = allOOS ? "<span style='color:red;'>AKTIIVNE (Kogu kaup otsas!)</span>" : "<span style='color:green;'>AKTIIVNE (Müük käib)</span>";
     
     let myVerifiedBadge = "";
     const isVerifiedInCloud = localStorage.getItem('otset_verified') === 'true';
@@ -695,7 +739,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             <span style="color:#222;font-weight:600;">Sinu tooted:</span><br>
             ${prodListHTML}<br>
             <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Testi navigatsiooni</a><br>
-            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Wenn punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
+            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
         </div>
     `);
     if (!isRestoring) {
@@ -714,7 +758,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             lng: finalLng,
             products: parsedProducts,
             is_permanent: isPermanent,
-            is_out_of_stock: isOutOfStock,
+            is_out_of_stock: allOOS,
             contact_phone: phone,
             opening_hours: hours,
             verified: isVerifiedInCloud,
@@ -754,12 +798,14 @@ function updateActionBarState() {
     const verifyBtn = document.getElementById('verify-btn');
     if (!actionBtn) return;
     
+    // Eemaldame igaks juhuks vana globaalse stock-nupu kuva täielikult
+    if(stockBtn) stockBtn.style.display = "none";
+
     if (userRole === 'buyer') {
         actionBtn.disabled = false;
         actionBtn.innerText = "Minu Asukoht";
         actionBtn.className = "btn btn-success";
         if(editBtn) editBtn.style.display = "none";
-        if(stockBtn) stockBtn.style.display = "none";
         if(verifyBtn) verifyBtn.style.display = "none";
     } else {
         if (isSelling) {
@@ -771,25 +817,11 @@ function updateActionBarState() {
             
             const isVerified = localStorage.getItem('otset_verified') === 'true';
             if (verifyBtn) verifyBtn.style.display = isVerified ? "none" : "flex";
-
-            if(stockBtn && isPerm) {
-                stockBtn.style.display = "flex";
-                if (isOutOfStock) {
-                    stockBtn.innerText = "Kaup SAADAVAL";
-                    stockBtn.className = "btn btn-success";
-                } else {
-                    stockBtn.innerText = "Kaup OTSAS";
-                    stockBtn.className = "btn btn-warning";
-                }
-            } else if (stockBtn) {
-                stockBtn.style.display = "none";
-            }
         } else {
             actionBtn.disabled = false;
             actionBtn.innerText = "Alusta Müüki";
             actionBtn.className = "btn btn-accent";
             if(editBtn) editBtn.style.display = "none";
-            if(stockBtn) stockBtn.style.display = "none";
             if(verifyBtn) verifyBtn.style.display = "none";
         }
     }
@@ -807,7 +839,6 @@ function stopGeoTracking() {
         if (accuracyCircle) { map.removeLayer(accuracyCircle); accuracyCircle = null; }
         if (previewMarker) { map.removeLayer(previewMarker); previewMarker = null; }
         isSelling = false;
-        isOutOfStock = false;
         localStorage.setItem('otset_selling', 'false');
         localStorage.removeItem('otset_custom_lat');
         localStorage.removeItem('otset_custom_lng');
