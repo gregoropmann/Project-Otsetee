@@ -4,43 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Andmeturvalisus - Otset.ee</title>
+    
     <link rel="stylesheet" href="style.css">
+    
     <style>
-        body {
+        /* KRIITILINE PARANDUS: Lubame lehel skrollida ja tühistame style.css-i lukustuse */
+        html, body {
+            overflow: auto !important;
+            overflow-y: auto !important;
+            height: auto !important;
+            max-height: none !important;
             background-color: var(--summer-cream, #FAF8F5);
             color: var(--text-charcoal, #2C2A29);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            padding: 20px;
+            padding: 0;
             margin: 0;
         }
+        
+        .info-wrapper {
+            padding: 20px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
         .info-container {
             max-width: 600px;
-            margin: 40px auto;
+            margin: 20px auto 50px auto;
             background: #ffffff;
             padding: 30px;
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            width: 100%;
+            box-sizing: border-box;
         }
+        
         h1 {
             color: var(--sinilill-blue, #4F77AA);
             margin-top: 0;
             font-size: 1.8rem;
+            font-weight: bold;
         }
+        
         h2 {
             font-size: 1.2rem;
-            color: var(--text-charcoal);
-            margin-top: 24px;
+            color: var(--text-charcoal, #2C2A29);
+            margin-top: 28px;
             border-left: 4px solid var(--wheat-gold, #E5A93C);
-            padding-left: 10px;
+            padding-left: 12px;
+            font-weight: 600;
         }
+        
         p, li {
             line-height: 1.6;
             font-size: 0.95rem;
-            color: #555;
+            color: #4a4a4a;
         }
+        
         ul {
             padding-left: 20px;
+            margin-bottom: 15px;
         }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
         .badge {
             background: #E8F0FE;
             color: #1A73E8;
@@ -49,24 +77,31 @@
             font-size: 0.8rem;
             font-weight: bold;
             display: inline-block;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
+        
         .badge-secure {
             background: #E6F4EA;
             color: #137333;
         }
+        
+        .back-btn-container {
+            margin-top: 35px;
+            text-align: center;
+        }
+        
         .back-btn {
             display: inline-block;
-            margin-top: 30px;
-            padding: 12px 24px;
+            padding: 12px 30px;
             background-color: var(--sinilill-blue, #4F77AA);
             color: white;
             text-decoration: none;
             border-radius: 8px;
             font-weight: bold;
-            text-align: center;
             transition: opacity 0.2s;
+            box-shadow: 0 2px 6px rgba(79, 119, 170, 0.2);
         }
+        
         .back-btn:hover {
             opacity: 0.9;
         }
@@ -74,34 +109,39 @@
 </head>
 <body>
 
-    <div class="info-container">
-        <h1>🔒 Sinu andmed on kaitstud</h1>
-        <p>Otset.ee on loodud põhimõttel, et kasutajate andmed peavad olema täielikult turvatud, läbipaistvad ja privaatsed. Siit leiad lihtsa ülevaate, kuidas meie rakendus töötab ja miks see on turvaline.</p>
+    <div class="info-wrapper">
+        <div class="info-container">
+            <h1>🔒 Sinu andmed on kaitstud</h1>
+            <p>Otset.ee on loodud privaatsust ja läbipaistvust silmas pidades. Siit leiad lihtsa ja ausa ülevaate, kuidas meie rakendus töötab ning miks seda on turvaline kasutada.</p>
 
-        <h2>1. Krüpteeritud HTTPS ühendus</h2>
-        <p><span class="badge badge-secure">Turvaline ühendus</span></p>
-        <p>Rakendust majutatakse turvalises <strong>GitHub Pages</strong> keskkonnas, mis kasutab täielikku <strong>HTTPS krüpteeringut</strong> (veebiaadressi ees on tabaluku ikoon). See tähendab, et kogu andmevahetus Sinu telefoni ja rakenduse vahel on kõrvaliste isikute eest täielikult varjatud ja krüpteeritud.</p>
+            <h2>1. Krüpteeritud HTTPS ühendus</h2>
+            <div><span class="badge badge-secure">Täielik Krüpteering</span></div>
+            <p>Rakendust majutatakse turvalises <strong>GitHub Pages</strong> keskkonnas, mis kasutab automaatselt ametlikku <strong>HTTPS ühendust</strong> (veebiaadressi ees on tabalukk). See tagab, et mitte keegi ei saa Sinu telefoni ja rakenduse vahelist andmevahetust pealt kuulata ega võltsida.</p>
 
-        <h2>2. Google OAuth (Sisselogimine)</h2>
-        <p><span class="badge">Google Identity</span></p>
-        <p>Müüjana sisse logides kasutab rakendus <strong>Google OAuth 2.0</strong> ametlikku süsteemi. see tähendab:</p>
-        <ul>
-            <li><strong>Me ei näe ega salvesta Sinu parooli.</strong> Sisselogimine toimub otse Google'i turvalises aknas.</li>
-            <li>Rakendus saab Google'ilt ainult Sinu avaliku nime ja profiilipildi, et kuvada kaardil punkti juures, kes kaupa müüb.</li>
-        </ul>
+            <h2>2. Google OAuth sisselogimine</h2>
+            <div><span class="badge">Turvaline Autentimine</span></div>
+            <p>Müüjana sisse logides kasutatakse ametlikku Google'i süsteemi. See tähendab:</p>
+            <ul>
+                <li><strong>Me ei näe ega salvesta kunagi Sinu parooli.</strong> Sisselogimine toimub täielikult Google'i enda kontrollitud turvaaknas.</li>
+                <li>Rakendus saab Google'ilt ainult Sinu profiili avaliku nime, et kuvada kaardil punkti juures ostjatele korrektset infot (nt. "Müüja: Peeter").</li>
+            </ul>
 
-        <h2>3. Firebase Reaalaja Andmebaas</h2>
-        <p><span class="badge badge-secure">Google Cloud Security</span></p>
-        <p>Rakenduse andmebaasina on kasutusel Google'i maailmatasemel pilveplatvorm <strong>Firebase Firestore</strong>. See hoiab asukohad turvalisena:</p>
-        <ul>
-            <li><strong>Müüjatele:</strong> Sinu täpne asukoht salvestatakse andmebaasi *ainult* siis, kui oled aktiivselt müüki alustanud. Kui vajutad "Lõpeta müük" või logid välja, kustub Sinu ajutine välkmüügi asukoht andmebaasist koheselt.</li>
-            <li><strong>Ostjatele:</strong> Kui kasutad nuppu "Minu asukoht", arvutab Sinu telefon asukoha kohapeal kaardi kuvamiseks. Ostjate asukohti <strong>ei salvestata kunagi</strong> andmebaasi ega saadeta serverisse.</li>
-        </ul>
+            <h2>3. Firebase pilveandmebaas</h2>
+            <div><span class="badge badge-secure">Google Cloud Security</span></div>
+            <p>Andmebaasina on kasutusel Google'i reaalaja platvorm <strong>Firebase Firestore</strong>, mis toimib järgmiselt:</p>
+            <ul>
+                <li><strong>Müüjatele:</strong> Sinu müügikoha asukoht, telefoninumber ja lahtiolekuajad salvestatakse andmebaasi ainult siis, kui oled aktiivselt müüki alustanud. Niipea kui vajutad "Lõpeta müük" või logid välja, kustub välkmüügi punkt andmebaasist koheselt ja jäädavalt.</li>
+                <li><strong>Ostjatele:</strong> Kui kasutad nuppu "Minu asukoht", arvutab Sinu telefon asukoha kohapeal ainult kaardi nihutamiseks. Ostjate asukohti <strong>ei salvestata andmebaasi ega jälgita kunagi</strong>.</li>
+            </ul>
 
-        <h2>4. Serverivaba ja reklaamivaba</h2>
-        <p>Otset.ee on otsene ja "puhas" rakendus. Meil ei ole oma privaatset serverit, kuhu kogutaks kasutajate ajalugu või profiile. Me ei kasuta jälitusküpsiseid ega jaga andmeid mitte ühegi kolmanda osapoole või reklaamifirmaga.</p>
+            <h2>4. Serverivaba ja puhas kood</h2>
+            <div><span class="badge">Reklaamivaba</span></div>
+            <p>Otset.ee on otseühendus tarbija ja tootja vahel. Meil ei ole tagalasse peidetud oma andmeserverit, mis koguks kasutajate ajalugu, profiile või liikumismustreid. Me ei kasuta jälitusküpsiseid ega jaga infot ühegi kolmanda osapoole või turundusfirmaga.</p>
 
-        <a href="index.html" class="back-btn">← Tagasi kaardile</a>
+            <div class="back-btn-container">
+                <a href="index.html" class="back-btn">← Tagasi kaardile</a>
+            </div>
+        </div>
     </div>
 
 </body>
