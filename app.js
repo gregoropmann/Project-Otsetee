@@ -682,7 +682,6 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
         showNotification("Müügikoht kaardil aktiivne!");
     }
     
-    // Uuendame nuppude visuaali reaalajas
     updateActionBarState();
 
     if (auth.currentUser) {
@@ -748,7 +747,6 @@ function updateActionBarState() {
             actionBtn.className = "btn btn-danger";
             if(editBtn) editBtn.style.display = "flex"; 
             
-            // Kuvame kuldse märgi nupu tegevusribal vaid siis, kui kasutaja pole juba kinnitatud
             const isVerified = localStorage.getItem('otset_verified') === 'true';
             if (verifyBtn) verifyBtn.style.display = isVerified ? "none" : "flex";
 
@@ -824,11 +822,21 @@ window.askForSupportAndVerify = async function() {
                 className: "btn-accent",
                 callback: async () => {
                     try {
+                        localStorage.setItem('otset_verified', 'true');
+                        
                         await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
-                            pending_verification: true
+                            pending_verification: true,
+                            verified: true
                         });
+                        
+                        const savedLat = localStorage.getItem('otset_custom_lat');
+                        const savedLng = localStorage.getItem('otset_custom_lng');
+                        if (savedLat && savedLng) {
+                            updateLocationProcess(parseFloat(savedLat), parseFloat(savedLng), 10, true);
+                        }
+
                         window.open(`https://buymeacoffee.com/gregoropmann`, '_blank');
-                        showNotification("Suunasime Sind toetuslehele. Kui toetus on kohal, ilmub Sinu punktile kuldne märgis!");
+                        showNotification("Suunasime Sind toetuslehele. Sinu punktile lisati kuldne märgis!");
                     } catch (e) {
                         console.error(e);
                     }
