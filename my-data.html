@@ -5,17 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Andmeturvalisus - Otset.ee</title>   
     <link rel="stylesheet" href="style.css"> 
-    <style>
+        <style>
         html, body {
             overflow: auto !important;
             overflow-y: auto !important;
             height: auto !important;
             max-height: none !important;
-            background-color: var(--summer-cream, #FAF8F5);
             color: var(--text-charcoal, #2C2A29);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             padding: 0;
             margin: 0;
+            
+            background: linear-gradient(rgba(250, 248, 245, 0.85), rgba(250, 248, 245, 0.85)), 
+                        url('assets/pold.webp') no-repeat center center fixed;
+            background-size: cover;
         }
         
         .info-wrapper {
@@ -26,13 +29,14 @@
 
         .info-container {
             max-width: 600px;
-            margin: 20px auto 50px auto;
-            background: #ffffff;
+            margin: 40px auto 50px auto;
+            background: rgba(255, 255, 255, 0.96); /* Veidi läbipaistev valge, et taust kumaks läbi */
             padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             width: 100%;
             box-sizing: border-box;
+            backdrop-filter: blur(4px);
         }
         
         h1 {
