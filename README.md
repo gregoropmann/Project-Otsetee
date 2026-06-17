@@ -90,7 +90,7 @@ By pairing clean data logic with real-time hardware GPS location updates, the Ot
 ecosystem transforms unstructured roadside commerce into a synchronized, secure, and
 entirely lawful regional trade network.
 
-## Links, the people are outraged.
+## Lingid, rahva raev.
 
 https://www.err.ee/1610056144/transpordiamet-on-kehtestanud-teeaarsetele-muugisiltidele-hulga-noudeid
 
