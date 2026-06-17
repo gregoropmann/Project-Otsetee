@@ -853,3 +853,29 @@ window.askForSupportAndVerify = async function() {
         ]
     );
 }
+
+// Ostja tagasiside akna avamine
+window.openBuyerFeedback = function() {
+    const modal = document.getElementById('buyer-feedback-modal');
+    if (!modal) return;
+    document.getElementById('feedback-step-1').style.display = 'block';
+    document.getElementById('feedback-step-2').style.display = 'none';
+    modal.style.display = 'flex';
+}
+
+// Akna sulgemine
+window.closeBuyerFeedback = function() {
+    const modal = document.getElementById('buyer-feedback-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Tagasiside nupu vajutuse töötlemine
+window.handleBuyerFeedback = function(helped) {
+    if (helped) {
+        // Kui aitas, liigume sammu 2 juurde (Buy Me a Coffee)
+        document.getElementById('feedback-step-1').style.display = 'none';
+        document.getElementById('feedback-step-2').style.display = 'block';
+    } else {
+        closeBuyerFeedback();
+    }
+}
