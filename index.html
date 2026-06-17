@@ -435,35 +435,28 @@
     </div>
 
     <script type="module">
-        // Import Firebase core and auth services
+        // 1. Impordime Firebase'i ja andmebaasi (Firestore) funktsioonid
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-        
-        // LISATUD: Impordime Firestore andmebaasi funktsioonid
         import { getFirestore, doc, setDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-        // Firebase configuration
+        // 2. Sinu projekti unikaalsed Firebase andmed
         const firebaseConfig = {
             apiKey: "AIzaSyBo648Em9A94sabAg0M-MXAlFUbXGjUr-Y",
             authDomain: "otsetee-9e167.firebaseapp.com",
             projectId: "otsetee-9e167",
             storageBucket: "otsetee-9e167.firebasestorage.app",
             messagingSenderId: "221378870886",
-            appId: "1:221378870886:web:e595d472deb904ef6437a7",
-            measurementId: "G-0VSYGL35JN"
+            appId: "1:221378870886:web:e595d472deb904ef6437a7"
         };
 
-        // Initialize Firebase services
+        // 3. Algatame süsteemid
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
-        
-        // LISATUD: Algatame Firestore andmebaasi
         const db = getFirestore(app);
 
-        // Application variables
+        // Äpi globaalsed muutujad
         let map;
         let activeMarker = null;
         let accuracyCircle = null;
@@ -472,7 +465,7 @@
         let geoWatchId = null;
         let isSelling = false;
         let userRole = 'buyer'; 
-        let merchantMarkers = {}; // LISATUD: hoiab teiste müüjate markereid kaardil reaalajas
+        let merchantMarkers = {}; // Siia kogume teiste müüjate markerid reaalajas
 
         const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
 
@@ -486,7 +479,7 @@
             "Küpsetised ja Omatoodang": ["Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook"]
         };
 
-        // Track Auth status globally
+        // Kuulame sisselogimise staatust
         window.addEventListener('DOMContentLoaded', () => {
             renderCatalog();
             
@@ -583,7 +576,7 @@
             } else {
                 if (isSelling) {
                     stopGeoTracking();
-                    showNotification("Müük lõpetatud. Sinu asukohapunkt on kaardilt ja andmebaasist eemaldatud.");
+                    showNotification("Müük lõpetatud. Sinu asukohapunkt on eemaldatud.");
                 } else {
                     switchView('product-selection-view');
                 }
@@ -694,7 +687,7 @@
                                 previewMarker.bindPopup(`
                                     <b>${placeName}</b><br>
                                     Koordinaadid: ${lat.toFixed(5)}, ${lon.toFixed(5)}<br>
-                                    <a href="${mapsLink}" target="_blank" class="nav-link-btn">Navigeeri siia (Google Maps)</a>
+                                    <a href="${mapsLink}" target="_blank" class="nav-link-btn">Navigeeri siia</a>
                                 `).openPopup();
 
                                 if (userRole === 'merchant') {
@@ -710,7 +703,7 @@
                                                     previewMarker = null;
                                                     localStorage.setItem('otset_custom_lat', lat);
                                                     localStorage.setItem('otset_custom_lng', lon);
-                                                    showNotification("Asukoht salvestatud mällu. Vajuta 'Alusta müüki' nupule.");
+                                                    showNotification("Asukoht salvestatud. Vajuta 'Alusta müüki'.");
                                                 }
                                             },
                                             {
@@ -723,12 +716,12 @@
                                 }
                             }
                         } else {
-                            showNotification("Asukohta ei leitud. Proovi täpsemat nime.");
+                            showNotification("Asukohta ei leitud.");
                         }
                     })
                     .catch(err => {
                         console.error(err);
-                        showNotification("Otsingutõrge. Kontrolli võrguühendust.");
+                        showNotification("Otsingutõrge.");
                     });
             }
         }
@@ -752,20 +745,19 @@
                 if (providerName === 'Google') {
                     showNotification("Ühendun Google'iga...");
                     try {
-                        const result = await signInWithPopup(auth, provider);
-                        showNotification(`Sisselogimine edukas! Tere, ${result.user.displayName}`);
+                        await signInWithPopup(auth, provider);
                     } catch (error) {
                         console.error(error);
-                        showNotification("Google sisselogimine ebaõnnestus: " + error.message);
+                        showNotification("Sisselogimine ebaõnnestus: " + error.message);
                     }
                 } else if (providerName === 'Apple') {
-                    showNotification("Apple sisselogimine pole veel saadaval (vajab 99€/a arendajakontot).");
+                    showNotification("Apple sisselogimine pole veel ühendatud.");
                 }
             } else {
                 localStorage.setItem('otset_loggedin', 'true');
                 switchView('map-view');
                 updateActionBarState();
-                showNotification("Sisenesid Ostjana. Head sirvimist!");
+                showNotification("Sisenesid Ostjana.");
                 findPassengerLocation();
             }
         }
@@ -785,7 +777,6 @@
             } catch (error) {
                 console.error("Viga väljalogimisel:", error);
             }
-            
             switchView('login-view');
         }
 
@@ -800,43 +791,36 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // ----------------------------------------------------
-            // LISATUD REAALAJA KUULAJA: Loeb Firestore'ist teiste müüjate punkte kaardile
-            // ----------------------------------------------------
+            // REAALAJA ANDMEBAASI KUULAJA: Kuvab automaatselt teiste müüjate punktid pilvest
             onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     const id = change.doc.id;
                     const data = change.doc.data();
                     
-                    // Kui see on praegu sisselogitud müüja ise, siis me tema asukohta siit topelt ei joonista
                     if (auth.currentUser && id === auth.currentUser.uid) return;
 
                     if (change.type === "removed") {
-                        // Müüja pani leti kinni -> eemaldame markeri kaardilt
                         if (merchantMarkers[id]) {
                             map.removeLayer(merchantMarkers[id]);
                             delete merchantMarkers[id];
                         }
                     } else {
-                        // Müüja on võrgus või uuendas asukohta/tooteid
                         const prodHTML = data.products ? data.products.map(p => `• ${p}`).join('<br>') : 'Tooted puuduvad';
                         const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}`;
                         
                         const popupContent = `
-                            <div style="font-size:0.85rem; max-height: 180px; overflow-y:auto;">
+                            <div style="font-size:0.85rem;">
                                 <b>${data.name}</b><br>
                                 <span style="color:#222;font-weight:600;">Müüdavad tooted:</span><br>
-                                ${prodHTML}<br><br>
+                                ${prodHTML}<br>
                                 <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Sõida siia (Navigatsioon)</a>
                             </div>
                         `;
 
                         if (merchantMarkers[id]) {
-                            // Marker on juba kaardil, lihtsalt liigutame seda ja uuendame sisu
                             merchantMarkers[id].setLatLng([data.lat, data.lng]);
                             merchantMarkers[id].setPopupContent(popupContent);
                         } else {
-                            // Uus müüja tuli võrku, loome talle kaardile markeri
                             merchantMarkers[id] = L.marker([data.lat, data.lng]).addTo(map)
                                 .bindPopup(popupContent);
                         }
@@ -936,12 +920,10 @@
             
             if (!isRestoring) {
                 activeMarker.openPopup();
-                showNotification("Müügikoht aktiivne ja koos toodetega kaardile kantud!");
+                showNotification("Müügikoht aktiivne!");
             }
 
-            // ----------------------------------------------------
-            // LISATUD/MUDETUD: Saadame müüja andmed Firestore andmebaasi
-            // ----------------------------------------------------
+            // ANDMETE SAATMINE PILVE: Salvestame reaalajas Firestore'i andmebaasi
             if (auth.currentUser) {
                 const merchantId = auth.currentUser.uid;
                 const merchantName = auth.currentUser.displayName || "Teeäärne Müüja";
@@ -952,11 +934,7 @@
                     lng: finalLng,
                     products: parsedProducts,
                     updatedAt: new Date().toISOString()
-                }).then(() => {
-                    console.log("Andmed edukalt pilve andmebaasi saadetud!");
-                }).catch(err => {
-                    console.error("Viga pilve salvestamisel:", err);
-                });
+                }).catch(err => console.error("Viga andmebaasi kirjutamisel:", err));
             }
 
             activeMarker.on('dragend', function(event) {
@@ -966,7 +944,6 @@
                 localStorage.setItem('otset_custom_lat', currentPos.lat);
                 localStorage.setItem('otset_custom_lng', currentPos.lng);
                 
-                // Kui lohistatakse, uuendame kohe andmeid ka pilves
                 if (auth.currentUser) {
                     setDoc(doc(db, "active_merchants", auth.currentUser.uid), {
                         name: auth.currentUser.displayName || "Teeäärne Müüja",
@@ -976,7 +953,7 @@
                         updatedAt: new Date().toISOString()
                     });
                 }
-                showNotification("Asukoht teeääres täpsustatud ja salvestatud!");
+                showNotification("Asukoht täpsustatud!");
             });
 
             isSelling = true;
@@ -1006,13 +983,9 @@
         }
 
         function stopGeoTracking() {
-            // ----------------------------------------------------
-            // LISATUD: Eemaldame müügikoha Firestore andmebaasist
-            // ----------------------------------------------------
+            // ANDMETE KUSTUTAMINE: Eemaldame punkti andmebaasist, kui müük lõppeb
             if (auth.currentUser) {
-                const merchantId = auth.currentUser.uid;
-                deleteDoc(doc(db, "active_merchants", merchantId))
-                    .then(() => console.log("Müügikoht andmebaasist eemaldatud."))
+                deleteDoc(doc(db, "active_merchants", auth.currentUser.uid))
                     .catch(err => console.error(err));
             }
 
