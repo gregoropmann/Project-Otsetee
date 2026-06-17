@@ -75,29 +75,45 @@
             <span>Müügikoha Seaded</span>
             <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; flex: none;" onclick="switchView('map-view')">Tagasi</button>
         </div>
-        <div class="meta-settings-card">
-            <div class="form-group">
-                <label>Müügikoha tüüp:</label>
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input type="radio" name="sale_type" value="temporary" checked onchange="toggleMetaFields()"> Välkmüük (Live kohapeal)
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="sale_type" value="permanent" onchange="toggleMetaFields()"> Püsikoht (Talu, Kiosk)
-                    </label>
-                </div>
-            </div>
-            <div id="permanent-only-fields" style="display: none; flex-direction: column; gap: 12px;">
-                <div class="form-group">
-                    <label for="merchant-phone">Kontakttelefon (Tellimiseks):</label>
-                    <input type="text" id="merchant-phone" class="form-input" placeholder="nt. +372 555 XXXXX">
-                </div>
-                <div class="form-group">
-                    <label for="merchant-hours">Lahtiolekuajad / Info:</label>
-                    <input type="text" id="merchant-hours" class="form-input" placeholder="nt. E-P 9-18 või Iseteenindus 24/7">
-                </div>
-            </div>
+<div class="meta-settings-card">
+    <div class="form-group">
+        <label>Müügikoha tüüp:</label>
+        <div class="radio-group">
+            <label class="radio-option">
+                <input type="radio" name="sale_type" value="temporary" checked onchange="toggleMetaFields()"> Välkmüük (Live kohapeal)
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="sale_type" value="permanent" onchange="toggleMetaFields()"> Püsikoht (Talu, Kiosk)
+            </label>
         </div>
+    </div>
+
+    <div class="form-group" style="margin-top: 15px;">
+        <label>Toetatud makseviisid:</label>
+        <div class="radio-group">
+            <label class="radio-option">
+                <input type="radio" name="payment_type" value="both" checked> Sularaha ja Kaart 💵💳
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="payment_type" value="cash"> Ainult Sularaha 💵
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="payment_type" value="card"> Ainult Kaart 💳
+            </label>
+        </div>
+    </div>
+
+    <div id="permanent-only-fields" style="display: none; flex-direction: column; gap: 12px;">
+        <div class="form-group">
+            <label for="merchant-phone">Kontakttelefon (Tellimiseks):</label>
+            <input type="text" id="merchant-phone" class="form-input" placeholder="nt. +372 555 XXXXX">
+        </div>
+        <div class="form-group">
+            <label for="merchant-hours">Lahtiolekuajad / Info:</label>
+            <input type="text" id="merchant-hours" class="form-input" placeholder="nt. E-P 9-18 või Iseteenindus 24/7">
+        </div>
+    </div>
+</div>
         <div id="catalog-container"></div>
         <div class="sticky-footer">
             <button class="btn btn-accent" style="width: 100%;" onclick="confirmProductsAndStartGeo()">Kinnita andmed ja aktiveeri kaardil</button>
