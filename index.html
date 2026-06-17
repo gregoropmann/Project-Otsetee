@@ -8,7 +8,7 @@
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#4F77AA">
 
-    <link rel="icon" type="image/png" href="/assets/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="assets/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <link rel="shortcut icon" href="assets/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
@@ -491,8 +491,6 @@
                         getDoc(doc(db, "active_merchants", user.uid)).then((docSnap) => {
                             if (docSnap.exists()) {
                                 const data = docSnap.data();
-                                console.log("Müük on aktiivne teises seadmes!", data);
-                                
                                 isSelling = true;
                                 localStorage.setItem('otset_selling', 'true');
                                 if (data.lat && data.lng) {
@@ -502,7 +500,6 @@
                                 if (data.products) {
                                     localStorage.setItem('otset_active_products', JSON.stringify(data.products));
                                 }
-                                
                                 renderCatalog(); 
                                 updateActionBarState();
                                 setupWatchPosition(true);
@@ -653,7 +650,7 @@
         window.confirmProductsAndStartGeo = function() {
             const selectedElements = document.querySelectorAll('.product-card.selected');
             if (selectedElements.length === 0) {
-                alert("Palun vali vähemalt üks toode, mida müüga!");
+                alert("Palun vali vähemalt üks toode, mida müüa!");
                 return;
             }
 
@@ -670,19 +667,18 @@
             switchView('map-view');
             
             if (isSelling) {
-                // Kui müük juba käis, siis lihtsalt uuendame pilves andmeid ilma GPSi taaskäivitamata
                 const savedLat = localStorage.getItem('otset_custom_lat');
                 const savedLng = localStorage.getItem('otset_custom_lng');
                 if (savedLat && savedLng) {
                     updateLocationProcess(parseFloat(savedLat), parseFloat(savedLng), 10, true);
-                    showNotification("Tooted ja hinnad reaalajas uuendatud!");
+                    showNotification("Tooted ja hinnad pilves reaalajas uuendatud!");
                 }
             } else {
                 startGeoTracking(false);
             }
         }
 
-        function showNotification(message, duration = 3500, actions = null) {
+        window.showNotification = function(message, duration = 3500, actions = null) {
             const container = document.getElementById('app-notification');
             const content = document.getElementById('notification-content');
             const btnArea = document.getElementById('notification-buttons');
@@ -786,7 +782,7 @@
             }
         }
 
-        function switchView(viewId) {
+        window.switchView = function(viewId) {
             document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
             
@@ -795,7 +791,7 @@
                     if (!map) { initMap(); } else { map.invalidateSize(); }
                 }, 100);
             } else if (viewId === 'product-selection-view') {
-                renderCatalog(); // Uuendame kataloogi vaadet alati avamisel, et värsked hinnad sisse laadida
+                renderCatalog();
             }
         }
 
@@ -916,7 +912,7 @@
         }
 
         function setupWatchPosition(isRestoring) {
-            if (geoWatchId) return; // Hoiame ära topelt-kuulajad
+            if (geoWatchId) return; 
             geoWatchId = navigator.geolocation.watchPosition(
                 (position) => {
                     let { latitude, longitude, accuracy } = position.coords;
@@ -1039,7 +1035,7 @@
                     actionBtn.disabled = false;
                     actionBtn.innerText = "Lõpeta Müük";
                     actionBtn.className = "btn btn-danger";
-                    if(editBtn) editBtn.style.display = "flex"; // KUVAME kiiruuendamise nuppu
+                    if(editBtn) editBtn.style.display = "flex"; 
                 } else {
                     actionBtn.disabled = false;
                     actionBtn.innerText = "Alusta Müüki";
