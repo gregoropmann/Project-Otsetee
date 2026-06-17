@@ -109,6 +109,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         isSelling = true;
                         isOutOfStock = data.is_out_of_stock || false;
                         localStorage.setItem('otset_selling', 'true');
+                        // Salvestame pilve staatuse brauserisse ainult sisselogimisel tagavaraks
                         localStorage.setItem('otset_verified', data.verified ? 'true' : 'false');
                         if (data.lat && data.lng) {
                             localStorage.setItem('otset_custom_lat', data.lat);
@@ -393,7 +394,7 @@ window.handleSearch = function(event) {
                             className: 'preview-marker-icon'
                         });
                         previewMarker = L.marker([lat, lon], { icon: orangeIcon }).addTo(map);
-                        const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                        const mapsLink = `http://googleusercontent.com/maps.google.com/maps?q=${lat},${lon}`;
                         previewMarker.bindPopup(`
                             <b>${placeName}</b><br>
                             Koordinaadid: ${lat.toFixed(5)}, ${lon.toFixed(5)}<br>
@@ -520,7 +521,17 @@ function initMap() {
             const id = change.doc.id;
             const data = change.doc.data();
             
-            if (auth.currentUser && id === auth.currentUser.uid) return;
+            // Müüja vaate reaalajas kuulaja, et märk muutuks kohe kuldseks kui administraator seda andmebaasis käsitsi muudab
+            if (auth.currentUser && id === auth.currentUser.uid) {
+                if (data && data.verified !== undefined) {
+                    const currentLocalVerified = localStorage.getItem('otset_verified') === 'true';
+                    if (data.verified !== currentLocalVerified) {
+                        localStorage.setItem('otset_verified', data.verified ? 'true' : 'false');
+                        updateLocationProcess(data.lat, data.lng, 10, true);
+                    }
+                }
+                return;
+            }
             
             if (change.type === "removed") {
                 if (merchantMarkers[id]) {
@@ -529,10 +540,11 @@ function initMap() {
                 }
             } else {
                 const prodHTML = data.products ? data.products.map(p => `• ${p}`).join('<br>') : 'Tooted puuduvad';
-                const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}`;
+                const gMapsLink = `http://googleusercontent.com/maps.google.com/maps?q=${data.lat},${data.lng}`;
                 let currentIcon = markerIcons.temporary;
                 let typeLabel = "<span style='color:green;font-weight:bold;'>VÄLKMÜÜK (Live kohapeal)</span>";
                 
+                // Loetakse otse andmebaasist (lollikindel)
                 let verifiedBadge = "";
                 if (data.verified === true) {
                     verifiedBadge = `<div style="background: #FFD700; color: #000; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.75rem; margin-bottom: 8px; text-align: center; border: 1px solid #DAA520;">🌟 Pikaajaline koostöö Otseteega</div>`;
@@ -574,11 +586,10 @@ function initMap() {
         });
     });
 
-    // Lollikindel globaalne kuulaja: Käivitub reaalajas kohe kui ostja klikib navigatsiooninupule
     map.on('popupopen', function() {
         const navBtn = document.querySelector('.navlink-click-trigger');
         if (navBtn) {
-            navBtn.onclick = null; // Puhastame duplikaadid
+            navBtn.onclick = null; 
             navBtn.onclick = function() {
                 setTimeout(() => {
                     if (typeof window.openBuyerFeedback === 'function') {
@@ -642,7 +653,7 @@ function setupWatchPosition(isRestoring) {
     );
 }
 
-function updateLocationProcess(lat, lng, accuracy, isRestoring) {
+async function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     let finalLat = lat;
     let finalLng = lng;
     const savedLat = localStorage.getItem('otset_custom_lat');
@@ -671,11 +682,23 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     const rawProducts = localStorage.getItem('otset_active_products');
     const parsedProducts = rawProducts ? JSON.parse(rawProducts) : [];
     const prodListHTML = parsedProducts.map(p => `• ${p}`).join('<br>');
-    const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${finalLat},${finalLng}`;
+    const gMapsLink = `http://googleusercontent.com/maps.google.com/maps?q=${finalLat},${finalLng}`;
     const activeText = isOutOfStock ? "<span style='color:red;'>AKTIIVNE (Kaup otsas!)</span>" : "<span style='color:green;'>AKTIIVNE (Müük käib)</span>";
     
+    // Kuldse märgi näitamine sõltub ainult sellest, mis on andmebaasi pilves väärtus
     let myVerifiedBadge = "";
-    const isVerifiedInCloud = localStorage.getItem('otset_verified') === 'true';
+    let isVerifiedInCloud = localStorage.getItem('otset_verified') === 'true';
+    
+    if (auth.currentUser) {
+        try {
+            const freshDoc = await getDoc(doc(db, "active_merchants", auth.currentUser.uid));
+            if (freshDoc.exists()) {
+                isVerifiedInCloud = freshDoc.data().verified === true;
+                localStorage.setItem('otset_verified', isVerifiedInCloud ? 'true' : 'false');
+            }
+        } catch(e) { console.error(e); }
+    }
+
     if (isVerifiedInCloud) {
         myVerifiedBadge = `<div style="background: #FFD700; color: #000; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.75rem; margin-bottom: 8px; text-align: center; border: 1px solid #DAA520;">🌟 Sinu pood on KINNITATUD</div>`;
     }
@@ -711,7 +734,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             is_out_of_stock: isOutOfStock,
             contact_phone: phone,
             opening_hours: hours,
-            verified: isVerifiedInCloud,
+            verified: isVerifiedInCloud, // Ei kirjuta kunagi üle ilma Sinu manuaalse loata andmebaasis
             updatedAt: new Date().toISOString()
         }).catch(err => console.error("Viga andmebaasi kirjutamisel:", err));
     }
@@ -837,21 +860,14 @@ window.askForSupportAndVerify = async function() {
                 className: "btn-accent",
                 callback: async () => {
                     try {
-                        localStorage.setItem('otset_verified', 'true');
-                        
+                        // NYD: Kood EI MÄÄRA enam automaatselt "verified: true" ega uuenda localStorage'it.
+                        // See saadab andmebaasi ainult teavituse taotluse kohta.
                         await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
-                            pending_verification: true,
-                            verified: true
+                            pending_verification: true
                         });
                         
-                        const savedLat = localStorage.getItem('otset_custom_lat');
-                        const savedLng = localStorage.getItem('otset_custom_lng');
-                        if (savedLat && savedLng) {
-                            updateLocationProcess(parseFloat(savedLat), parseFloat(savedLng), 10, true);
-                        }
-
                         window.open(`https://buymeacoffee.com/gregoropmann`, '_blank');
-                        showNotification("Suunasime Sind toetuslehele. Sinu punktile lisati kuldne märgis!");
+                        showNotification("Suunasime Sind toetuslehele. Sinu märgis aktiveeritakse kohe, kui administraator on toetuse kinnitanud!");
                     } catch (e) {
                         console.error(e);
                     }
