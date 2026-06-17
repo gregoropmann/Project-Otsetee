@@ -926,3 +926,90 @@ window.handleBuyerFeedback = function(helped) {
         closeBuyerFeedback();
     }
 }
+
+// UUS: Globaalne funktsioon, mis käivitub kui klikitakse toote filtri nupule
+window.filterByProduct = function(productName) {
+    if (!navigator.geolocation) {
+        showNotification("Sinu seade ei toeta GPS-teenuseid.");
+        return;
+    }
+
+    showNotification("Arvutan lähimaid müügipunkte...");
+
+    navigator.geolocation.getCurrentPosition((position) => {
+        const buyerLat = position.coords.latitude;
+        const buyerLng = position.coords.longitude;
+        const buyerLatLng = L.latLng(buyerLat, buyerLng);
+
+        let validShops = [];
+
+        // Käime läbi kõik kaardil olevad teiste müüjate markerid
+        // (Sinu koodis on need objektis merchantMarkers, aga meil on vaja andmeid Firebase snapshotist)
+        // Lihtsuse mõttes saame küsida otse Leaflet markerite küljest nende asukohta ja popup sisu,
+        // või veel parem – koguda andmed kokku otse nendest markeritest, mida sa initMap() sees lood.
+        
+        for (const [merchantId, marker] of Object.entries(merchantMarkers)) {
+            // Kuna meil on vaja kontrollida tooteid ja hindu, siis modifitseerime veidi Sinu initMap loogikat tulevikus, 
+            // aga praegu saame markerile andmed külge panna unikaalsete atribuutidena.
+            if (!marker.options.merchantData) continue; 
+            
+            const data = marker.options.merchantData;
+            
+            // Kontrollime, kas sellel müüjal on otsitav toode olemas ja SAADAVAL
+            const matchedProd = data.products.find(p => {
+                const name = (typeof p === 'object') ? p.name : p;
+                const available = (typeof p === 'object') ? p.available !== false : true;
+                return name.toLowerCase().includes(productName.toLowerCase()) && available;
+            });
+
+            if (matchedProd) {
+                const shopLatLng = L.latLng(data.lat, data.lng);
+                const distanceInMeters = buyerLatLng.distanceTo(shopLatLng); // Täpne meetrite arvutus kaardil
+                
+                // Eraldame hinna tekstist (nt "Maasikad (5.0 €/kg)")
+                let priceValue = 999.0; // Default kõrge hind, kui ei leia
+                const priceMatch = matchedProd.name.match(/\(([^)]+)\)/);
+                if (priceMatch && priceMatch[1]) {
+                    priceValue = parseFloat(priceMatch[1].replace(' €', '').split('/')[0]);
+                }
+
+                validShops.push({
+                    id: merchantId,
+                    marker: marker,
+                    distance: distanceInMeters / 1000, // kilomeetriteks
+                    price: priceValue,
+                    productFullName: matchedProd.name,
+                    shopName: data.name
+                });
+            }
+        }
+
+        if (validShops.length === 0) {
+            showNotification(`Kahjuks toodet "${productName}" hetkel ühegi aktiivse müüja valikus pole.`);
+            return;
+        }
+
+        // Sorteerime esmalt distantsi järgi (lähim eespool)
+        validShops.sort((a, b) => a.distance - b.distance);
+        const closestShop = validShops[0];
+
+        // Sorteerime eraldi hinna järgi, et leida parim pakkumine võrdluseks
+        const cheapestShop = [...validShops].sort((a, b) => a.price - b.price)[0];
+
+        // Koostame ilusa teavituse ja suuname kaardi lähima juurde
+        if (map) {
+            map.setView(closestShop.marker.getLatLng(), 13);
+            closestShop.marker.openPopup();
+        }
+
+        let msg = `Lähim <b>${productName}</b> on <b>${closestShop.distance.toFixed(1)} km</b> kaugusel (Hind: ${closestShop.price} €).`;
+        if (cheapestShop.id !== closestShop.id && cheapestShop.price < closestShop.price) {
+            msg += `<br>Soodsaim hind on natuke eemal: <b>${cheapestShop.price} €</b> (${cheapestShop.distance.toFixed(1)} km).`;
+        }
+
+        showNotification(msg, 5000);
+
+    }, (err) => {
+        showNotification("Asukoha määramine ebaõnnestus.");
+    }, geoOptions);
+};
