@@ -6,16 +6,16 @@
     <title>Otset.ee</title>
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#4F77AA">
-<meta name="description" content="Otset.ee - Otsetee värske toiduni. Leia kaardilt kohalikud teeäärsed müüjad, värsked maamunad, mesi, marjad ja aiasaadused otse tootjalt.">
-<meta name="keywords" content="otsetee, kohalik toit, värsked munad, maamunad, mesi, otse tootjalt, omatoodang, teeäärne müük">
-<meta name="robots" content="index, follow">
+    <meta name="description" content="Otset.ee - Otsetee värske toiduni. Leia kaardilt kohalikud teeäärsed müüjad, värsked maamunad, mesi, marjad ja aiasaadused otse tootjalt.">
+    <meta name="keywords" content="otsetee, kohalik toit, värsked munad, maamunad, mesi, otse tootjalt, omatoodang, teeäärne müük">
+    <meta name="robots" content="index, follow">
 
-<meta property="og:title" content="Otset.ee - Otsetee värske toiduni">
-<meta property="og:description" content="Leia kaardilt kohalikud müüjad ja värske kodumaine kraam otse tee äärest.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://gregoropmann.github.io/otsetee/">
+    <meta property="og:title" content="Otset.ee - Otsetee värske toiduni">
+    <meta property="og:description" content="Leia kaardilt kohalikud müüjad ja värske kodumaine kraam otse tee äärest.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gregoropmann.github.io/otsetee/">
 
-<meta name="google-site-verification" content="evLh_s8NUTBzcndfoJ3MNhBJH9SNUV_10m8ROfrUezM" />
+    <meta name="google-site-verification" content="evLh_s8NUTBzcndfoJ3MNhBJH9SNUV_10m8ROfrUezM" />
 
     <link rel="icon" type="image/png" href="assets/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -42,13 +42,14 @@
             <button class="oauth-btn buyer" onclick="handleLogin('buyer', 'Sõitja')">
                 <span>Sisene Ostjana (Vaata Kaarti)</span>
             </button>
-<div style="margin-top: 25px; text-align: center;">
-        <a href="my-data.html" style="color: #777; font-size: 0.85rem; text-decoration: underline;">
-            Kuidas me Sinu andmeid kaitseme?
-        </a>
-    </div>
+            <div style="margin-top: 25px; text-align: center;">
+                <a href="my-data.html" style="color: #777; font-size: 0.85rem; text-decoration: underline;">
+                    Kuidas me Sinu andmeid kaitseme?
+                </a>
+            </div>
         </div>
     </div>
+
     <div id="map-view" class="view">
         <div class="search-container">
             <input type="text" id="location-search" class="search-bar" placeholder="Otsi asukohta või teeotsa..." onkeypress="handleSearch(event)">
@@ -62,11 +63,13 @@
             <div class="action-bar">
                 <button id="action-btn" class="btn btn-accent" onclick="handleActionBarClick()">Alusta Müüki</button>
                 <button id="stock-btn" class="btn btn-warning" style="display: none;" onclick="toggleStockState()">Kaup OTSAS</button>
+                <button id="verify-btn" class="btn btn-accent" style="display: none; background-color: #E5A93C; color: white;" onclick="askForSupportAndVerify()">⭐ Tõsta usaldusväärsust</button>
                 <button id="edit-products-btn" class="btn btn-primary" style="display: none;" onclick="switchView('product-selection-view')">Seaded</button>
                 <button class="btn btn-primary" style="flex: 0.6; min-width: 70px;" onclick="handleLogout()">Logi välja</button>
             </div>
         </div>
     </div>
+
     <div id="product-selection-view" class="view">
         <div class="section-title">
             <span>Müügikoha Seaded</span>
@@ -100,6 +103,7 @@
             <button class="btn btn-accent" style="width: 100%;" onclick="confirmProductsAndStartGeo()">Kinnita andmed ja aktiveeri kaardil</button>
         </div>
     </div>
+
     <div id="app-notification" class="notification-container">
         <div id="notification-content" class="notification-text">Teavitus</div>
         <div id="notification-buttons" class="notification-actions"></div>
