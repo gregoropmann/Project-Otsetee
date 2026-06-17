@@ -1,6 +1,6 @@
-[otset.ee on $300 — GoDaddy](https://buymeacoffee.com/gregoropmann)
+#### [otset.ee on $300 — GoDaddy](https://buymeacoffee.com/gregoropmann)
 
-### Otseteel ei leia Sa kunagi reklaame.
+#### Otseteel ei leia Sa kunagi reklaame.
 
 # Projekt Otsetee: Nutikas ja ohutu tee värske toiduni
 
