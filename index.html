@@ -52,8 +52,17 @@
 
     <div id="map-view" class="view">
         <div class="search-container">
-            <input type="text" id="location-search" class="search-bar" placeholder="Otsi asukohta või teeotsa..." onkeypress="handleSearch(event)">
-        </div>
+    <input type="text" id="location-search" class="search-bar" placeholder="Otsi asukohta või teeotsa..." onkeypress="handleSearch(event)">
+    
+    <div class="quick-filters">
+        <button class="filter-btn" onclick="filterByProduct('Maasikad')">🍓 Maasikad</button>
+        <button class="filter-btn" onclick="filterByProduct('Herned')">🫛 Herned</button>
+        <button class="filter-btn" onclick="filterByProduct('Mesi')">🍯 Mesi</button>
+        <button class="filter-btn" onclick="filterByProduct('Kala')">🐟 Kala</button>
+        <button class="filter-btn" onclick="filterByProduct('Munad')">🥚 Munad</button>
+    </div>
+</div>
+
         <div id="map-container"></div>
         <div class="custom-zoom-controls">
             <button class="zoom-btn" onclick="mapZoomIn()">+</button>
