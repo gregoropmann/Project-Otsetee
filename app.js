@@ -835,12 +835,9 @@ window.askForSupportAndVerify = async function() {
                         await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
                             pending_verification: true
                         });
-                        
-                        // Teeme nime URL-i jaoks turvaliseks
-                        const encodedName = encodeURIComponent(merchantName);
-                        
+
                         // Avame Buy Me a Coffee unikaalse lingiga, kus nimi on küljes
-                        window.open(`https://buymeacoffee.com/gregoropmann?name=${encodedName}`, '_blank');
+                        window.open(`https://buymeacoffee.com/gregoropmann`, '_blank');
                         
                         showNotification("Suunasime Sind toetuslehele. Kui toetus on kohal, ilmub Sinu punktile kuldne märgis!");
                     } catch (e) {
