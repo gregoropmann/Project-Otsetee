@@ -487,7 +487,7 @@ window.handleLogin = async function(role, providerName) {
                 showNotification("Sisselogimine ebaõnnestus: " + error.message);
             }
         } else if (providerName === 'Apple') {
-            showNotification("Apple sisselogimine pole vielä ühendatud.");
+            showNotification("Apple sisselogimine pole veel ühendatud.");
         }
     } else {
         localStorage.setItem('otset_loggedin', 'true');
@@ -927,7 +927,11 @@ window.handleBuyerFeedback = function(helped) {
     }
 }
 
-// UUS: Globaalne funktsioon, mis käivitub kui klikitakse toote filtri nupule
+
+
+
+
+/* // UUS: Globaalne funktsioon, mis käivitub kui klikitakse toote filtri nupule
 window.filterByProduct = function(productName) {
     if (!navigator.geolocation) {
         showNotification("Sinu seade ei toeta GPS-teenuseid.");
@@ -1013,3 +1017,18 @@ window.filterByProduct = function(productName) {
         showNotification("Asukoha määramine ebaõnnestus.");
     }, geoOptions);
 };
+
+// Selleks, et ülaltoodud kood teaks, millised tooted ja hinnad mis markeril küljes on, pead oma initMap() funktsiooni sees (kus sa lood L.marker objekti) panema kaasa merchantData.
+
+if (merchantMarkers[id]) {
+    merchantMarkers[id].setLatLng([data.lat, data.lng]);
+    merchantMarkers[id].setIcon(currentIcon);
+    merchantMarkers[id].setPopupContent(popupContent);
+    merchantMarkers[id].options.merchantData = data; // UUS: Uuendab andmeid reaalajas snapshoti pealt
+} else {
+    merchantMarkers[id] = L.marker([data.lat, data.lng], { 
+        icon: currentIcon, 
+        draggable: false,
+        merchantData: data // UUS: Salvestab andmed markeri külge kohe loomisel
+    }).addTo(map).bindPopup(popupContent);
+} */
