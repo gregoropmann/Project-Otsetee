@@ -736,8 +736,7 @@
 
                                 previewMarker = L.marker([lat, lon], { icon: orangeIcon }).addTo(map);
                                 
-                                // PARANDATUD: 0{ asemel on nüüd õige ${
-                                const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                                const mapsLink = `https://www.google.com/maps/?q=${lat},${lon}`;
                                 previewMarker.bindPopup(`
                                     <b>${placeName}</b><br>
                                     Koordinaadid: ${lat.toFixed(5)}, ${lon.toFixed(5)}<br>
@@ -810,7 +809,7 @@
                         showNotification("Sisselogimine ebaõnnestus: " + error.message);
                     }
                 } else if (providerName === 'Apple') {
-                    showNotification("Apple sisselogimine pole vielä ühendatud.");
+                    showNotification("Apple sisselogimine pole veel ühendatud.");
                 }
             } else {
                 localStorage.setItem('otset_loggedin', 'true');
@@ -867,9 +866,7 @@
                         }
                     } else {
                         const prodHTML = data.products ? data.products.map(p => `• ${p}`).join('<br>') : 'Tooted puuduvad';
-                        
-                        // PARANDATUD: 0{ asemel on nüüd õige ${ ning link suunab otse Mapsi otsingusse
-                        const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}`;
+                        const gMapsLink = `https://www.google.com/maps/?q=${data.lat},${data.lng}`;
                         
                         const popupContent = `
                             <div style="font-size:0.85rem;">
@@ -975,9 +972,7 @@
             const rawProducts = localStorage.getItem('otset_active_products');
             const parsedProducts = rawProducts ? JSON.parse(rawProducts) : [];
             const prodListHTML = parsedProducts.map(p => `• ${p}`).join('<br>');
-            
-            // PARANDATUD: 0{ asemel on nüüd õige ${ ning link suunab otse Mapsi otsingusse
-            const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${finalLat},${finalLng}`;
+            const gMapsLink = `https://www.google.com/maps/?q=${finalLat},${finalLng}`;
 
             activeMarker.bindPopup(`
                 <div style="max-height:180px; overflow-y:auto; font-size:0.85rem;">
