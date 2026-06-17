@@ -208,7 +208,6 @@ function renderCatalog() {
             let savedPrice = "5.0";
             let savedUnit = "kg";
 
-            // Otsime, kas see toode on juba nimekirjas (toode võib olla kas string või objekt uues loogikas)
             const matchedProduct = activeProductsList.find(p => {
                 const text = (typeof p === 'object') ? p.name : p;
                 return text.startsWith(item);
@@ -280,7 +279,6 @@ window.toggleProductSelect = function(id) {
     }
 }
 
-// UUS funktsioon: Käivitub kui toote juures klikitakse "Kaup otsas" linnukest
 window.toggleItemStock = function(id) {
     const card = document.getElementById(`prod-card-${id}`);
     const isChecked = document.getElementById(`stock-check-${id}`).checked;
@@ -339,7 +337,6 @@ window.confirmProductsAndStartGeo = function() {
         const unit = document.getElementById(`unit-${id}`).value;
         const isItemOutOfStock = document.getElementById(`stock-check-${id}`).checked;
         
-        // Salvestame objekti, kus on toote tekst ja selle kättesaadavus
         inventorySummary.push({
             name: `${name} (${price} €/${unit})`,
             available: !isItemOutOfStock
@@ -487,7 +484,7 @@ window.handleLogin = async function(role, providerName) {
                 showNotification("Sisselogimine ebaõnnestus: " + error.message);
             }
         } else if (providerName === 'Apple') {
-            showNotification("Apple sisselogimine pole veel ühendatud.");
+            showNotification("Apple sisselogimine pole vielä ühendatud.");
         }
     } else {
         localStorage.setItem('otset_loggedin', 'true');
@@ -531,11 +528,9 @@ window.handleLogout = async function() {
     switchView('login-view');
 }
 
-// Abifunktsioon toodete ilusa teksti genereerimiseks ostja jaoks
 function buildProductsHTML(productsArray) {
     if (!productsArray || productsArray.length === 0) return 'Tooted puuduvad';
     return productsArray.map(p => {
-        // Toetame nii vana formaati (String) kui ka uut formaati (Objekt) tagasiühilduvuse jaoks
         const name = (typeof p === 'object') ? p.name : p;
         const isAvailable = (typeof p === 'object') ? (p.available !== false) : true;
         
@@ -571,7 +566,6 @@ function initMap() {
                 const prodHTML = buildProductsHTML(data.products);
                 const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}`;
                 
-                // Kui kõik tooted on otsas, võime panna halli markeri, muidu tavalise
                 const allOOS = data.products && data.products.length > 0 && data.products.every(p => typeof p === 'object' && p.available === false);
                 
                 let currentIcon = markerIcons.temporary;
@@ -601,6 +595,7 @@ function initMap() {
                 if (data.payment_type === 'cash') paymentLabel = "Ainult sularaha 💵";
                 if (data.payment_type === 'card') paymentLabel = "Ainult kaart <code>💳</code>";
 
+                // Lisatud raporteerimise nupp popup sisse!
                 const popupContent = `
                     <div style="font-size:0.85rem; min-width:180px;">
                         ${verifiedBadge}
@@ -612,15 +607,24 @@ function initMap() {
                         <span style="color:#222;font-weight:600;">Müüdavad tooted:</span><br>
                         ${prodHTML}<br>
                         <a href="${gMapsLink}" target="_blank" class="nav-link-btn" onclick="setTimeout(openBuyerFeedback, 3000)">Sõida siia (Navigatsioon)</a>
+                        <button class="report-btn" onclick="reportMerchant('${id}', '${data.name}')" style="background:none; border:none; color:#D9534F; font-size:0.75rem; text-decoration:underline; cursor:pointer; margin-top:8px; width:100%; text-align:center;">
+                            ⚠️ Kohapeal pole kedagi / Vale info? Teata siin
+                        </button>
                     </div>
                 `;
+                
+                // MÄRKUS: Siin seome andmed otse Leaflet markeri külge (merchantData: data), et filtreerimine töötaks!
                 if (merchantMarkers[id]) {
                     merchantMarkers[id].setLatLng([data.lat, data.lng]);
                     merchantMarkers[id].setIcon(currentIcon);
                     merchantMarkers[id].setPopupContent(popupContent);
+                    merchantMarkers[id].options.merchantData = data; 
                 } else {
-                    merchantMarkers[id] = L.marker([data.lat, data.lng], { icon: currentIcon, draggable: false }).addTo(map)
-                        .bindPopup(popupContent);
+                    merchantMarkers[id] = L.marker([data.lat, data.lng], { 
+                        icon: currentIcon, 
+                        draggable: false,
+                        merchantData: data 
+                    }).addTo(map).bindPopup(popupContent);
                 }
             }
         });
@@ -727,7 +731,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
 
     let myPaymentLabel = "Sularaha ja Kaart 💵💳";
     if (paymentType === 'cash') myPaymentLabel = "Ainult sularaha 💵";
-    if (paymentType === 'card') myPaymentLabel = "Ainult kaart 💳";
+    if (paymentType === 'card') myPaymentLabel = "Ainult kaart <code>💳</code>";
 
     activeMarker.bindPopup(`
         <div style="max-height:240px; overflow-y:auto; font-size:0.85rem; min-width:180px;">
@@ -798,7 +802,6 @@ function updateActionBarState() {
     const verifyBtn = document.getElementById('verify-btn');
     if (!actionBtn) return;
     
-    // Eemaldame igaks juhuks vana globaalse stock-nupu kuva täielikult
     if(stockBtn) stockBtn.style.display = "none";
 
     if (userRole === 'buyer') {
@@ -896,11 +899,7 @@ window.askForSupportAndVerify = async function() {
                     }
                 }
             },
-            {
-                text: "Tühista",
-                className: "btn-primary",
-                callback: () => {}
-            }
+            { text: "Tühista", className: "btn-primary", callback: () => {} }
         ]
     );
 }
@@ -927,11 +926,7 @@ window.handleBuyerFeedback = function(helped) {
     }
 }
 
-
-
-
-
-/* // UUS: Globaalne funktsioon, mis käivitub kui klikitakse toote filtri nupule
+// UUS: TOODETE FILTER (KOMMENTAARIDEST VÄLJAS JA VALMIS KASUTAMISEKS)
 window.filterByProduct = function(productName) {
     if (!navigator.geolocation) {
         showNotification("Sinu seade ei toeta GPS-teenuseid.");
@@ -946,20 +941,13 @@ window.filterByProduct = function(productName) {
         const buyerLatLng = L.latLng(buyerLat, buyerLng);
 
         let validShops = [];
-
-        // Käime läbi kõik kaardil olevad teiste müüjate markerid
-        // (Sinu koodis on need objektis merchantMarkers, aga meil on vaja andmeid Firebase snapshotist)
-        // Lihtsuse mõttes saame küsida otse Leaflet markerite küljest nende asukohta ja popup sisu,
-        // või veel parem – koguda andmed kokku otse nendest markeritest, mida sa initMap() sees lood.
         
         for (const [merchantId, marker] of Object.entries(merchantMarkers)) {
-            // Kuna meil on vaja kontrollida tooteid ja hindu, siis modifitseerime veidi Sinu initMap loogikat tulevikus, 
-            // aga praegu saame markerile andmed külge panna unikaalsete atribuutidena.
-            if (!marker.options.merchantData) continue; 
+            if (!marker.options || !marker.options.merchantData) continue; 
             
             const data = marker.options.merchantData;
+            if (!data.products) continue;
             
-            // Kontrollime, kas sellel müüjal on otsitav toode olemas ja SAADAVAL
             const matchedProd = data.products.find(p => {
                 const name = (typeof p === 'object') ? p.name : p;
                 const available = (typeof p === 'object') ? p.available !== false : true;
@@ -968,10 +956,9 @@ window.filterByProduct = function(productName) {
 
             if (matchedProd) {
                 const shopLatLng = L.latLng(data.lat, data.lng);
-                const distanceInMeters = buyerLatLng.distanceTo(shopLatLng); // Täpne meetrite arvutus kaardil
+                const distanceInMeters = buyerLatLng.distanceTo(shopLatLng);
                 
-                // Eraldame hinna tekstist (nt "Maasikad (5.0 €/kg)")
-                let priceValue = 999.0; // Default kõrge hind, kui ei leia
+                let priceValue = 999.0; 
                 const priceMatch = matchedProd.name.match(/\(([^)]+)\)/);
                 if (priceMatch && priceMatch[1]) {
                     priceValue = parseFloat(priceMatch[1].replace(' €', '').split('/')[0]);
@@ -980,7 +967,7 @@ window.filterByProduct = function(productName) {
                 validShops.push({
                     id: merchantId,
                     marker: marker,
-                    distance: distanceInMeters / 1000, // kilomeetriteks
+                    distance: distanceInMeters / 1000, 
                     price: priceValue,
                     productFullName: matchedProd.name,
                     shopName: data.name
@@ -993,14 +980,10 @@ window.filterByProduct = function(productName) {
             return;
         }
 
-        // Sorteerime esmalt distantsi järgi (lähim eespool)
         validShops.sort((a, b) => a.distance - b.distance);
         const closestShop = validShops[0];
-
-        // Sorteerime eraldi hinna järgi, et leida parim pakkumine võrdluseks
         const cheapestShop = [...validShops].sort((a, b) => a.price - b.price)[0];
 
-        // Koostame ilusa teavituse ja suuname kaardi lähima juurde
         if (map) {
             map.setView(closestShop.marker.getLatLng(), 13);
             closestShop.marker.openPopup();
@@ -1018,25 +1001,7 @@ window.filterByProduct = function(productName) {
     }, geoOptions);
 };
 
-// Selleks, et ülaltoodud kood teaks, millised tooted ja hinnad mis markeril küljes on, pead oma initMap() funktsiooni sees (kus sa lood L.marker objekti) panema kaasa merchantData.
-
-if (merchantMarkers[id]) {
-    merchantMarkers[id].setLatLng([data.lat, data.lng]);
-    merchantMarkers[id].setIcon(currentIcon);
-    merchantMarkers[id].setPopupContent(popupContent);
-    merchantMarkers[id].options.merchantData = data; // UUS: Uuendab andmeid reaalajas snapshoti pealt
-} else {
-    merchantMarkers[id] = L.marker([data.lat, data.lng], { 
-        icon: currentIcon, 
-        draggable: false,
-        merchantData: data // UUS: Salvestab andmed markeri külge kohe loomisel
-    }).addTo(map).bindPopup(popupContent);
-} */
-
-
-
-
-// REPORT
+// REPORT MODAALAKNA LOOGIKA
 let currentReportingMerchantId = null;
 let currentReportingMerchantName = null;
 
@@ -1049,10 +1014,8 @@ window.reportMerchant = function(merchantId, merchantName) {
     
     if (!modal) return;
     
-    // Seame pealkirja, et kasutaja teaks, kelle kohta raport käib
     title.innerHTML = `Teata probleemist: <br><span style="color:#2C2A29; font-size:1rem;">${merchantName}</span>`;
     
-    // Tühjendame vanad sisestused
     document.getElementById('report-reason').value = '';
     document.getElementById('report-contact').value = '';
     
@@ -1064,7 +1027,6 @@ window.closeReportModal = function() {
     if (modal) modal.style.display = 'none';
 };
 
-// Kui vajutatakse "Saada teade" nuppu
 document.getElementById('report-submit-btn').addEventListener('click', async () => {
     const reason = document.getElementById('report-reason').value.trim();
     const contact = document.getElementById('report-contact').value.trim();
