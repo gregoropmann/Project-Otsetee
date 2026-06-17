@@ -8,7 +8,7 @@
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#4F77AA">
 
-    <link rel="icon" type="image/png" href="assets/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="/assets/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <link rel="shortcut icon" href="assets/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
@@ -201,29 +201,32 @@
             transform: translateX(-50%);
             z-index: 1100;
             width: calc(100% - 32px);
-            max-width: 400px;
+            max-width: 420px;
         }
 
         .action-bar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
-            padding: 16px;
+            padding: 14px;
             border-radius: 20px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
 
         .btn {
             flex: 1;
-            padding: 14px;
+            padding: 12px 8px;
             border: none;
             border-radius: 12px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 700;
             cursor: pointer;
             text-align: center;
             transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-primary { background-color: var(--sinilill-blue); color: white; }
@@ -411,7 +414,8 @@
         <div class="map-overlay">
             <div class="action-bar">
                 <button id="action-btn" class="btn btn-accent" onclick="handleActionBarClick()">Alusta Müüki</button>
-                <button class="btn btn-primary" onclick="handleLogout()">Logi välja</button>
+                <button id="edit-products-btn" class="btn btn-primary" style="display: none;" onclick="switchView('product-selection-view')">Muuda hindu</button>
+                <button class="btn btn-primary" style="flex: 0.7;" onclick="handleLogout()">Logi välja</button>
             </div>
         </div>
     </div>
@@ -419,13 +423,13 @@
     <div id="product-selection-view" class="view">
         <div class="section-title">
             <span>Vali müüdavad tooted</span>
-            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="switchView('map-view')">Tagasi</button>
+            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; flex: none;" onclick="switchView('map-view')">Tagasi</button>
         </div>
         
         <div id="catalog-container"></div>
 
         <div class="sticky-footer">
-            <button class="btn btn-accent" style="width: 100%;" onclick="confirmProductsAndStartGeo()">Kinnita tooted ja aktiveeri kaart</button>
+            <button class="btn btn-accent" style="width: 100%;" onclick="confirmProductsAndStartGeo()">Kinnita tooted ja uuenda kaarti</button>
         </div>
     </div>
 
@@ -435,12 +439,10 @@
     </div>
 
     <script type="module">
-        // 1. Impordime Firebase'i ja andmebaasi (Firestore) funktsioonid
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-        // 2. Sinu projekti unikaalsed Firebase andmed
         const firebaseConfig = {
             apiKey: "AIzaSyBo648Em9A94sabAg0M-MXAlFUbXGjUr-Y",
             authDomain: "otsetee-9e167.firebaseapp.com",
@@ -450,13 +452,11 @@
             appId: "1:221378870886:web:e595d472deb904ef6437a7"
         };
 
-        // 3. Algatame süsteemid
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
         const db = getFirestore(app);
 
-        // Äpi globaalsed muutujad
         let map;
         let activeMarker = null;
         let accuracyCircle = null;
@@ -465,7 +465,7 @@
         let geoWatchId = null;
         let isSelling = false;
         let userRole = 'buyer'; 
-        let merchantMarkers = {}; // Siia kogume teiste müüjate markerid reaalajas
+        let merchantMarkers = {}; 
 
         const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
 
@@ -479,23 +479,48 @@
             "Küpsetised ja Omatoodang": ["Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook"]
         };
 
-        // Kuulame sisselogimise staatust
         window.addEventListener('DOMContentLoaded', () => {
-            renderCatalog();
-            
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     localStorage.setItem('otset_loggedin', 'true');
                     userRole = localStorage.getItem('otset_role') || 'merchant';
                     
                     switchView('map-view');
-                    updateActionBarState();
                     
-                    const wasSelling = localStorage.getItem('otset_selling') === 'true';
-                    if (userRole === 'merchant' && wasSelling) {
-                        isSelling = true;
+                    if (userRole === 'merchant') {
+                        getDoc(doc(db, "active_merchants", user.uid)).then((docSnap) => {
+                            if (docSnap.exists()) {
+                                const data = docSnap.data();
+                                console.log("Müük on aktiivne teises seadmes!", data);
+                                
+                                isSelling = true;
+                                localStorage.setItem('otset_selling', 'true');
+                                if (data.lat && data.lng) {
+                                    localStorage.setItem('otset_custom_lat', data.lat);
+                                    localStorage.setItem('otset_custom_lng', data.lng);
+                                }
+                                if (data.products) {
+                                    localStorage.setItem('otset_active_products', JSON.stringify(data.products));
+                                }
+                                
+                                renderCatalog(); 
+                                updateActionBarState();
+                                setupWatchPosition(true);
+                            } else {
+                                const wasSelling = localStorage.getItem('otset_selling') === 'true';
+                                if (wasSelling) {
+                                    isSelling = true;
+                                    setupWatchPosition(true);
+                                }
+                                renderCatalog();
+                                updateActionBarState();
+                            }
+                        }).catch(() => {
+                            renderCatalog();
+                            updateActionBarState();
+                        });
+                    } else {
                         updateActionBarState();
-                        setupWatchPosition(true);
                     }
                 } else {
                     const isBuyer = localStorage.getItem('otset_role') === 'buyer';
@@ -512,8 +537,12 @@
 
         function renderCatalog() {
             const container = document.getElementById('catalog-container');
+            if (!container) return;
             container.innerHTML = '';
             let globalId = 0;
+
+            const rawActive = localStorage.getItem('otset_active_products');
+            const activeProductsList = rawActive ? JSON.parse(rawActive) : [];
 
             for (const [category, items] of Object.entries(agriProducts)) {
                 const block = document.createElement('div');
@@ -528,8 +557,24 @@
 
                 items.forEach(item => {
                     globalId++;
+                    
+                    let isSelected = false;
+                    let savedPrice = "5.0";
+                    let savedUnit = "kg";
+
+                    const matchedProduct = activeProductsList.find(p => p.startsWith(item));
+                    if (matchedProduct) {
+                        isSelected = true;
+                        const parts = matchedProduct.match(/\(([^)]+)\)/);
+                        if (parts && parts[1]) {
+                            const priceUnit = parts[1].replace(' €', '').split('/');
+                            if (priceUnit[0]) savedPrice = priceUnit[0].trim();
+                            if (priceUnit[1]) savedUnit = priceUnit[1].trim();
+                        }
+                    }
+
                     const card = document.createElement('div');
-                    card.className = 'product-card';
+                    card.className = `product-card ${isSelected ? 'selected' : ''}`;
                     card.id = `prod-card-${globalId}`;
                     card.setAttribute('data-name', item);
 
@@ -538,18 +583,18 @@
                             <div class="product-label">${item}</div>
                             <div class="price-input-group">
                                 <div class="pricing-fields">
-                                    <input type="number" step="0.1" value="5.0" class="price-num-input" id="price-num-${globalId}">
+                                    <input type="number" step="0.1" value="${savedPrice}" class="price-num-input" id="price-num-${globalId}">
                                     <select class="unit-select" id="unit-${globalId}">
-                                        <option value="kg">€/kg</option>
-                                        <option value="karp">€/karp</option>
-                                        <option value="purk">€/purk</option>
-                                        <option value="tükk">€/tk</option>
-                                        <option value="pudel">€/pdl</option>
+                                        <option value="kg" ${savedUnit === 'kg' ? 'selected' : ''}>€/kg</option>
+                                        <option value="karp" ${savedUnit === 'karp' ? 'selected' : ''}>€/karp</option>
+                                        <option value="purk" ${savedUnit === 'purk' ? 'selected' : ''}>€/purk</option>
+                                        <option value="tükk" ${savedUnit === 'tükk' ? 'selected' : ''}>€/tk</option>
+                                        <option value="pudel" ${savedUnit === 'pudel' ? 'selected' : ''}>€/pdl</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
-                        <button class="select-toggle-btn" onclick="toggleProductSelect(${globalId})">Vali toode</button>
+                        <button class="select-toggle-btn" onclick="toggleProductSelect(${globalId})">${isSelected ? 'Valitud' : 'Vali toode'}</button>
                     `;
                     grid.appendChild(card);
                 });
@@ -608,7 +653,7 @@
         window.confirmProductsAndStartGeo = function() {
             const selectedElements = document.querySelectorAll('.product-card.selected');
             if (selectedElements.length === 0) {
-                alert("Palun vali vähemalt üks toode, mida müüa!");
+                alert("Palun vali vähemalt üks toode, mida müüga!");
                 return;
             }
 
@@ -623,7 +668,18 @@
 
             localStorage.setItem('otset_active_products', JSON.stringify(inventorySummary));
             switchView('map-view');
-            startGeoTracking(false);
+            
+            if (isSelling) {
+                // Kui müük juba käis, siis lihtsalt uuendame pilves andmeid ilma GPSi taaskäivitamata
+                const savedLat = localStorage.getItem('otset_custom_lat');
+                const savedLng = localStorage.getItem('otset_custom_lng');
+                if (savedLat && savedLng) {
+                    updateLocationProcess(parseFloat(savedLat), parseFloat(savedLng), 10, true);
+                    showNotification("Tooted ja hinnad reaalajas uuendatud!");
+                }
+            } else {
+                startGeoTracking(false);
+            }
         }
 
         function showNotification(message, duration = 3500, actions = null) {
@@ -631,6 +687,7 @@
             const content = document.getElementById('notification-content');
             const btnArea = document.getElementById('notification-buttons');
             
+            if(!content || !container || !btnArea) return;
             content.innerHTML = message;
             btnArea.innerHTML = '';
 
@@ -703,7 +760,10 @@
                                                     previewMarker = null;
                                                     localStorage.setItem('otset_custom_lat', lat);
                                                     localStorage.setItem('otset_custom_lng', lon);
-                                                    showNotification("Asukoht salvestatud. Vajuta 'Alusta müüki'.");
+                                                    showNotification("Asukoht salvestatud.");
+                                                    if(isSelling) {
+                                                        updateLocationProcess(lat, lon, 10, true);
+                                                    }
                                                 }
                                             },
                                             {
@@ -734,6 +794,8 @@
                 setTimeout(() => {
                     if (!map) { initMap(); } else { map.invalidateSize(); }
                 }, 100);
+            } else if (viewId === 'product-selection-view') {
+                renderCatalog(); // Uuendame kataloogi vaadet alati avamisel, et värsked hinnad sisse laadida
             }
         }
 
@@ -791,7 +853,6 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // REAALAJA ANDMEBAASI KUULAJA: Kuvab automaatselt teiste müüjate punktid pilvest
             onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     const id = change.doc.id;
@@ -855,6 +916,7 @@
         }
 
         function setupWatchPosition(isRestoring) {
+            if (geoWatchId) return; // Hoiame ära topelt-kuulajad
             geoWatchId = navigator.geolocation.watchPosition(
                 (position) => {
                     let { latitude, longitude, accuracy } = position.coords;
@@ -872,10 +934,12 @@
                     updateLocationProcess(latitude, longitude, accuracy, isRestoring);
                 },
                 (error) => {
-                    isSelling = false;
-                    updateActionBarState();
+                    if (!localStorage.getItem('otset_custom_lat')) {
+                        isSelling = false;
+                        updateActionBarState();
+                        showNotification("GPS asukoha määramine ebaõnnestus.");
+                    }
                     console.error(error);
-                    showNotification("GPS asukoha määramine ebaõnnestus.");
                 },
                 geoOptions
             );
@@ -923,7 +987,6 @@
                 showNotification("Müügikoht aktiivne!");
             }
 
-            // ANDMETE SAATMINE PILVE: Salvestame reaalajas Firestore'i andmebaasi
             if (auth.currentUser) {
                 const merchantId = auth.currentUser.uid;
                 const merchantName = auth.currentUser.displayName || "Teeäärne Müüja";
@@ -940,7 +1003,7 @@
             activeMarker.on('dragend', function(event) {
                 const marker = event.target;
                 const currentPos = marker.getLatLng();
-                accuracyCircle.setLatLng(currentPos);
+                if(accuracyCircle) accuracyCircle.setLatLng(currentPos);
                 localStorage.setItem('otset_custom_lat', currentPos.lat);
                 localStorage.setItem('otset_custom_lng', currentPos.lng);
                 
@@ -963,27 +1026,30 @@
 
         function updateActionBarState() {
             const actionBtn = document.getElementById('action-btn');
+            const editBtn = document.getElementById('edit-products-btn');
             if (!actionBtn) return;
 
             if (userRole === 'buyer') {
                 actionBtn.disabled = false;
                 actionBtn.innerText = "Minu Asukoht";
                 actionBtn.className = "btn btn-success";
+                if(editBtn) editBtn.style.display = "none";
             } else {
                 if (isSelling) {
                     actionBtn.disabled = false;
                     actionBtn.innerText = "Lõpeta Müük";
                     actionBtn.className = "btn btn-danger";
+                    if(editBtn) editBtn.style.display = "flex"; // KUVAME kiiruuendamise nuppu
                 } else {
                     actionBtn.disabled = false;
                     actionBtn.innerText = "Alusta Müüki";
                     actionBtn.className = "btn btn-accent";
+                    if(editBtn) editBtn.style.display = "none";
                 }
             }
         }
 
         function stopGeoTracking() {
-            // ANDMETE KUSTUTAMINE: Eemaldame punkti andmebaasist, kui müük lõppeb
             if (auth.currentUser) {
                 deleteDoc(doc(db, "active_merchants", auth.currentUser.uid))
                     .catch(err => console.error(err));
