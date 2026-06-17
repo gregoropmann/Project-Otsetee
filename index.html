@@ -4,461 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Otset.ee</title>
-    
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#4F77AA">
-
     <link rel="icon" type="image/png" href="assets/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <link rel="shortcut icon" href="assets/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Otsetee" />
-    
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <style>
-        :root {
-            --sinilill-blue: #4F77AA;
-            --wheat-gold: #E5A93C;
-            --summer-cream: #FAF8F5;
-            --text-charcoal: #2C2A29;
-            --card-white: #FFFFFF;
-            --danger-red: #D9534F;
-            --border-gray: #EAEAEA;
-            --buyer-green: #4CAF50;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-
-        body, html {
-            width: 100%;
-            height: 100%;
-            background-color: var(--summer-cream);
-            color: var(--text-charcoal);
-            overflow: hidden;
-        }
-
-        .view {
-            display: none;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .view.active {
-            display: flex;
-            flex-direction: column;
-        }
-
-        #login-view {
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url("assets/pold.webp") center/cover no-repeat;
-            background-color: var(--sinilill-blue);
-        }
-
-        .login-card {
-            background: var(--card-white);
-            padding: 40px 30px;
-            border-radius: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            width: 100%;
-            max-width: 380px;
-            text-align: center;
-        }
-
-        .brand-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--sinilill-blue);
-            letter-spacing: -1px;
-            margin-bottom: 4px;
-        }
-
-        .brand-subtitle {
-            font-size: 0.95rem;
-            color: #707070;
-            margin-bottom: 35px;
-        }
-
-        .oauth-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 14px;
-            border: 1px solid #E0E0E0;
-            background: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 12px;
-            transition: background 0.2s;
-        }
-
-        .oauth-btn:hover { background: #F9F9F9; }
-        .oauth-btn.apple { background: #000000; color: white; border: none; }
-        
-        .oauth-btn.buyer {
-            background: var(--buyer-green);
-            color: white;
-            border: none;
-            margin-top: 10px;
-        }
-        .oauth-btn.buyer:hover { background: #43A047; }
-
-        .divider {
-            margin: 20px 0;
-            display: flex;
-            align-items: center;
-            text-align: center;
-            font-size: 0.85rem;
-            color: #aaa;
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid #eee;
-        }
-        .divider:not(:empty)::before { margin-right: .25em; }
-        .divider:not(:empty)::after { margin-left: .25em; }
-
-        #map-container {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .search-container {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 80px;
-            max-width: 360px;
-            z-index: 1100;
-        }
-
-        .search-bar {
-            width: 100%;
-            padding: 14px 16px;
-            border-radius: 14px;
-            border: none;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            font-size: 1rem;
-            color: var(--text-charcoal);
-            outline: none;
-        }
-
-        .custom-zoom-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1100;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .zoom-btn {
-            width: 46px;
-            height: 46px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(4px);
-            border: none;
-            border-radius: 12px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--text-charcoal);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            transition: background 0.2s;
-        }
-
-        .zoom-btn:active { background: #EAEAEA; }
-
-        .map-overlay {
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1100;
-            width: calc(100% - 32px);
-            max-width: 460px;
-        }
-
-        .action-bar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            padding: 14px;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            flex: 1;
-            min-width: 90px;
-            padding: 12px 8px;
-            border: none;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.2s, color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-primary { background-color: var(--sinilill-blue); color: white; }
-        .btn-accent { background-color: var(--wheat-gold); color: white; }
-        .btn-danger { background-color: var(--danger-red); color: white; }
-        .btn-success { background-color: var(--buyer-green); color: white; }
-        .btn-warning { background-color: #757575; color: white; } /* Kasutatakse kauba otsas oleku jaoks */
-        
-        #product-selection-view {
-            background-color: var(--summer-cream);
-            padding: 20px;
-            overflow-y: auto;
-            height: 100%;
-        }
-
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--text-charcoal);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .meta-settings-card {
-            background: var(--card-white);
-            padding: 16px;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-group label {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--text-charcoal);
-        }
-
-        .form-input {
-            padding: 10px;
-            border: 1px solid #CCC;
-            border-radius: 8px;
-            font-size: 0.95rem;
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 16px;
-            margin-top: 4px;
-        }
-
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .category-block { margin-bottom: 24px; }
-        .category-name {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--sinilill-blue);
-            margin-bottom: 12px;
-            border-bottom: 2px solid rgba(79, 119, 170, 0.15);
-            padding-bottom: 4px;
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-            gap: 12px;
-        }
-
-        .product-card {
-            background: var(--card-white);
-            border: 2px solid transparent;
-            border-radius: 16px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            transition: all 0.2s ease;
-        }
-
-        .product-card.selected {
-            border-color: var(--wheat-gold);
-            background: #FFFDF9;
-        }
-
-        .product-info { margin-bottom: 10px; }
-        .product-label { font-size: 0.95rem; font-weight: 600; color: var(--text-charcoal); }
-
-        .price-input-group {
-            display: none;
-            flex-direction: column;
-            gap: 6px;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed var(--border-gray);
-        }
-
-        .product-card.selected .price-input-group { display: flex; }
-        .pricing-fields { display: flex; gap: 4px; }
-
-        .price-num-input {
-            width: 65px;
-            padding: 6px;
-            border: 1px solid #CCC;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            text-align: center;
-        }
-
-        .unit-select {
-            flex: 1;
-            padding: 6px;
-            border: 1px solid #CCC;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            background: white;
-        }
-
-        .select-toggle-btn {
-            width: 100%;
-            padding: 6px;
-            border: 1px solid #DDD;
-            background: #F5F5F5;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .product-card.selected .select-toggle-btn {
-            background: var(--wheat-gold);
-            color: white;
-            border-color: var(--wheat-gold);
-        }
-
-        .sticky-footer {
-            position: sticky;
-            bottom: 0;
-            background: var(--summer-cream);
-            padding: 16px 0;
-            margin-top: auto;
-            border-top: 1px solid rgba(0,0,0,0.05);
-            z-index: 10;
-        }
-
-        .notification-container {
-            position: absolute;
-            top: 90px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-20px);
-            z-index: 2000;
-            width: calc(100% - 32px);
-            max-width: 360px;
-            background: white;
-            padding: 16px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            opacity: 0;
-            pointer-events: none;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .notification-container.show {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .notification-text { font-size: 0.95rem; font-weight: 500; line-height: 1.4; }
-        .notification-actions { display: flex; gap: 8px; justify-content: flex-end; }
-        .notif-btn { padding: 10px 18px; border: none; border-radius: 10px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
-        .preview-marker-icon { filter: hue-rotate(140deg) saturate(2); }
-        .nav-link-btn { display: block; margin-top: 8px; padding: 10px 12px; background: #4285F4; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem; text-align: center;}
-    </style>
 </head>
 <body>
-
     <div id="login-view" class="view active">
         <div class="login-card">
             <div class="brand-title">otset.ee</div>
-            <div class="brand-subtitle">Otsetee värske toiduni maanteel</div>
-            
+            <div class="brand-subtitle">Otsetee värske toiduni maanteel</div>      
             <button class="oauth-btn" onclick="handleLogin('merchant', 'Google')">
                 <span>Müüja: Google konto</span>
             </button>
             <button class="oauth-btn apple" onclick="handleLogin('merchant', 'Apple')">
                 <span>Müüja: Apple konto</span>
             </button>
-
             <div class="divider">või siseneda sirvimiseks</div>
-
             <button class="oauth-btn buyer" onclick="handleLogin('buyer', 'Sõitja')">
                 <span>Sisene Ostjana (Vaata Kaarti)</span>
             </button>
         </div>
     </div>
-
     <div id="map-view" class="view">
         <div class="search-container">
             <input type="text" id="location-search" class="search-bar" placeholder="Otsi asukohta või teeotsa..." onkeypress="handleSearch(event)">
         </div>
-
         <div id="map-container"></div>
-        
         <div class="custom-zoom-controls">
             <button class="zoom-btn" onclick="mapZoomIn()">+</button>
             <button class="zoom-btn" onclick="mapZoomOut()">−</button>
         </div>
-        
         <div class="map-overlay">
             <div class="action-bar">
                 <button id="action-btn" class="btn btn-accent" onclick="handleActionBarClick()">Alusta Müüki</button>
@@ -468,13 +50,11 @@
             </div>
         </div>
     </div>
-
     <div id="product-selection-view" class="view">
         <div class="section-title">
             <span>Müügikoha Seaded</span>
             <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; flex: none;" onclick="switchView('map-view')">Tagasi</button>
         </div>
-
         <div class="meta-settings-card">
             <div class="form-group">
                 <label>Müügikoha tüüp:</label>
@@ -498,24 +78,19 @@
                 </div>
             </div>
         </div>
-        
         <div id="catalog-container"></div>
-
         <div class="sticky-footer">
             <button class="btn btn-accent" style="width: 100%;" onclick="confirmProductsAndStartGeo()">Kinnita andmed ja aktiveeri kaardil</button>
         </div>
     </div>
-
     <div id="app-notification" class="notification-container">
         <div id="notification-content" class="notification-text">Teavitus</div>
         <div id="notification-buttons" class="notification-actions"></div>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
         const firebaseConfig = {
             apiKey: "AIzaSyBo648Em9A94sabAg0M-MXAlFUbXGjUr-Y",
             authDomain: "otsetee-9e167.firebaseapp.com",
@@ -524,12 +99,10 @@
             messagingSenderId: "221378870886",
             appId: "1:221378870886:web:e595d472deb904ef6437a7"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
         const db = getFirestore(app);
-
         let map;
         let activeMarker = null;
         let accuracyCircle = null;
@@ -540,7 +113,6 @@
         let isOutOfStock = false; 
         let userRole = 'buyer'; 
         let merchantMarkers = {}; 
-
         // Erinevat värvi markerite ikoonid kaardile kuvamiseks
         const markerIcons = {
             temporary: L.icon({
@@ -559,9 +131,7 @@
                 iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
             })
         };
-
         const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
-
         const agriProducts = {
             "Mesi ja Mesindustooted": ["Õiemesi", "Kanarbikumesi", "Metsamesi", "Kärjemesi", "Taruvaik", "Suir"],
             "Kala ja Kalatooted": ["Suitsuangerjas", "Suitsulest", "Suitsurääbis", "Kuivatatud särg", "Värske koha", "Värske ahven", "Marineeritud silmud"],
@@ -571,15 +141,12 @@
             "Piim, Juust ja Munad": ["Maamunad", "Vutimunad", "Lehma toorpiim", "Ahjujuust", "Sõir", "Maavõi"],
             "Küpsetised ja Omatoodang": ["Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook"]
         };
-
         window.addEventListener('DOMContentLoaded', () => {
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     localStorage.setItem('otset_loggedin', 'true');
-                    userRole = localStorage.getItem('otset_role') || 'merchant';
-                    
+                    userRole = localStorage.getItem('otset_role') || 'merchant';          
                     switchView('map-view');
-                    
                     if (userRole === 'merchant') {
                         getDoc(doc(db, "active_merchants", user.uid)).then((docSnap) => {
                             if (docSnap.exists()) {
@@ -594,12 +161,10 @@
                                 if (data.products) {
                                     localStorage.setItem('otset_active_products', JSON.stringify(data.products));
                                 }
-                                
                                 // Taastame sisestatud metaväljad kohalikku mällu
                                 localStorage.setItem('otset_is_permanent', data.is_permanent ? 'true' : 'false');
                                 localStorage.setItem('otset_phone', data.contact_phone || '');
                                 localStorage.setItem('otset_hours', data.opening_hours || '');
-
                                 renderCatalog(); 
                                 updateActionBarState();
                                 setupWatchPosition(true);
@@ -631,7 +196,6 @@
                 }
             });
         });
-
         window.toggleMetaFields = function() {
             const type = document.querySelector('input[name="sale_type"]:checked').value;
             const target = document.getElementById('permanent-only-fields');
@@ -641,7 +205,6 @@
                 target.style.display = 'none';
             }
         }
-
         function renderCatalog() {
             // Täidame väljad salvestatud andmetega
             const isPerm = localStorage.getItem('otset_is_permanent') === 'true';
@@ -654,18 +217,14 @@
                 if(rad) rad.checked = true;
                 document.getElementById('permanent-only-fields').style.display = 'none';
             }
-
             document.getElementById('merchant-phone').value = localStorage.getItem('otset_phone') || '';
             document.getElementById('merchant-hours').value = localStorage.getItem('otset_hours') || '';
-
             const container = document.getElementById('catalog-container');
             if (!container) return;
             container.innerHTML = '';
             let globalId = 0;
-
             const rawActive = localStorage.getItem('otset_active_products');
             const activeProductsList = rawActive ? JSON.parse(rawActive) : [];
-
             for (const [category, items] of Object.entries(agriProducts)) {
                 const block = document.createElement('div');
                 block.className = 'category-block';
@@ -673,17 +232,13 @@
                 title.className = 'category-name';
                 title.innerText = category;
                 block.appendChild(title);
-
                 const grid = document.createElement('div');
                 grid.className = 'products-grid';
-
                 items.forEach(item => {
-                    globalId++;
-                    
+                    globalId++;                    
                     let isSelected = false;
                     let savedPrice = "5.0";
                     let savedUnit = "kg";
-
                     const matchedProduct = activeProductsList.find(p => p.startsWith(item));
                     if (matchedProduct) {
                         isSelected = true;
@@ -694,12 +249,10 @@
                             if (priceUnit[1]) savedUnit = priceUnit[1].trim();
                         }
                     }
-
                     const card = document.createElement('div');
                     card.className = `product-card ${isSelected ? 'selected' : ''}`;
                     card.id = `prod-card-${globalId}`;
                     card.setAttribute('data-name', item);
-
                     card.innerHTML = `
                         <div class="product-info">
                             <div class="product-label">${item}</div>
@@ -724,7 +277,6 @@
                 container.appendChild(block);
             }
         }
-
         window.toggleProductSelect = function(id) {
             const card = document.getElementById(`prod-card-${id}`);
             const btn = card.querySelector('.select-toggle-btn');
@@ -736,7 +288,6 @@
                 btn.innerText = "Valitud";
             }
         }
-
         window.handleActionBarClick = function() {
             if (userRole === 'buyer') {
                 findPassengerLocation();
@@ -748,7 +299,6 @@
                 }
             }
         }
-
         function findPassengerLocation() {
             if (!navigator.geolocation) {
                 showNotification("Sinu seade ei toeta GPS-teenuseid.");
@@ -760,8 +310,7 @@
                     const { latitude, longitude } = position.coords;
                     if (map) {
                         map.setView([latitude, longitude], 14);
-                        if (buyerCircle) map.removeLayer(buyerCircle);
-                        
+                        if (buyerCircle) map.removeLayer(buyerCircle);               
                         buyerCircle = L.circle([latitude, longitude], { radius: 40, color: '#4CAF50', fillColor: '#4CAF50', fillOpacity: 0.4 }).addTo(map)
                             .bindPopup('Sinu asukoht').openPopup();
                     }
@@ -770,7 +319,6 @@
                 geoOptions
             );
         }
-
         window.confirmProductsAndStartGeo = function() {
             const selectedElements = document.querySelectorAll('.product-card.selected');
             if (selectedElements.length === 0) {
@@ -786,19 +334,15 @@
                 const unit = document.getElementById(`unit-${id}`).value;
                 inventorySummary.push(`${name} (${price} €/${unit})`);
             });
-
             // Salvestame uued metaväljad
             const isPermanent = document.querySelector('input[name="sale_type"]:checked').value === 'permanent';
             const phone = document.getElementById('merchant-phone').value;
             const hours = document.getElementById('merchant-hours').value;
-
             localStorage.setItem('otset_active_products', JSON.stringify(inventorySummary));
             localStorage.setItem('otset_is_permanent', isPermanent ? 'true' : 'false');
             localStorage.setItem('otset_phone', phone);
             localStorage.setItem('otset_hours', hours);
-
             switchView('map-view');
-            
             if (isSelling) {
                 const savedLat = localStorage.getItem('otset_custom_lat');
                 const savedLng = localStorage.getItem('otset_custom_lng');
@@ -810,21 +354,17 @@
                 startGeoTracking(false);
             }
         }
-
         // UUS: Funktsioon "Kaup otsas" oleku muutmiseks reaalselt
         window.toggleStockState = async function() {
             if (!auth.currentUser || !isSelling) return;
-            isOutOfStock = !isOutOfStock;
-            
+            isOutOfStock = !isOutOfStock;   
             try {
                 await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
                     is_out_of_stock: isOutOfStock
                 });
-                
                 const savedLat = localStorage.getItem('otset_custom_lat');
                 const savedLng = localStorage.getItem('otset_custom_lng');
                 updateLocationProcess(parseFloat(savedLat), parseFloat(savedLng), 10, true);
-
                 if (isOutOfStock) {
                     showNotification("Märgitud: Kaup hetkel OTSAS. Marker muutus halliks.");
                 } else {
@@ -834,16 +374,13 @@
                 console.error(e);
             }
         }
-
         window.showNotification = function(message, duration = 3500, actions = null) {
             const container = document.getElementById('app-notification');
             const content = document.getElementById('notification-content');
-            const btnArea = document.getElementById('notification-buttons');
-            
+            const btnArea = document.getElementById('notification-buttons');   
             if(!content || !container || !btnArea) return;
             content.innerHTML = message;
             btnArea.innerHTML = '';
-
             if (actions && actions.length > 0) {
                 actions.forEach(action => {
                     const btn = document.createElement('button');
@@ -856,18 +393,15 @@
                     btnArea.appendChild(btn);
                 });
             }
-
             container.classList.add('show');
             if (!actions || actions.length === 0) {
                 setTimeout(() => { container.classList.remove('show'); }, duration);
             }
         }
-
         window.handleSearch = function(event) {
             if (event.key === 'Enter') {
                 const query = document.getElementById('location-search').value;
                 if (!query) return;
-
                 fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Estonia')}&limit=1`)
                     .then(response => response.json())
                     .then(data => {
@@ -875,11 +409,9 @@
                             const lat = parseFloat(data[0].lat);
                             const lon = parseFloat(data[0].lon);
                             const placeName = data[0].display_name.split(',')[0];
-
                             if (map) {
                                 map.setView([lat, lon], 14);
                                 if (previewMarker) map.removeLayer(previewMarker);
-
                                 const orangeIcon = L.icon({
                                     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
                                     iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -887,16 +419,13 @@
                                     iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
                                     className: 'preview-marker-icon'
                                 });
-
                                 previewMarker = L.marker([lat, lon], { icon: orangeIcon }).addTo(map);
-                                
                                 const mapsLink = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
                                 previewMarker.bindPopup(`
                                     <b>${placeName}</b><br>
                                     Koordinaadid: ${lat.toFixed(5)}, ${lon.toFixed(5)}<br>
                                     <a href="${mapsLink}" target="_blank" class="nav-link-btn">Navigeeri siia</a>
                                 `).openPopup();
-
                                 if (userRole === 'merchant') {
                                     showNotification(
                                         `Leiti koht: <b>${placeName}</b>.<br>Kas soovid müügikoha siia teeotsa lukustada?`,
@@ -935,11 +464,9 @@
                     });
             }
         }
-
         window.switchView = function(viewId) {
             document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            
+            document.getElementById(viewId).classList.add('active');   
             if (viewId === 'map-view') {
                 setTimeout(() => {
                     if (!map) { initMap(); } else { map.invalidateSize(); }
@@ -948,11 +475,9 @@
                 renderCatalog();
             }
         }
-
         window.handleLogin = async function(role, providerName) {
             userRole = role;
             localStorage.setItem('otset_role', role);
-
             if (role === 'merchant') {
                 if (providerName === 'Google') {
                     showNotification("Ühendun Google'iga...");
@@ -973,10 +498,8 @@
                 findPassengerLocation();
             }
         }
-
         window.handleLogout = async function() {
             const isPerm = localStorage.getItem('otset_is_permanent') === 'true';
-
             // Puhastame seadme kohaliku mälu igal juhul
             localStorage.removeItem('otset_loggedin');
             localStorage.removeItem('otset_selling');
@@ -986,19 +509,16 @@
             localStorage.removeItem('otset_is_permanent');
             localStorage.removeItem('otset_phone');
             localStorage.removeItem('otset_hours');
-            
             if (buyerCircle) { map.removeLayer(buyerCircle); buyerCircle = null; }
             if (geoWatchId) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
             if (activeMarker) { map.removeLayer(activeMarker); activeMarker = null; }
             if (accuracyCircle) { map.removeLayer(accuracyCircle); accuracyCircle = null; }
-            
             try {
                 // Kui oli TAVALINE välkmüük, siis kustutame kohe kaardilt.
                 // Kui oli PÜSIKOHT, siis jätame andmebaasi alles!
                 if (!isPerm && auth.currentUser) {
                     await deleteDoc(doc(db, "active_merchants", auth.currentUser.uid));
                 }
-
                 await signOut(auth);
                 if(isPerm) {
                     showNotification("Välja logitud. Sinu PÜSIKOHT jäi autojuhtidele kaardile nähtavaks!");
@@ -1010,28 +530,22 @@
             }
             switchView('login-view');
         }
-
         function initMap() {
             const savedLat = localStorage.getItem('otset_custom_lat');
             const savedLng = localStorage.getItem('otset_custom_lng');
             const centerPoint = (savedLat && savedLng) ? [parseFloat(savedLat), parseFloat(savedLng)] : [58.2522, 26.4719];
-
             map = L.map('map-container', { zoomControl: false }).setView(centerPoint, 12); 
-
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
-
             // Reaalajas andmete kuulamine ja õigete markerite joonistamine kaardile
 onSnapshot(collection(db, "active_merchants"), (snapshot) => {
     snapshot.docChanges().forEach((change) => {
         const id = change.doc.id;
         const data = change.doc.data();
-        
         // Kui see on praeguse sisselogitud müüja enda punkt, siis tema enda ekraanil 
         // tegeleb selle kuvamisega updateLocationProcess funktsioon. Me ei joonista seda siin topelt.
         if (auth.currentUser && id === auth.currentUser.uid) return;
-
         if (change.type === "removed") {
             if (merchantMarkers[id]) {
                 map.removeLayer(merchantMarkers[id]);
@@ -1040,10 +554,8 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
         } else {
             const prodHTML = data.products ? data.products.map(p => `• ${p}`).join('<br>') : 'Tooted puuduvad';
             const gMapsLink = `http://googleusercontent.com/maps.google.com/maps?q=${data.lat},${data.lng}`;
-            
             let currentIcon = markerIcons.temporary;
             let typeLabel = "<span style='color:green;font-weight:bold;'>VÄLKMÜÜK (Kohapeal reaalajas)</span>";
-            
             if (data.is_permanent) {
                 if (data.is_out_of_stock) {
                     currentIcon = markerIcons.outofstock;
@@ -1053,10 +565,8 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                     typeLabel = "<span style='color:blue;font-weight:bold;'>PÜSIKOHT (Avatud / Saadaval)</span>";
                 }
             }
-
             const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
             const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
-
             // Kuna see punkt kuulub KELLELEGI TEISELE, siis siit puuduvad igasugused muutmise ja kustutamise nupud.
             // Teised kasutajad saavad ainult navigeerida või helistada.
             const popupContent = `
@@ -1070,7 +580,6 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                     <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Sõida siia (Navigatsioon)</a>
                 </div>
             `;
-
             if (merchantMarkers[id]) {
                 merchantMarkers[id].setLatLng([data.lat, data.lng]);
                 merchantMarkers[id].setIcon(currentIcon);
@@ -1083,22 +592,17 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
     });
 });
         }
-
         window.mapZoomIn = function() { if (map) map.zoomIn(); }
         window.mapZoomOut = function() { if (map) map.zoomOut(); }
-
         function startGeoTracking(isRestoring) {
             if (userRole === 'buyer') return; 
-            
             const actionBtn = document.getElementById('action-btn');
             if (!navigator.geolocation) {
                 showNotification("Sinu seade ei toeta GPS-teenuseid.");
                 return;
             }
-
             actionBtn.innerText = "Otsib asukohta...";
             actionBtn.disabled = true;
-
             const savedLat = localStorage.getItem('otset_custom_lat');
             const savedLng = localStorage.getItem('otset_custom_lng');
             if (savedLat && savedLng) {
@@ -1108,7 +612,6 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
             }
             setupWatchPosition(isRestoring);
         }
-
         function setupWatchPosition(isRestoring) {
             if (geoWatchId) return; 
             geoWatchId = navigator.geolocation.watchPosition(
@@ -1138,11 +641,9 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                 geoOptions
             );
         }
-
         function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             let finalLat = lat;
             let finalLng = lng;
-
             const savedLat = localStorage.getItem('otset_custom_lat');
             const savedLng = localStorage.getItem('otset_custom_lng');
             if (savedLat && savedLng) {
@@ -1152,36 +653,27 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                 localStorage.setItem('otset_custom_lat', finalLat);
                 localStorage.setItem('otset_custom_lng', finalLng);
             }
-
             // Võtame kohalikust mälust püsikoha seaded
             const isPermanent = localStorage.getItem('otset_is_permanent') === 'true';
             const phone = localStorage.getItem('otset_phone') || '';
             const hours = localStorage.getItem('otset_hours') || '';
-
             if (activeMarker) map.removeLayer(activeMarker);
             if (accuracyCircle) map.removeLayer(accuracyCircle);
-
             if (!isRestoring) { map.setView([finalLat, finalLng], 15); }
-
             accuracyCircle = L.circle([finalLat, finalLng], {
                 radius: accuracy, color: 'rgba(79, 119, 170, 0.5)', fillColor: '#4F77AA', fillOpacity: 0.15, weight: 1.5
             }).addTo(map);
-
             // Valime müüjale endale kaardil näitamiseks õige ikooni värvi
             let myIcon = markerIcons.temporary;
             if(isPermanent) {
                 myIcon = isOutOfStock ? markerIcons.outofstock : markerIcons.permanent;
             }
-
             activeMarker = L.marker([finalLat, finalLng], { draggable: true, icon: myIcon }).addTo(map);
-            
             const rawProducts = localStorage.getItem('otset_active_products');
             const parsedProducts = rawProducts ? JSON.parse(rawProducts) : [];
             const prodListHTML = parsedProducts.map(p => `• ${p}`).join('<br>');
             const gMapsLink = `https://www.google.com/maps/dir/?api=1&destination=${finalLat},${finalLng}`;
-
             const activeText = isOutOfStock ? "<span style='color:red;'>AKTIIVNE (Kaup otsas!)</span>" : "<span style='color:green;'>AKTIIVNE (Müük käib)</span>";
-
             activeMarker.bindPopup(`
                 <div style="max-height:220px; overflow-y:auto; font-size:0.85rem; min-width:180px;">
                     <b>Sinu Müügikoht on ${activeText}</b><br>
@@ -1193,16 +685,13 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                     <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
                 </div>
             `);
-            
             if (!isRestoring) {
                 activeMarker.openPopup();
                 showNotification("Müügikoht kaardil aktiivne!");
             }
-
             if (auth.currentUser) {
                 const merchantId = auth.currentUser.uid;
-                const merchantName = auth.currentUser.displayName || "Teeäärne Müüja";
-                
+                const merchantName = auth.currentUser.displayName || "Teeäärne Müüja";   
                 setDoc(doc(db, "active_merchants", merchantId), {
                     name: merchantName,
                     lat: finalLat,
@@ -1215,15 +704,12 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                     updatedAt: new Date().toISOString()
                 }).catch(err => console.error("Viga andmebaasi kirjutamisel:", err));
             }
-
             activeMarker.on('dragend', function(event) {
                 const marker = event.target;
                 const currentPos = marker.getLatLng();
-                if(accuracyCircle) accuracyCircle.setLatLng(currentPos);
-                
+                if(accuracyCircle) accuracyCircle.setLatLng(currentPos);   
                 localStorage.setItem('otset_custom_lat', currentPos.lat);
                 localStorage.setItem('otset_custom_lng', currentPos.lng);
-                
                 if (auth.currentUser) {
                     setDoc(doc(db, "active_merchants", auth.currentUser.uid), {
                         name: auth.currentUser.displayName || "Teeäärne Müüja",
@@ -1239,18 +725,15 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                 }
                 showNotification("Asukoht täpsustatud!");
             });
-
             isSelling = true;
             localStorage.setItem('otset_selling', 'true');
             updateActionBarState();
         }
-
         function updateActionBarState() {
             const actionBtn = document.getElementById('action-btn');
             const editBtn = document.getElementById('edit-products-btn');
             const stockBtn = document.getElementById('stock-btn');
             if (!actionBtn) return;
-
             if (userRole === 'buyer') {
                 actionBtn.disabled = false;
                 actionBtn.innerText = "Minu Asukoht";
@@ -1261,13 +744,10 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                 if (isSelling) {
                     actionBtn.disabled = false;
                     const isPerm = localStorage.getItem('otset_is_permanent') === 'true';
-                    
                     // Kui tegu on püsikohaga, saab selle kaardilt eemaldada spetsiaalselt.
                     actionBtn.innerText = isPerm ? "Kustuta Püsikoht" : "Lõpeta Müük";
                     actionBtn.className = "btn btn-danger";
-                    
                     if(editBtn) editBtn.style.display = "flex"; 
-
                     // "Kaup otsas" nupp kuvatakse AINULT püsikohtadele
                     if(stockBtn && isPerm) {
                         stockBtn.style.display = "flex";
@@ -1290,21 +770,17 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                 }
             }
         }
-
         function stopGeoTracking() {
-            const isPerm = localStorage.getItem('otset_is_permanent') === 'true';
-            
+            const isPerm = localStorage.getItem('otset_is_permanent') === 'true';   
             const confirmStop = () => {
                 if (auth.currentUser) {
                     deleteDoc(doc(db, "active_merchants", auth.currentUser.uid))
                         .catch(err => console.error(err));
                 }
-
                 if (geoWatchId) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
                 if (activeMarker) { map.removeLayer(activeMarker); activeMarker = null; }
                 if (accuracyCircle) { map.removeLayer(accuracyCircle); accuracyCircle = null; }
                 if (previewMarker) { map.removeLayer(previewMarker); previewMarker = null; }
-                
                 isSelling = false;
                 isOutOfStock = false;
                 localStorage.setItem('otset_selling', 'false');
@@ -1314,11 +790,9 @@ onSnapshot(collection(db, "active_merchants"), (snapshot) => {
                 localStorage.removeItem('otset_is_permanent');
                 localStorage.removeItem('otset_phone');
                 localStorage.removeItem('otset_hours');
-                
                 updateActionBarState();
                 showNotification("Müük lõpetatud ja punkt kaardilt eemaldatud.");
             };
-
             if (isPerm) {
                 showNotification(
                     "Kas soovid selle püsikoha kaardilt <b>täielikult kustutada</b>? (Kui soovid lihtsalt poest lahkuda, logi hoopis välja)",
