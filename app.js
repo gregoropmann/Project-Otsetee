@@ -559,7 +559,7 @@ function initMap() {
                         ${phoneHTML}<br><br>
                         <span style="color:#222;font-weight:600;">Müüdavad tooted:</span><br>
                         ${prodHTML}<br>
-                        <a href="${gMapsLink}" target="_blank" class="nav-link-btn" onclick="setTimeout(openBuyerFeedback, 3000)">Sõida siia (Navigatsioon)</a>
+                        <a href="${gMapsLink}" target="_blank" class="nav-link-btn navlink-click-trigger">Sõida siia (Navigatsioon)</a>
                     </div>
                 `;
                 if (merchantMarkers[id]) {
@@ -572,6 +572,21 @@ function initMap() {
                 }
             }
         });
+    });
+
+    // Lollikindel globaalne kuulaja: Käivitub reaalajas kohe kui ostja klikib navigatsiooninupule
+    map.on('popupopen', function() {
+        const navBtn = document.querySelector('.navlink-click-trigger');
+        if (navBtn) {
+            navBtn.onclick = null; // Puhastame duplikaadid
+            navBtn.onclick = function() {
+                setTimeout(() => {
+                    if (typeof window.openBuyerFeedback === 'function') {
+                        window.openBuyerFeedback();
+                    }
+                }, 500);
+            };
+        }
     });
 }
 
