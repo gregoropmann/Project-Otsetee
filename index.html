@@ -736,6 +736,7 @@
 
                                 previewMarker = L.marker([lat, lon], { icon: orangeIcon }).addTo(map);
                                 
+                                // PARANDATUD: 0{ asemel on nüüd õige ${
                                 const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
                                 previewMarker.bindPopup(`
                                     <b>${placeName}</b><br>
@@ -809,7 +810,7 @@
                         showNotification("Sisselogimine ebaõnnestus: " + error.message);
                     }
                 } else if (providerName === 'Apple') {
-                    showNotification("Apple sisselogimine pole veel ühendatud.");
+                    showNotification("Apple sisselogimine pole vielä ühendatud.");
                 }
             } else {
                 localStorage.setItem('otset_loggedin', 'true');
@@ -821,9 +822,6 @@
         }
 
         window.handleLogout = async function() {
-            // EEMALDATUD: stopGeoTracking() – et müük jääks pilve alles!
-            
-            // Puhastame ainult seadme kohaliku sessiooni mälust
             localStorage.removeItem('otset_loggedin');
             localStorage.removeItem('otset_selling');
             localStorage.removeItem('otset_custom_lat');
@@ -869,6 +867,8 @@
                         }
                     } else {
                         const prodHTML = data.products ? data.products.map(p => `• ${p}`).join('<br>') : 'Tooted puuduvad';
+                        
+                        // PARANDATUD: 0{ asemel on nüüd õige ${ ning link suunab otse Mapsi otsingusse
                         const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}`;
                         
                         const popupContent = `
@@ -948,101 +948,91 @@
         }
 
         function updateLocationProcess(lat, lng, accuracy, isRestoring) {
-    let finalLat = lat;
-    let finalLng = lng;
+            let finalLat = lat;
+            let finalLng = lng;
 
-    // 1. KONTROLL: Kui meil on juba salvestatud kohandatud/lukustatud asukoht,
-    // siis kasutame alati seda ja ignoreerime telefoni reaalset GPS-i kõikumist taskus.
-    const savedLat = localStorage.getItem('otset_custom_lat');
-    const savedLng = localStorage.getItem('otset_custom_lng');
-    if (savedLat && savedLng) {
-        finalLat = parseFloat(savedLat);
-        finalLng = parseFloat(savedLng);
-    } else {
-        // Kui kohandatud asukohta mälus pole, siis salvestame esmase leitud GPS asukoha seadmesse
-        localStorage.setItem('otset_custom_lat', finalLat);
-        localStorage.setItem('otset_custom_lng', finalLng);
-    }
+            const savedLat = localStorage.getItem('otset_custom_lat');
+            const savedLng = localStorage.getItem('otset_custom_lng');
+            if (savedLat && savedLng) {
+                finalLat = parseFloat(savedLat);
+                finalLng = parseFloat(savedLng);
+            } else {
+                localStorage.setItem('otset_custom_lat', finalLat);
+                localStorage.setItem('otset_custom_lng', finalLng);
+            }
 
-    // Eemaldame vanad kihid kaardilt enne uute joonistamist
-    if (activeMarker) map.removeLayer(activeMarker);
-    if (accuracyCircle) map.removeLayer(accuracyCircle);
+            if (activeMarker) map.removeLayer(activeMarker);
+            if (accuracyCircle) map.removeLayer(accuracyCircle);
 
-    // Kui me ei tegele rakenduse algse sisselaadimisega/taastamisega, tsentreerime kaardi
-    if (!isRestoring) { map.setView([finalLat, finalLng], 15); }
+            if (!isRestoring) { map.setView([finalLat, finalLng], 15); }
 
-    // Joonistame täpsusringi ja markeri
-    accuracyCircle = L.circle([finalLat, finalLng], {
-        radius: accuracy, color: 'rgba(79, 119, 170, 0.5)', fillColor: '#4F77AA', fillOpacity: 0.15, weight: 1.5
-    }).addTo(map);
+            accuracyCircle = L.circle([finalLat, finalLng], {
+                radius: accuracy, color: 'rgba(79, 119, 170, 0.5)', fillColor: '#4F77AA', fillOpacity: 0.15, weight: 1.5
+            }).addTo(map);
 
-    activeMarker = L.marker([finalLat, finalLng], { draggable: true }).addTo(map);
-    
-    // Loeme tooted kohalikust seadme mälust
-    const rawProducts = localStorage.getItem('otset_active_products');
-    const parsedProducts = rawProducts ? JSON.parse(rawProducts) : [];
-    const prodListHTML = parsedProducts.map(p => `• ${p}`).join('<br>');
-    const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${finalLat},${finalLng}`;
+            activeMarker = L.marker([finalLat, finalLng], { draggable: true }).addTo(map);
+            
+            const rawProducts = localStorage.getItem('otset_active_products');
+            const parsedProducts = rawProducts ? JSON.parse(rawProducts) : [];
+            const prodListHTML = parsedProducts.map(p => `• ${p}`).join('<br>');
+            
+            // PARANDATUD: 0{ asemel on nüüd õige ${ ning link suunab otse Mapsi otsingusse
+            const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${finalLat},${finalLng}`;
 
-    // Loome markerile popup akna infoga
-    activeMarker.bindPopup(`
-        <div style="max-height:180px; overflow-y:auto; font-size:0.85rem;">
-            <b>Sinu Müügikoht on AKTIIVNE!</b><br>
-            <span style="color:#222;font-weight:600;">Müüdavad tooted:</span><br>
-            ${prodListHTML}<br>
-            <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Testi navigatsiooni</a><br>
-            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on vales kohas, lohista see näpuga õigesse teeotsa!</span>
-        </div>
-    `);
-    
-    if (!isRestoring) {
-        activeMarker.openPopup();
-        showNotification("Müügikoht aktiivne!");
-    }
+            activeMarker.bindPopup(`
+                <div style="max-height:180px; overflow-y:auto; font-size:0.85rem;">
+                    <b>Sinu Müügikoht on AKTIIVNE!</b><br>
+                    <span style="color:#222;font-weight:600;">Müüdavad tooted:</span><br>
+                    ${prodListHTML}<br>
+                    <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Testi navigatsiooni</a><br>
+                    <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on vales kohas, lohista see näpuga õigesse teeotsa!</span>
+                </div>
+            `);
+            
+            if (!isRestoring) {
+                activeMarker.openPopup();
+                showNotification("Müügikoht aktiivne!");
+            }
 
-    // 2. ANDMEBAASI UUENDUS: Kirjutame pilve reaalajas andmeid AINULT siis, kui kasutaja on reaalselt sisse logitud.
-    // Kui ta logib välja, ei hakka seade tühja päringut saatma ja punkt säilib pilves sellisena, nagu see enne oli.
-    if (auth.currentUser) {
-        const merchantId = auth.currentUser.uid;
-        const merchantName = auth.currentUser.displayName || "Teeäärne Müüja";
-        
-        setDoc(doc(db, "active_merchants", merchantId), {
-            name: merchantName,
-            lat: finalLat,
-            lng: finalLng,
-            products: parsedProducts,
-            updatedAt: new Date().toISOString()
-        }).catch(err => console.error("Viga andmebaasi kirjutamisel:", err));
-    }
+            if (auth.currentUser) {
+                const merchantId = auth.currentUser.uid;
+                const merchantName = auth.currentUser.displayName || "Teeäärne Müüja";
+                
+                setDoc(doc(db, "active_merchants", merchantId), {
+                    name: merchantName,
+                    lat: finalLat,
+                    lng: finalLng,
+                    products: parsedProducts,
+                    updatedAt: new Date().toISOString()
+                }).catch(err => console.error("Viga andmebaasi kirjutamisel:", err));
+            }
 
-    // Käsitsi markeri lohistamise loogika kaardil
-    activeMarker.on('dragend', function(event) {
-        const marker = event.target;
-        const currentPos = marker.getLatLng();
-        if(accuracyCircle) accuracyCircle.setLatLng(currentPos);
-        
-        localStorage.setItem('otset_custom_lat', currentPos.lat);
-        localStorage.setItem('otset_custom_lng', currentPos.lng);
-        
-        // Kui lohistamise ajal ollakse sisse logitud, uuendame kohe ka pilve andmebaasi
-        if (auth.currentUser) {
-            setDoc(doc(db, "active_merchants", auth.currentUser.uid), {
-                name: auth.currentUser.displayName || "Teeäärne Müüja",
-                lat: currentPos.lat,
-                lng: currentPos.lng,
-                products: parsedProducts,
-                updatedAt: new Date().toISOString()
-            }).catch(err => console.error(err));
-        } else {
-            showNotification("Asukoht muudetud kohalikult! Pilves uuendamiseks logi sisse.");
+            activeMarker.on('dragend', function(event) {
+                const marker = event.target;
+                const currentPos = marker.getLatLng();
+                if(accuracyCircle) accuracyCircle.setLatLng(currentPos);
+                
+                localStorage.setItem('otset_custom_lat', currentPos.lat);
+                localStorage.setItem('otset_custom_lng', currentPos.lng);
+                
+                if (auth.currentUser) {
+                    setDoc(doc(db, "active_merchants", auth.currentUser.uid), {
+                        name: auth.currentUser.displayName || "Teeäärne Müüja",
+                        lat: currentPos.lat,
+                        lng: currentPos.lng,
+                        products: parsedProducts,
+                        updatedAt: new Date().toISOString()
+                    }).catch(err => console.error(err));
+                } else {
+                    showNotification("Asukoht muudetud kohalikult! Pilves uuendamiseks logi sisse.");
+                }
+                showNotification("Asukoht täpsustatud!");
+            });
+
+            isSelling = true;
+            localStorage.setItem('otset_selling', 'true');
+            updateActionBarState();
         }
-        showNotification("Asukoht täpsustatud!");
-    });
-
-    isSelling = true;
-    localStorage.setItem('otset_selling', 'true');
-    updateActionBarState();
-}
 
         function updateActionBarState() {
             const actionBtn = document.getElementById('action-btn');
