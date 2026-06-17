@@ -27,7 +27,6 @@ let isOutOfStock = false;
 let userRole = 'buyer'; 
 let merchantMarkers = {}; 
 
-// Erinevat värvi markerite ikoonid kaardile kuvamiseks
 const markerIcons = {
     temporary: L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
@@ -48,54 +47,14 @@ const markerIcons = {
 
 const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
 
-// Massiivne 50+ kohaliku toote nimekiri kategooriate kaupa
 const agriProducts = {
-    "Mesi ja Mesindustooted": [
-        "Õiemesi", "Kanarbikumesi", "Metsamesi", "Kärjemesi", "Taruvaik", "Suir", 
-        "Mesilasvaha", "Sulatatud mesi maitsetaimedega", "Suhkrustunud mesi"
-    ],
-    "Kala ja Kalatooted": [
-        "Suitsuangerjas", "Suitsulest", "Suitsurääbis", "Kuivatatud särg", "Värske koha", 
-        "Värske ahven", "Marineeritud silmud", "Suitsulõhe", "Värske haug", "Kohafilee", 
-        "Soolasiig", "Jõevähid"
-    ],
-    "Marjad": [
-        "Metsmaasikad", "Aedmaasikad", "Vaarikad", "Mustikad", "Pohlad", "Jõhvikad", 
-        "Murakad", "Mustad sõstrad", "Punased sõstrad", "Tikrid", "Kultuurmustikad", 
-        "Arooniad", "Astelpajumarjad", "Ebaküdooniad"
-    ],
-    "Köögiviljad, Juurikad ja Seened": [
-        "Värske kartul", "Meresoolakurk", "Hapukurk", "Küüslauk", "Mugulsibul", 
-        "Peipsi sibul", "Porgand", "Hernekaunad", "Tilli-rohelise kimp", 
-        "Värske kapsas", "Hapukapsas", "Punane peet", "Värske kurk", "Eesti tomat", 
-        "Kirsstomatid", "Suvikõrvits", "Kõrvits", "Kukeseened", 
-        "Puravikud", "Austerservikud", "Roheline sibul"
-    ],
-    "Puuviljad ja Marjaaiad": [
-        "Kodumaised õunad", "Ploomid", "Kirsid", "Hapukirsid", "Pirnid", "Kreegid"
-    ],
-    "Piim, Juust ja Munad": [
-        "Maamunad", "Vutimunad", "Lehma toorpiim", "Ahjujuust", "Sõir", "Maavõi", 
-        "Hapukoor", "Kodujuust", "Kitsepiim", "Kohupiim"
-    ],
-    "Liha ja Lihatooted": [
-        "Suitsusink", "Suitsuvorst", "Metssea vorst", "Põdraliha konserv", "Kodune sült", 
-        "Grillvorstid", "Soolapekk", "Värske sealiha", "Lamba suitsuliha"
-    ],
-    "Küpsetised ja Omatoodang": [
-        "Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook", 
-        "Kodune kali", "Mahl (õuna/sõstra)", "Moos", "Ebaküdooniasiirup", 
-        "Kuivatatud õunaviilud", "Karask", "Kohupiimakook"
-    ],
-    "Istikud, Taimed ja Lilled": [
-        "Tomatiistikud", "Kurgiistikud", "Maasikataimed", "Maitsetaimede potid", 
-        "Suvelillede amplid", "Lõikelilled", "Viljapuude istikud"
-    ],
-    "Saun, Käsitöö ja Kodu": [
-        "Kase-saunavihad", "Tamme-saunavihad", "Käsitööseebid", "Saunamesi", 
-        "Kootud villased sokid", "Käsitöövaibad", "Küttepuud (kotis)", "Kaminapuud (lepp)", 
-        "Puidust köögiriistad", "Punutud korvid", "Vahaküünlad"
-    ]
+    "Mesi ja Mesindustooted": ["Õiemesi", "Kanarbikumesi", "Metsamesi", "Kärjemesi", "Taruvaik", "Suir"],
+    "Kala ja Kalatooted": ["Suitsuangerjas", "Suitsulest", "Suitsurääbis", "Kuivatatud särg", "Värske koha", "Värske ahven", "Marineeritud silmud"],
+    "Marjad": ["Metsmaasikad", "Aedmaasikad", "Vaarikad", "Mustikad", "Pohlad", "Jõhvikad", "Murakad", "Mustad sõstrad", "Punased sõstrad", "Tikrid"],
+    "Köögiviljad ja Juurikad": ["Värske kartul", "Meresoolakurk", "Hapukurk", "Küüslauk", "Mugulsibul", "Peipsi sibul", "Porgand", "Pilvikud/Kukeseened", "Hernekaunad", "Tilli-rohelise kimp"],
+    "Puuviljad ja Marjaaiad": ["Kodumaised õunad", "Ploomid", "Kirsid", "Hapukirsid", "Pirnid"],
+    "Piim, Juust ja Munad": ["Maamunad", "Vutimunad", "Lehma toorpiim", "Ahjujuust", "Sõir", "Maavõi"],
+    "Küpsetised ja Omatoodang": ["Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook"]
 };
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -119,6 +78,7 @@ window.addEventListener('DOMContentLoaded', () => {
                             localStorage.setItem('otset_active_products', JSON.stringify(data.products));
                         }
                         localStorage.setItem('otset_is_permanent', data.is_permanent ? 'true' : 'false');
+                        localStorage.setItem('otset_is_recommended', data.is_recommended ? 'true' : 'false');
                         localStorage.setItem('otset_phone', data.contact_phone || '');
                         localStorage.setItem('otset_hours', data.opening_hours || '');
                         renderCatalog(); 
@@ -327,24 +287,22 @@ window.confirmProductsAndStartGeo = function() {
     }
 }
 
-window.toggleStockState = async function() {
+window.toggleStockState = function() {
     if (!auth.currentUser || !isSelling) return;
     isOutOfStock = !isOutOfStock;   
-    try {
-        await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
-            is_out_of_stock: isOutOfStock
-        });
-        const savedLat = localStorage.getItem('otset_custom_lat');
-        const savedLng = localStorage.getItem('otset_custom_lng');
+    const savedLat = localStorage.getItem('otset_custom_lat');
+    const savedLng = localStorage.getItem('otset_custom_lng');
+    
+    updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
+        is_out_of_stock: isOutOfStock
+    }).then(() => {
         updateLocationProcess(parseFloat(savedLat), parseFloat(savedLng), 10, true);
         if (isOutOfStock) {
             showNotification("Märgitud: Kaup hetkel OTSAS. Marker muutus halliks.");
         } else {
             showNotification("Märgitud: Kaup jälle SAADAVAL!");
         }
-    } catch(e) {
-        console.error(e);
-    }
+    }).catch(e => console.error(e));
 }
 
 window.showNotification = function(message, duration = 3500, actions = null) {
@@ -394,7 +352,7 @@ window.handleSearch = function(event) {
                             className: 'preview-marker-icon'
                         });
                         previewMarker = L.marker([lat, lon], { icon: orangeIcon }).addTo(map);
-                        const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                        const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
                         previewMarker.bindPopup(`
                             <b>${placeName}</b><br>
                             Koordinaadid: ${lat.toFixed(5)}, ${lon.toFixed(5)}<br>
@@ -483,13 +441,13 @@ window.handleLogout = async function() {
     localStorage.removeItem('otset_custom_lng');
     localStorage.removeItem('otset_active_products');
     localStorage.removeItem('otset_is_permanent');
+    localStorage.removeItem('otset_is_recommended');
     localStorage.removeItem('otset_phone');
     localStorage.removeItem('otset_hours');
     if (buyerCircle) { map.removeLayer(buyerCircle); buyerCircle = null; }
     if (geoWatchId) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
     if (activeMarker) { map.removeLayer(activeMarker); activeMarker = null; }
     if (accuracyCircle) { map.removeLayer(accuracyCircle); accuracyCircle = null; }
-    if (previewMarker) { map.removeLayer(previewMarker); previewMarker = null; }
     try {
         if (!isPerm && auth.currentUser) {
             await deleteDoc(doc(db, "active_merchants", auth.currentUser.uid));
@@ -529,9 +487,10 @@ function initMap() {
                 }
             } else {
                 const prodHTML = data.products ? data.products.map(p => `• ${p}`).join('<br>') : 'Tooted puuduvad';
-                const gMapsLink = `https://www.google.com/maps?q=${data.lat},${data.lng}`;
+                const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}`;
                 let currentIcon = markerIcons.temporary;
                 let typeLabel = "<span style='color:green;font-weight:bold;'>VÄLKMÜÜK (Kohapeal reaalajas)</span>";
+                
                 if (data.is_permanent) {
                     if (data.is_out_of_stock) {
                         currentIcon = markerIcons.outofstock;
@@ -541,19 +500,26 @@ function initMap() {
                         typeLabel = "<span style='color:blue;font-weight:bold;'>PÜSIKOHT (Avatud / Saadaval)</span>";
                     }
                 }
+
+                // Kuldse märgise loogika teiste ostjate vaates
+                let recommendedBadge = "";
+                if (data.is_recommended) {
+                    recommendedBadge = "<div style='background:#FFF9E6; border:1px solid #E5A93C; color:#B37D14; padding:5px; border-radius:6px; margin-bottom:8px; font-weight:bold; font-size:0.8rem; text-align:center;'>⭐ Pikaajaline koostöö Otseteega</div>";
+                }
+
                 const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
                 const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
                 
-                // Lisatud viivitusega tagasiside akna käivitus ostjale navigeerimisnupu vajutamisel
                 const popupContent = `
                     <div style="font-size:0.85rem; min-width:180px;">
+                        ${recommendedBadge}
                         <b>${data.name}</b><br>
                         ${typeLabel}<br>
                         ${hoursHTML}
                         ${phoneHTML}<br><br>
                         <span style="color:#222;font-weight:600;">Müüdavad tooted:</span><br>
                         ${prodHTML}<br>
-                        <a href="${gMapsLink}" target="_blank" class="nav-link-btn" onclick="setTimeout(openBuyerFeedback, 3000)">Sõida siia (Navigatsioon)</a>
+                        <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Sõida siia (Navigatsioon)</a>
                     </div>
                 `;
                 if (merchantMarkers[id]) {
@@ -634,14 +600,17 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
         localStorage.setItem('otset_custom_lng', finalLng);
     }
     const isPermanent = localStorage.getItem('otset_is_permanent') === 'true';
+    const isRecommended = localStorage.getItem('otset_is_recommended') === 'true';
     const phone = localStorage.getItem('otset_phone') || '';
     const hours = localStorage.getItem('otset_hours') || '';
+    
     if (activeMarker) map.removeLayer(activeMarker);
     if (accuracyCircle) map.removeLayer(accuracyCircle);
     if (!isRestoring) { map.setView([finalLat, finalLng], 15); }
     accuracyCircle = L.circle([finalLat, finalLng], {
         radius: accuracy, color: 'rgba(79, 119, 170, 0.5)', fillColor: '#4F77AA', fillOpacity: 0.15, weight: 1.5
     }).addTo(map);
+    
     let myIcon = markerIcons.temporary;
     if(isPermanent) {
         myIcon = isOutOfStock ? markerIcons.outofstock : markerIcons.permanent;
@@ -650,10 +619,18 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     const rawProducts = localStorage.getItem('otset_active_products');
     const parsedProducts = rawProducts ? JSON.parse(rawProducts) : [];
     const prodListHTML = parsedProducts.map(p => `• ${p}`).join('<br>');
-    const gMapsLink = `https://www.google.com/maps?q=${finalLat},${finalLng}`;
+    const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${finalLat},${finalLng}`;
     const activeText = isOutOfStock ? "<span style='color:red;'>AKTIIVNE (Kaup otsas!)</span>" : "<span style='color:green;'>AKTIIVNE (Müük käib)</span>";
+    
+    // Kuldne silt ka kasutajale endale tema punktile klikates
+    let recommendedBadge = "";
+    if (isRecommended) {
+        recommendedBadge = "<div style='background:#FFF9E6; border:1px solid #E5A93C; color:#B37D14; padding:5px; border-radius:6px; margin-bottom:8px; font-weight:bold; font-size:0.8rem; text-align:center;'>⭐ Pikaajaline koostöö Otseteega</div>";
+    }
+
     activeMarker.bindPopup(`
         <div style="max-height:220px; overflow-y:auto; font-size:0.85rem; min-width:180px;">
+            ${recommendedBadge}
             <b>Sinu Müügikoht on ${activeText}</b><br>
             <b>Tüüp:</b> ${isPermanent ? 'Püsikoht' : 'Välkmüük'}<br>
             ${hours ? `<b>Avatud:</b> ${hours}<br>` : ''}
@@ -677,6 +654,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             products: parsedProducts,
             is_permanent: isPermanent,
             is_out_of_stock: isOutOfStock,
+            is_recommended: isRecommended,
             contact_phone: phone,
             opening_hours: hours,
             updatedAt: new Date().toISOString()
@@ -711,6 +689,8 @@ function updateActionBarState() {
     const actionBtn = document.getElementById('action-btn');
     const editBtn = document.getElementById('edit-products-btn');
     const stockBtn = document.getElementById('stock-btn');
+    const verifyBtn = document.getElementById('verify-btn');
+    
     if (!actionBtn) return;
     if (userRole === 'buyer') {
         actionBtn.disabled = false;
@@ -718,13 +698,24 @@ function updateActionBarState() {
         actionBtn.className = "btn btn-success";
         if(editBtn) editBtn.style.display = "none";
         if(stockBtn) stockBtn.style.display = "none";
+        if(verifyBtn) verifyBtn.style.display = "none";
     } else {
         if (isSelling) {
             actionBtn.disabled = false;
             const isPerm = localStorage.getItem('otset_is_permanent') === 'true';
+            const isRecommended = localStorage.getItem('otset_is_recommended') === 'true';
+            
             actionBtn.innerText = isPerm ? "Kustuta Püsikoht" : "Lõpeta Müük";
             actionBtn.className = "btn btn-danger";
             if(editBtn) editBtn.style.display = "flex"; 
+            
+            // Kui on püsikoht ja POLE veel soovitatud, näitame kuldset nuppu
+            if (verifyBtn && isPerm && !isRecommended) {
+                verifyBtn.style.display = "flex";
+            } else if (verifyBtn) {
+                verifyBtn.style.display = "none";
+            }
+
             if(stockBtn && isPerm) {
                 stockBtn.style.display = "flex";
                 if (isOutOfStock) {
@@ -743,6 +734,7 @@ function updateActionBarState() {
             actionBtn.className = "btn btn-accent";
             if(editBtn) editBtn.style.display = "none";
             if(stockBtn) stockBtn.style.display = "none";
+            if(verifyBtn) verifyBtn.style.display = "none";
         }
     }
 }
@@ -765,6 +757,7 @@ function stopGeoTracking() {
         localStorage.removeItem('otset_custom_lng');
         localStorage.removeItem('otset_active_products');
         localStorage.removeItem('otset_is_permanent');
+        localStorage.removeItem('otset_is_recommended');
         localStorage.removeItem('otset_phone');
         localStorage.removeItem('otset_hours');
         updateActionBarState();
@@ -784,26 +777,40 @@ function stopGeoTracking() {
     }
 }
 
-// === OSTJA TAGASISIDE JA TOETUSE MODAALAKNA JUHTIMINE ===
-
-window.openBuyerFeedback = function() {
-    const modal = document.getElementById('buyer-feedback-modal');
-    if (!modal) return;
-    document.getElementById('feedback-step-1').style.display = 'block';
-    document.getElementById('feedback-step-2').style.display = 'none';
-    modal.style.display = 'flex';
-}
-
-window.closeBuyerFeedback = function() {
-    const modal = document.getElementById('buyer-feedback-modal');
-    if (modal) modal.style.display = 'none';
-}
-
-window.handleBuyerFeedback = function(helped) {
-    if (helped) {
-        document.getElementById('feedback-step-1').style.display = 'none';
-        document.getElementById('feedback-step-2').style.display = 'block';
-    } else {
-        closeBuyerFeedback();
-    }
+// NIMELISE TOETUSSÜSTEEMI INTERFEIS
+window.askForSupportAndVerify = async function() {
+    if (!auth.currentUser) return;
+    
+    const merchantName = auth.currentUser.displayName || "Teeäärne Müüja";
+    
+    showNotification(
+        `<b>Kas oled Otset.ee abil kliente leidnud?</b><br><br>Toeta arendajat ühe kohviga BuyMeACoffee kaudu. Tänu sellele märgime Sinu poe kaardil kuldse märgiga <b>"Pikaajaline koostöö Otseteega"</b>!`,
+        0,
+        [
+            {
+                text: "🚀 Toeta ja saa märgis",
+                className: "btn-accent",
+                callback: async () => {
+                    try {
+                        // Märgime andmebaasis, et taotlus on sees
+                        await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
+                            pending_verification: true
+                        });
+                        
+                        // Avame Buy Me a Coffee
+                        window.open(`https://buymeacoffee.com/gregoropmann`, '_blank');
+                        
+                        showNotification("Suunasime Sind toetuslehele. Kui toetus on kohal, ilmub Sinu punktile kuldne märgis!");
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            },
+            {
+                text: "Tühista",
+                className: "btn-primary",
+                callback: () => {}
+            }
+        ]
+    );
 }
