@@ -48,13 +48,52 @@ const markerIcons = {
 const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
 
 const agriProducts = {
-    "Mesi ja Mesindustooted": ["Õiemesi", "Kanarbikumesi", "Metsamesi", "Kärjemesi", "Taruvaik", "Suir"],
-    "Kala ja Kalatooted": ["Suitsuangerjas", "Suitsulest", "Suitsurääbis", "Kuivatatud särg", "Värske koha", "Värske ahven", "Marineeritud silmud"],
-    "Marjad": ["Metsmaasikad", "Aedmaasikad", "Vaarikad", "Mustikad", "Pohlad", "Jõhvikad", "Murakad", "Mustad sõstrad", "Punased sõstrad", "Tikrid"],
-    "Köögiviljad ja Juurikad": ["Värske kartul", "Meresoolakurk", "Hapukurk", "Küüslauk", "Mugulsibul", "Peipsi sibul", "Porgand", "Pilvikud/Kukeseened", "Hernekaunad", "Tilli-rohelise kimp"],
-    "Puuviljad ja Marjaaiad": ["Kodumaised õunad", "Ploomid", "Kirsid", "Hapukirsid", "Pirnid"],
-    "Piim, Juust ja Munad": ["Maamunad", "Vutimunad", "Lehma toorpiim", "Ahjujuust", "Sõir", "Maavõi"],
-    "Küpsetised ja Omatoodang": ["Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook"]
+    "Mesi ja Mesindustooted": [
+        "Õiemesi", "Kanarbikumesi", "Metsamesi", "Kärjemesi", "Taruvaik", "Suir", 
+        "Mesilasvaha", "Sulatatud mesi maitsetaimedega", "Suhkrustunud mesi"
+    ],
+    "Kala ja Kalatooted": [
+        "Suitsuangerjas", "Suitsulest", "Suitsurääbis", "Kuivatatud särg", "Värske koha", 
+        "Värske ahven", "Marineeritud silmud", "Suitsulahhe", "Värske haug", "Kohafilee", 
+        "Soolasiig", "Krevatid / Jõevähid"
+    ],
+    "Marjad": [
+        "Metsmaasikad", "Aedmaasikad", "Vaarikad", "Mustikad", "Pohlad", "Jõhvikad", 
+        "Murakad", "Mustad sõstrad", "Punased sõstrad", "Tikrid", "Kultuurmustikad", 
+        "Arooniad", "Astelpajumarjad", "Sõstrad (segatops)", "Ebaküdooniad"
+    ],
+    "Köögiviljad, Juurikad ja Seened": [
+        "Värske kartul", "Meresoolakurk", "Hapukurk", "Küüslauk", "Mugulsibul", 
+        "Peipsi sibul", "Porgand", "Pilvikud/Kukeseened", "Hernekaunad", "Tilli-rohelise kimp", 
+        "Värske kapsas", "Hapukapsas", "Punane peet", "Regulaarne kurk", "Eesti tomat", 
+        "Kirsstomatid", "Suvikõrvits", "Kõrvits", "Varajane rullkõrvits", "Kukeseened", 
+        "Puravikud", "Austerservikud", "Ridaredi roheline sibul"
+    ],
+    "Puuviljad ja Marjaaiad": [
+        "Kodumaised õunad", "Ploomid", "Kirsid", "Hapukirsid", "Pirnid", "Kreegid", "Sõstrad"
+    ],
+    "Piim, Juust ja Munad": [
+        "Maamunad", "Vutimunad", "Lehma toorpiim", "Ahjujuust", "Sõir", "Maavõi", 
+        "Hapukoor (talupere)", "Kodujuust", "Kitsesaunajuust", "Kitsepiim", "Kohupiim"
+    ],
+    "Liha ja Lihatooted": [
+        "Suitsusink", "Suitsuvorst", "Metssea vorst", "Põdraliha konserv", "Päris kodune sült", 
+        "Grillvorstid", "Soolapekk", "Värske sealiha", "Lamba suitsuliha", "Kanalihasült"
+    ],
+    "Küpsetised ja Omatoodang": [
+        "Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook", 
+        "Kodune kali", "Mahl (õuna/sõstra)", "Moos (maasika/vaatika)", "Ebaküdooniasiirup", 
+        "Kuivatatud õunaviilud", "Karask", "Kohupiimakook", "Piparkoogid (kodused)"
+    ],
+    "Istikud, Taimed ja Lilled": [
+        "Tomatiistikud", "Kurgiistikud", "Maasikataimed", "Maitsetaimede potid", 
+        "Suvelillede amplid", "Lõikelilled (tulbid/rukkililled)", "Pruudikimbud", "Viljapuude istikud"
+    ],
+    "Saun, Käsitöö ja Kodu": [
+        "Kase-saunavihad", "Tamme-saunavihad", "Käsitööseebid", "Saunamesi", 
+        "Kootud villased sokid", "Käsitöövaibad", "Küttepuud (kotis)", "Kaminapuud (lepp)", 
+        "Puidust köögiriistad", "Punutud korvid", "Vahaküünlad"
+    ]
 };
 
 window.addEventListener('DOMContentLoaded', () => {
