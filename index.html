@@ -1023,62 +1023,65 @@
             }).addTo(map);
 
             // Reaalajas andmete kuulamine ja õigete markerite joonistamine kaardile
-            onSnapshot(collection(db, "active_merchants"), (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    const id = change.doc.id;
-                    const data = change.doc.data();
-                    
-                    if (auth.currentUser && id === auth.currentUser.uid) return;
+onSnapshot(collection(db, "active_merchants"), (snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+        const id = change.doc.id;
+        const data = change.doc.data();
+        
+        // Kui see on praeguse sisselogitud müüja enda punkt, siis tema enda ekraanil 
+        // tegeleb selle kuvamisega updateLocationProcess funktsioon. Me ei joonista seda siin topelt.
+        if (auth.currentUser && id === auth.currentUser.uid) return;
 
-                    if (change.type === "removed") {
-                        if (merchantMarkers[id]) {
-                            map.removeLayer(merchantMarkers[id]);
-                            delete merchantMarkers[id];
-                        }
-                    } else {
-                        const prodHTML = data.products ? data.products.map(p => `• ${p}`).join('<br>') : 'Tooted puuduvad';
-                        const gMapsLink = `https://www.google.com/maps/dir/?api=1&destination=${data.lat},${data.lng}`;
-                        
-                        // Valime markeritüübi ja teksti vastavalt staatusele
-                        let currentIcon = markerIcons.temporary;
-                        let typeLabel = "<span style='color:green;font-weight:bold;'>VÄLKMÜÜK (Kohapeal reaalajas)</span>";
-                        
-                        if (data.is_permanent) {
-                            if (data.is_out_of_stock) {
-                                currentIcon = markerIcons.outofstock;
-                                typeLabel = "<span style='color:red;font-weight:bold;'>PÜSIKOHT (Kaup hetkel otsas!)</span>";
-                            } else {
-                                currentIcon = markerIcons.permanent;
-                                typeLabel = "<span style='color:blue;font-weight:bold;'>PÜSIKOHT (Avatud / Saadaval)</span>";
-                            }
-                        }
+        if (change.type === "removed") {
+            if (merchantMarkers[id]) {
+                map.removeLayer(merchantMarkers[id]);
+                delete merchantMarkers[id];
+            }
+        } else {
+            const prodHTML = data.products ? data.products.map(p => `• ${p}`).join('<br>') : 'Tooted puuduvad';
+            const gMapsLink = `http://googleusercontent.com/maps.google.com/maps?q=${data.lat},${data.lng}`;
+            
+            let currentIcon = markerIcons.temporary;
+            let typeLabel = "<span style='color:green;font-weight:bold;'>VÄLKMÜÜK (Kohapeal reaalajas)</span>";
+            
+            if (data.is_permanent) {
+                if (data.is_out_of_stock) {
+                    currentIcon = markerIcons.outofstock;
+                    typeLabel = "<span style='color:red;font-weight:bold;'>PÜSIKOHT (Kaup hetkel otsas!)</span>";
+                } else {
+                    currentIcon = markerIcons.permanent;
+                    typeLabel = "<span style='color:blue;font-weight:bold;'>PÜSIKOHT (Avatud / Saadaval)</span>";
+                }
+            }
 
-                        const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
-                        const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
+            const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
+            const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
 
-                        const popupContent = `
-                            <div style="font-size:0.85rem; min-width:180px;">
-                                <b>${data.name}</b><br>
-                                ${typeLabel}<br>
-                                ${hoursHTML}
-                                ${phoneHTML}<br><br>
-                                <span style="color:#222;font-weight:600;">Müüdavad tooted:</span><br>
-                                ${prodHTML}<br>
-                                <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Sõida siia (Navigatsioon)</a>
-                            </div>
-                        `;
+            // Kuna see punkt kuulub KELLELEGI TEISELE, siis siit puuduvad igasugused muutmise ja kustutamise nupud.
+            // Teised kasutajad saavad ainult navigeerida või helistada.
+            const popupContent = `
+                <div style="font-size:0.85rem; min-width:180px;">
+                    <b>${data.name}</b><br>
+                    ${typeLabel}<br>
+                    ${hoursHTML}
+                    ${phoneHTML}<br><br>
+                    <span style="color:#222;font-weight:600;">Müüdavad tooted:</span><br>
+                    ${prodHTML}<br>
+                    <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Sõida siia (Navigatsioon)</a>
+                </div>
+            `;
 
-                        if (merchantMarkers[id]) {
-                            merchantMarkers[id].setLatLng([data.lat, data.lng]);
-                            merchantMarkers[id].setIcon(currentIcon);
-                            merchantMarkers[id].setPopupContent(popupContent);
-                        } else {
-                            merchantMarkers[id] = L.marker([data.lat, data.lng], { icon: currentIcon }).addTo(map)
-                                .bindPopup(popupContent);
-                        }
-                    }
-                });
-            });
+            if (merchantMarkers[id]) {
+                merchantMarkers[id].setLatLng([data.lat, data.lng]);
+                merchantMarkers[id].setIcon(currentIcon);
+                merchantMarkers[id].setPopupContent(popupContent);
+            } else {
+                merchantMarkers[id] = L.marker([data.lat, data.lng], { icon: currentIcon }).addTo(map)
+                    .bindPopup(popupContent);
+            }
+        }
+    });
+});
         }
 
         window.mapZoomIn = function() { if (map) map.zoomIn(); }
