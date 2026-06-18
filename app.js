@@ -747,6 +747,7 @@ function setupWatchPosition(isRestoring) {
     );
 }
 
+// ─── UUENDATUD FUNKTSIOON (FIX: Popup aken ei sulgu salvestamisel) ───
 function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     let finalLat = lat;
     let finalLng = lng;
@@ -763,12 +764,17 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     const paymentType = localStorage.getItem('otset_payment_type') || 'both';
     const phone = localStorage.getItem('otset_phone') || '';
     const hours = localStorage.getItem('otset_hours') || '';
-    if (activeMarker) map.removeLayer(activeMarker);
-    if (accuracyCircle) map.removeLayer(accuracyCircle);
+    
+    if (accuracyCircle) {
+        accuracyCircle.setLatLng([finalLat, finalLng]);
+        accuracyCircle.setRadius(accuracy);
+    } else {
+        accuracyCircle = L.circle([finalLat, finalLng], {
+            radius: accuracy, color: 'rgba(79, 119, 170, 0.5)', fillColor: '#4F77AA', fillOpacity: 0.15, weight: 1.5
+        }).addTo(map);
+    }
+
     if (!isRestoring) { map.setView([finalLat, finalLng], 15); }
-    accuracyCircle = L.circle([finalLat, finalLng], {
-        radius: accuracy, color: 'rgba(79, 119, 170, 0.5)', fillColor: '#4F77AA', fillOpacity: 0.15, weight: 1.5
-    }).addTo(map);
 
     const rawProducts = localStorage.getItem('otset_active_products');
     const parsedProducts = rawProducts ? JSON.parse(rawProducts) : [];
@@ -782,7 +788,6 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
         myIcon = markerIcons.outofstock;
     }
 
-    activeMarker = L.marker([finalLat, finalLng], { draggable: true, icon: myIcon }).addTo(map);
     const prodListHTML = buildProductsHTML(parsedProducts);
     const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${finalLat},${finalLng}`;
     const activeText = allOOS ? "<span style='color:red;'>AKTIIVNE (Kogu kaup otsas!)</span>" : "<span style='color:green;'>AKTIIVNE (Müük käib)</span>";
@@ -797,7 +802,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     if (paymentType === 'cash') myPaymentLabel = "Ainult sularaha 💵";
     if (paymentType === 'card') myPaymentLabel = "Ainult kaart <code>💳</code>";
 
-    activeMarker.bindPopup(`
+    const popupContent = `
         <div style="max-height:240px; overflow-y:auto; font-size:0.85rem; min-width:180px;">
             ${myVerifiedBadge}
             <b>Sinu Müügikoht on ${activeText}</b><br>
@@ -809,7 +814,37 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Testi navigatsiooni</a><br>
             <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
         </div>
-    `);
+    `;
+
+    if (activeMarker) {
+        activeMarker.setLatLng([finalLat, finalLng]);
+        activeMarker.setIcon(myIcon);
+        activeMarker.setPopupContent(popupContent);
+    } else {
+        activeMarker = L.marker([finalLat, finalLng], { draggable: true, icon: myIcon }).addTo(map);
+        activeMarker.bindPopup(popupContent);
+        
+        activeMarker.on('dragend', async function(event) {
+            const marker = event.target;
+            const currentPos = marker.getLatLng();
+            if(accuracyCircle) accuracyCircle.setLatLng(currentPos);   
+            localStorage.setItem('otset_custom_lat', currentPos.lat);
+            localStorage.setItem('otset_custom_lng', currentPos.lng);
+            if (auth.currentUser) {
+                try {
+                    await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
+                        lat: currentPos.lat,
+                        lng: currentPos.lng,
+                        updatedAt: new Date().toISOString()
+                    });
+                    showNotification("Asukoht täpsustatud!");
+                } catch(err) {
+                    console.error(err);
+                }
+            }
+        });
+    }
+
     if (!isRestoring) {
         activeMarker.openPopup();
         showNotification("Müügikoht kaardil aktiivne!");
@@ -835,25 +870,6 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
         }).catch(err => console.error("Viga andmebaasi kirjutamisel:", err));
     }
 
-    activeMarker.on('dragend', async function(event) {
-        const marker = event.target;
-        const currentPos = marker.getLatLng();
-        if(accuracyCircle) accuracyCircle.setLatLng(currentPos);   
-        localStorage.setItem('otset_custom_lat', currentPos.lat);
-        localStorage.setItem('otset_custom_lng', currentPos.lng);
-        if (auth.currentUser) {
-            try {
-                await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
-                    lat: currentPos.lat,
-                    lng: currentPos.lng,
-                    updatedAt: new Date().toISOString()
-                });
-                showNotification("Asukoht täpsustatud!");
-            } catch(err) {
-                console.error(err);
-            }
-        }
-    });
     isSelling = true;
     localStorage.setItem('otset_selling', 'true');
     updateActionBarState();
@@ -1089,7 +1105,6 @@ window.closeReportModal = function() {
     if (modal) modal.style.display = 'none';
 };
 
-// Veendu, et sündmus seotakse alles pärast DOM-i valmimist
 window.addEventListener('DOMContentLoaded', () => {
     const reportSubmitBtn = document.getElementById('report-submit-btn');
     if (reportSubmitBtn) {
