@@ -22,7 +22,7 @@ let accuracyCircle = null;
 let previewMarker = null;
 let buyerCircle = null;
 let geoWatchId = null;
-let notificationTimeout = null; // Globaalne taimeri hoidja teavituste jaoks
+let notificationTimeout = null; 
 let isSelling = false;
 let userRole = 'buyer'; 
 let merchantMarkers = {}; 
@@ -97,6 +97,7 @@ const agriProducts = {
 };
 
 window.addEventListener('DOMContentLoaded', () => {
+    renderQuickFilters(); 
     onAuthStateChanged(auth, (user) => {
         if (user) {
             localStorage.setItem('otset_loggedin', 'true');
@@ -153,6 +154,61 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+function renderQuickFilters() {
+    const container = document.getElementById('quick-filters-container');
+    if (!container) return;
+
+    const popularProducts = ["Maasikad", "Herned", "Mesi", "Kala", "Munad", "Kartul", "Küüslauk", "Suitsusink", "Leib"];
+    
+    const emojis = {
+        "Maasikad": "🍓", "Aedmaasikad": "🍓", "Metsmaasikad": "🍓",
+        "Herned": "🫛", "Hernekaunad": "🫛",
+        "Mesi": "🍯", "Õiemesi": "🍯", "Metsamesi": "🍯", "Kanarbikumesi": "🍯",
+        "Kala": "🐟", "Suitsulõhe": "🐟", "Suitsuangerjas": "🐟", "Ahven": "🐟",
+        "Munad": "🥚", "Maamunad": "🥚", "Vutimunad": "🥚",
+        "Kartul": "🥔", "Värske kartul": "🥔",
+        "Küüslauk": "🧄", "Mugulsibul": "🧅", "Peipsi sibul": "🧅",
+        "Suitsusink": "🥩", "Liha": "🥩", "Värske kurk": "🥒", "Hapukurk": "🥒",
+        "Eesti tomat": "🍅", "Kirsstomatid": "🍅", "Kukeseened": "🍄", "Seened": "🍄",
+        "Käsitööleib": "🍞", "Leib": "🍞", "Õunad": "🍎", "Kodumaised õunad": "🍎", 
+        "Piim": "🥛", "Juust": "🧀", "Kirsid": "🍒", "Vaarikad": "🍇", "Mustikad": "🫐"
+    };
+
+    let allItemsSet = new Set();
+    for (const [category, items] of Object.entries(agriProducts)) {
+        items.forEach(item => {
+            allItemsSet.add(item);
+        });
+    }
+
+    let finalSelection = [...popularProducts];
+
+    allItemsSet.forEach(item => {
+        const isAlreadyCovered = popularProducts.some(pop => item.toLowerCase().includes(pop.toLowerCase()));
+        if (!isAlreadyCovered) {
+            finalSelection.push(item);
+        }
+    });
+
+    container.innerHTML = '';
+    finalSelection.forEach(product => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        
+        let emoji = '🍃';
+        for (const [key, value] of Object.entries(emojis)) {
+            if (product.toLowerCase().includes(key.toLowerCase())) {
+                emoji = value;
+                break;
+            }
+        }
+
+        btn.innerHTML = `${emoji} ${product}`;
+        btn.onclick = () => filterByProduct(product);
+        container.appendChild(btn);
+    });
+}
 
 window.toggleMetaFields = function() {
     const type = document.querySelector('input[name="sale_type"]:checked').value;
@@ -374,7 +430,6 @@ window.showNotification = function(message, duration = 3500, actions = null) {
     const btnArea = document.getElementById('notification-buttons');   
     if(!content || !container || !btnArea) return;
 
-    // Kustutame eelnevalt jooksva taimeri, et vältida teavituste varajast kadumist või loopimist
     if (notificationTimeout) {
         clearTimeout(notificationTimeout);
         notificationTimeout = null;
@@ -1034,33 +1089,39 @@ window.closeReportModal = function() {
     if (modal) modal.style.display = 'none';
 };
 
-document.getElementById('report-submit-btn').addEventListener('click', async () => {
-    const reason = document.getElementById('report-reason').value.trim();
-    const contact = document.getElementById('report-contact').value.trim();
-    
-    if (!reason) {
-        alert("Palun kirjuta lühidalt, mis on probleemiks!");
-        return;
-    }
-    
-    if (!db || !currentReportingMerchantId) return;
-    
-    try {
-        const reportId = `${currentReportingMerchantId}_${Date.now()}`;
-        
-        await setDoc(doc(db, "reports", reportId), {
-            merchantId: currentReportingMerchantId,
-            merchantName: currentReportingMerchantName,
-            reason: reason,
-            reporterContact: contact || "Pole lisatud",
-            reporterTimestamp: new Date().toISOString(),
-            status: "pending"
+// Veendu, et sündmus seotakse alles pärast DOM-i valmimist
+window.addEventListener('DOMContentLoaded', () => {
+    const reportSubmitBtn = document.getElementById('report-submit-btn');
+    if (reportSubmitBtn) {
+        reportSubmitBtn.addEventListener('click', async () => {
+            const reason = document.getElementById('report-reason').value.trim();
+            const contact = document.getElementById('report-contact').value.trim();
+            
+            if (!reason) {
+                alert("Palun kirjuta lühidalt, mis on probleemiks!");
+                return;
+            }
+            
+            if (!db || !currentReportingMerchantId) return;
+            
+            try {
+                const reportId = `${currentReportingMerchantId}_${Date.now()}`;
+                
+                await setDoc(doc(db, "reports", reportId), {
+                    merchantId: currentReportingMerchantId,
+                    merchantName: currentReportingMerchantName,
+                    reason: reason,
+                    reporterContact: contact || "Pole lisatud",
+                    reporterTimestamp: new Date().toISOString(),
+                    status: "pending"
+                });
+                
+                closeReportModal();
+                showNotification("Aitäh! Sinu selgitus edastati arendajale ülevaatamiseks.");
+            } catch (e) {
+                console.error(e);
+                showNotification("Teate saatmine ebaõnnestus.");
+            }
         });
-        
-        closeReportModal();
-        showNotification("Aitäh! Sinu selgitus edastati arendajale ülevaatamiseks.");
-    } catch (e) {
-        console.error(e);
-        showNotification("Teate saatmine ebaõnnestus.");
     }
 });
