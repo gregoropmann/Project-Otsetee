@@ -22,6 +22,7 @@ let accuracyCircle = null;
 let previewMarker = null;
 let buyerCircle = null;
 let geoWatchId = null;
+let notificationTimeout = null; // Globaalne taimeri hoidja teavituste jaoks
 let isSelling = false;
 let userRole = 'buyer'; 
 let merchantMarkers = {}; 
@@ -372,6 +373,13 @@ window.showNotification = function(message, duration = 3500, actions = null) {
     const content = document.getElementById('notification-content');
     const btnArea = document.getElementById('notification-buttons');   
     if(!content || !container || !btnArea) return;
+
+    // Kustutame eelnevalt jooksva taimeri, et vältida teavituste varajast kadumist või loopimist
+    if (notificationTimeout) {
+        clearTimeout(notificationTimeout);
+        notificationTimeout = null;
+    }
+
     content.innerHTML = message;
     btnArea.innerHTML = '';
     if (actions && actions.length > 0) {
@@ -388,7 +396,10 @@ window.showNotification = function(message, duration = 3500, actions = null) {
     }
     container.classList.add('show');
     if (!actions || actions.length === 0) {
-        setTimeout(() => { container.classList.remove('show'); }, duration);
+        notificationTimeout = setTimeout(() => { 
+            container.classList.remove('show'); 
+            notificationTimeout = null;
+        }, duration);
     }
 }
 
@@ -595,7 +606,6 @@ function initMap() {
                 if (data.payment_type === 'cash') paymentLabel = "Ainult sularaha 💵";
                 if (data.payment_type === 'card') paymentLabel = "Ainult kaart <code>💳</code>";
 
-                // Lisatud raporteerimise nupp popup sisse!
                 const popupContent = `
                     <div style="font-size:0.85rem; min-width:180px;">
                         ${verifiedBadge}
@@ -613,7 +623,6 @@ function initMap() {
                     </div>
                 `;
                 
-                // MÄRKUS: Siin seome andmed otse Leaflet markeri külge (merchantData: data), et filtreerimine töötaks!
                 if (merchantMarkers[id]) {
                     merchantMarkers[id].setLatLng([data.lat, data.lng]);
                     merchantMarkers[id].setIcon(currentIcon);
@@ -926,7 +935,6 @@ window.handleBuyerFeedback = function(helped) {
     }
 }
 
-// UUS: TOODETE FILTER (KOMMENTAARIDEST VÄLJAS JA VALMIS KASUTAMISEKS)
 window.filterByProduct = function(productName) {
     if (!navigator.geolocation) {
         showNotification("Sinu seade ei toeta GPS-teenuseid.");
@@ -1001,7 +1009,6 @@ window.filterByProduct = function(productName) {
     }, geoOptions);
 };
 
-// REPORT MODAALAKNA LOOGIKA
 let currentReportingMerchantId = null;
 let currentReportingMerchantName = null;
 
