@@ -30,7 +30,24 @@
     <div id="login-view" class="view active">
         <div class="login-card">
             <div class="brand-title">otset.ee</div>
-            <div class="brand-subtitle">Otsetee värske toiduni maanteel</div>
+
+            <div class="brand-subtitle" id="brand-subtitle">Otsetee värske toiduni maanteel</div>
+
+<script>
+  const slogans = [
+    "Otsetee värske toiduni maanteel",
+    "Otseteel ei leia Sa kunagi reklaame",
+    "Sinu otsetee maitsva vahepalani",
+    "Otsetee — Kvaliteetne kaup ilma viivituseta",
+    "Parim otsetee tühjale kõhule",
+"otsetee, otsetee, otseteed, otseteesse, otseteest, otsetees, otseteele, otseteel, otseteelt, otseteeks, otseteeni, otseteena, otseteeta, otseteega
+"
+  ];
+
+  const randomSlogan = slogans[Math.floor(Math.random() * slogans.length)];
+  document.getElementById("brand-subtitle").textContent = randomSlogan;
+</script>
+
       
             <button class="oauth-btn" onclick="handleLogin('merchant', 'Google')">
                 <span>Müüja: Google konto</span>
