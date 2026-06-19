@@ -115,62 +115,74 @@ window.addEventListener('DOMContentLoaded', () => {
     renderQuickFilters(); 
     setupPaymentCheckboxListeners();
     onAuthStateChanged(auth, (user) => {
-        if (user) {
-            localStorage.setItem('otset_loggedin', 'true');
-            userRole = localStorage.getItem('otset_role') || 'merchant';          
-            switchView('map-view');
-            if (userRole === 'merchant') {
-                getDoc(doc(db, "active_merchants", user.uid)).then((docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        isSelling = true;
-                        localStorage.setItem('otset_selling', 'true');
-                        localStorage.setItem('otset_verified', data.verified ? 'true' : 'false');
-                        if (data.lat && data.lng) {
-                            localStorage.setItem('otset_custom_lat', data.lat);
-                            localStorage.setItem('otset_custom_lng', data.lng);
-                        }
-                        if (data.products) {
-                            localStorage.setItem('otset_active_products', JSON.stringify(data.products));
-                        }
-                        if (data.payment_type) {
-                            localStorage.setItem('otset_payment_type', data.payment_type);
-                        }
-                        localStorage.setItem('otset_is_permanent', data.is_permanent ? 'true' : 'false');
-                        localStorage.setItem('otset_phone', data.contact_phone || '');
-                        localStorage.setItem('otset_hours', data.opening_hours || '');
-                        
-                        if (data.name_type) localStorage.setItem('otset_name_type', data.name_type);
-                        if (data.custom_name) localStorage.setItem('otset_custom_name', data.custom_name);
-
-                        renderCatalog(); 
-                        updateActionBarState();
-                        setupWatchPosition(true);
-                    } else {
-                        const wasSelling = localStorage.getItem('otset_selling') === 'true';
-                        if (wasSelling) {
+        try {
+            if (user) {
+                localStorage.setItem('otset_loggedin', 'true');
+                userRole = localStorage.getItem('otset_role') || 'merchant';          
+                switchView('map-view');
+                if (userRole === 'merchant') {
+                    getDoc(doc(db, "active_merchants", user.uid)).then((docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
                             isSelling = true;
+                            localStorage.setItem('otset_selling', 'true');
+                            localStorage.setItem('otset_verified', data.verified ? 'true' : 'false');
+                            if (data.lat && data.lng) {
+                                localStorage.setItem('otset_custom_lat', data.lat);
+                                localStorage.setItem('otset_custom_lng', data.lng);
+                            }
+                            if (data.products) {
+                                localStorage.setItem('otset_active_products', JSON.stringify(data.products));
+                            }
+                            if (data.payment_type) {
+                                localStorage.setItem('otset_payment_type', data.payment_type);
+                            }
+                            localStorage.setItem('otset_is_permanent', data.is_permanent ? 'true' : 'false');
+                            localStorage.setItem('otset_phone', data.contact_phone || '');
+                            localStorage.setItem('otset_hours', data.opening_hours || '');
+                            
+                            if (data.name_type) localStorage.setItem('otset_name_type', data.name_type);
+                            if (data.custom_name) localStorage.setItem('otset_custom_name', data.custom_name);
+
+                            renderCatalog(); 
+                            updateActionBarState();
                             setupWatchPosition(true);
+                        } else {
+                            const wasSelling = localStorage.getItem('otset_selling') === 'true';
+                            if (wasSelling) {
+                                isSelling = true;
+                                setupWatchPosition(true);
+                            }
+                            renderCatalog();
+                            updateActionBarState();
                         }
+                    }).catch((err) => {
+                        console.error("Viga andmete lugemisel või õigustes:", err);
+                        // Kui andmebaasist lugemine ebaõnnestub, tagame et vaade ja kaart ikkagi töötaksid
                         renderCatalog();
                         updateActionBarState();
-                    }
-                }).catch(() => {
-                    renderCatalog();
+                        setTimeout(() => {
+                            if (typeof initMap === 'function' && !map) initMap();
+                        }, 200);
+                    });
+                } else {
                     updateActionBarState();
-                });
+                }
             } else {
-                updateActionBarState();
+                const isBuyer = localStorage.getItem('otset_role') === 'buyer';
+                if (isBuyer) {
+                    userRole = 'buyer';
+                    switchView('map-view');
+                    updateActionBarState();
+                } else {
+                    switchView('login-view');
+                }
             }
-        } else {
-            const isBuyer = localStorage.getItem('otset_role') === 'buyer';
-            if (isBuyer) {
-                userRole = 'buyer';
-                switchView('map-view');
-                updateActionBarState();
-            } else {
-                switchView('login-view');
-            }
+        } catch (authError) {
+            console.error("Autentimise oleku viga:", authError);
+            localStorage.clear();
+            switchView('login-view');
+            alert("Sisselogimisel tekkis tõrge. Palun veendu, et brauser lubab kolmanda osapoole küpsiseid (Cookies) ja proovi uuesti.");
         }
     });
 });
