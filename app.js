@@ -300,7 +300,6 @@ function renderCatalog() {
                                 <option value="karp" ${savedUnit === 'karp' ? 'selected' : ''}>€/karp</option>
                                 <option value="purk" ${savedUnit === 'purk' ? 'selected' : ''}>€/purk</option>
                                 <option value="tükk" ${savedUnit === 'tükk' ? 'selected' : ''}>€/tk</option>
-                                <option value="kimp" ${savedUnit === 'kimp' ? 'selected' : ''}>€/kimp</option>
                                 <option value="pudel" ${savedUnit === 'pudel' ? 'selected' : ''}>€/pdl</option>
                             </select>
                         </div>
@@ -381,22 +380,17 @@ function findPassengerLocation() {
 }
 
 window.confirmProductsAndStartGeo = function() {
-    // FIX IPHONE'I JAOKS: Sunnime klaviatuuri sulguma, et viimane sisestatud hind salvestuks!
-    if (document.activeElement && typeof document.activeElement.blur === 'function') {
-        document.activeElement.blur();
-    }
-
     const selectedElements = document.querySelectorAll('.product-card.selected');
+    if (selectedElements.length === 0) {
+        alert("Palun vali vähemalt üks toode, mida müüa!");
+        return;
+    }
 
     let inventorySummary = [];
     selectedElements.forEach(el => {
         const id = el.id.replace('prod-card-', '');
         const name = el.getAttribute('data-name');
-        
-        // FIX IPHONE'I JAOKS: Kui kasutaja sisestas koma, muudame selle punktiks, et vältida salvestusvigu
-        const rawPrice = document.getElementById(`price-num-${id}`).value;
-        const price = rawPrice ? rawPrice.toString().replace(',', '.') : "5.0";
-        
+        const price = document.getElementById(`price-num-${id}`).value;
         const unit = document.getElementById(`unit-${id}`).value;
         const isItemOutOfStock = document.getElementById(`stock-check-${id}`).checked;
         
@@ -556,7 +550,7 @@ window.handleLogin = async function(role, providerName) {
                 showNotification("Sisselogimine ebaõnnestus: " + error.message);
             }
         } else if (providerName === 'Apple') {
-            showNotification("Apple sisselogimine pole vielä ühendatud.");
+            showNotification("Apple sisselogimine pole veel ühendatud.");
         }
     } else {
         localStorage.setItem('otset_loggedin', 'true');
@@ -667,9 +661,8 @@ function initMap() {
                 if (data.payment_type === 'cash') paymentLabel = "Ainult sularaha 💵";
                 if (data.payment_type === 'card') paymentLabel = "Ainult kaart <code>💳</code>";
 
-                // FIX IPHONE JAOKS: Lisatud sujuv puutetundlik kerimine ja parem padding sulgemisristile
                 const popupContent = `
-                    <div style="max-height:250px; overflow-y:auto; -webkit-overflow-scrolling:touch; font-size:0.85rem; min-width:185px; padding-right:12px;">
+                    <div style="font-size:0.85rem; min-width:180px;">
                         ${verifiedBadge}
                         <b>${data.name}</b><br>
                         ${typeLabel}<br>
@@ -754,6 +747,7 @@ function setupWatchPosition(isRestoring) {
     );
 }
 
+// ─── UUENDATUD FUNKTSIOON (FIX: Popup aken ei sulgu salvestamisel) ───
 function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     let finalLat = lat;
     let finalLng = lng;
@@ -808,9 +802,8 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     if (paymentType === 'cash') myPaymentLabel = "Ainult sularaha 💵";
     if (paymentType === 'card') myPaymentLabel = "Ainult kaart <code>💳</code>";
 
-    // FIX IPHONE JAOKS: Lisatud sujuv puutetundlik kerimine ja parem parempoolne padding
     const popupContent = `
-        <div style="max-height:250px; overflow-y:auto; -webkit-overflow-scrolling:touch; font-size:0.85rem; min-width:185px; padding-right:12px;">
+        <div style="max-height:240px; overflow-y:auto; font-size:0.85rem; min-width:180px;">
             ${myVerifiedBadge}
             <b>Sinu Müügikoht on ${activeText}</b><br>
             <b>Tüüp:</b> ${isPermanent ? 'Püsikoht' : 'Välkmüük'}<br>
