@@ -137,22 +137,22 @@
                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-charcoal); display: block; margin-bottom: 8px;">Toetatud makseviisid:</label>
                 
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
-                    <label style="font-size: 0.9rem; color: #4a4a4a; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="checkbox" name="payment_method" value="cash" checked onchange="updatePaymentTypeFieldValue()"> Sularaha 💵
+                    <label style="font-size: 0.9rem; color: #2C2A29; font-weight: bold; display: flex; align-items: center; gap: 8px; cursor: pointer; padding-bottom: 4px; border-bottom: 1px solid #eee;">
+                        <input type="checkbox" id="pay-all" value="all" checked> Kõik 3 makseviisi 💵💳📲
                     </label>
-                    <label style="font-size: 0.9rem; color: #4a4a4a; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="checkbox" name="payment_method" value="card" onchange="updatePaymentTypeFieldValue()"> Kaardimakse 💳
+
+                    <label style="font-size: 0.9rem; color: #4a4a4a; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-left: 5px;">
+                        <input type="checkbox" name="payment_method" value="cash" checked> Sularaha 💵
                     </label>
-                    <label style="font-size: 0.9rem; color: #4a4a4a; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="checkbox" name="payment_method" value="transfer" onchange="updatePaymentTypeFieldValue()"> Pangaülekanne 📲🏦
+                    <label style="font-size: 0.9rem; color: #4a4a4a; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-left: 5px;">
+                        <input type="checkbox" name="payment_method" value="card" checked> Kaardimakse 💳
+                    </label>
+                    <label style="font-size: 0.9rem; color: #4a4a4a; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-left: 5px;">
+                        <input type="checkbox" name="payment_method" value="transfer" checked> Pangaülekanne 📲🏦
                     </label>
                 </div>
 
-                <button type="button" onclick="selectAllPaymentMethods()" style="background: #F1F3F4; border: 1px solid #DADCE0; border-radius: 6px; padding: 6px 12px; font-size: 0.85rem; color: #2C2A29; cursor: pointer; font-weight: 500; width: 100%;">
-                    Vali kõik 3 makseviisi 💵💳📲
-                </button>
-
-                <input type="hidden" name="payment_type" id="hidden-payment-type" value="cash">
+                <input type="hidden" name="payment_type" id="hidden-payment-type" value="all">
             </div>
 
             <div id="permanent-only-fields" style="display: none; flex-direction: column; gap: 12px;">
