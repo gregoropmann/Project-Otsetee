@@ -221,6 +221,17 @@ window.toggleMetaFields = function() {
 }
 
 function renderCatalog() {
+    // --- LISATUD: Nime valiku ja kohandatud nime taastamine mälust ---
+    const savedNameType = localStorage.getItem('otset_name_type') || 'google';
+    const nameTypeRad = document.querySelector(`input[name="name_type"][value="${savedNameType}"]`);
+    if (nameTypeRad) nameTypeRad.checked = true;
+
+    const customNameInput = document.getElementById('merchant-custom-name');
+    if (customNameInput) {
+        customNameInput.value = localStorage.getItem('otset_custom_name') || '';
+        customNameInput.style.display = savedNameType === 'custom' ? 'block' : 'none';
+    }
+    // -----------------------------------------------------------------
     const isPerm = localStorage.getItem('otset_is_permanent') === 'true';
     if (isPerm) {
         const rad = document.querySelector('input[name="sale_type"][value="permanent"]');
@@ -412,6 +423,23 @@ window.confirmProductsAndStartGeo = function() {
     localStorage.setItem('otset_phone', phone);
     localStorage.setItem('otset_hours', hours);
 
+    // --- LISATUD: Loe raadionupu ja tekstivälja väärtused ---
+    const nameType = document.querySelector('input[name="name_type"]:checked').value;
+    const customName = document.getElementById('merchant-custom-name').value.trim();
+
+    localStorage.setItem('otset_active_products', JSON.stringify(inventorySummary));
+    localStorage.setItem('otset_is_permanent', isPermanent ? 'true' : 'false');
+    localStorage.setItem('otset_payment_type', paymentType);
+    localStorage.setItem('otset_phone', phone);
+    localStorage.setItem('otset_hours', hours);
+    
+    // Salvestame valikud telefonisse mällu
+    localStorage.setItem('otset_name_type', nameType);
+    localStorage.setItem('otset_custom_name', customName);
+    // -------------------------------------------------------
+
+    switchView('map-view');
+
     switchView('map-view');
     if (isSelling) {
         const savedLat = localStorage.getItem('otset_custom_lat');
@@ -574,6 +602,8 @@ window.handleLogout = async function() {
     localStorage.removeItem('otset_hours');
     localStorage.removeItem('otset_verified');
     localStorage.removeItem('otset_payment_type');
+    localStorage.removeItem('otset_name_type');
+    localStorage.removeItem('otset_custom_name');
     if (buyerCircle) { map.removeLayer(buyerCircle); buyerCircle = null; }
     if (geoWatchId) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
     if (activeMarker) { map.removeLayer(activeMarker); activeMarker = null; }
@@ -832,17 +862,33 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             localStorage.setItem('otset_custom_lat', currentPos.lat);
             localStorage.setItem('otset_custom_lng', currentPos.lng);
             if (auth.currentUser) {
-                try {
-                    await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
-                        lat: currentPos.lat,
-                        lng: currentPos.lng,
-                        updatedAt: new Date().toISOString()
-                    });
-                    showNotification("Asukoht täpsustatud!");
-                } catch(err) {
-                    console.error(err);
-                }
-            }
+        const merchantId = auth.currentUser.uid;
+        const merchantNameFromGoogle = auth.currentUser.displayName || "Teeäärne Müüja";   
+        
+        // --- LISATUD: Dünaamiline nime valik vastavalt seadetele ---
+        const savedNameType = localStorage.getItem('otset_name_type') || 'google';
+        const savedCustomName = localStorage.getItem('otset_custom_name') || '';
+        
+        let finalMerchantName = merchantNameFromGoogle;
+        if (savedNameType === 'custom' && savedCustomName !== '') {
+            finalMerchantName = savedCustomName;
+        }
+        // -----------------------------------------------------------
+
+        setDoc(doc(db, "active_merchants", merchantId), {
+            name: finalMerchantName, // <--- Muudetud muutujaks finalMerchantName
+            lat: finalLat,
+            lng: finalLng,
+            products: parsedProducts,
+            is_permanent: isPermanent,
+            is_out_of_stock: allOOS,
+            contact_phone: phone,
+            opening_hours: hours,
+            verified: isVerifiedInCloud,
+            payment_type: paymentType,
+            updatedAt: new Date().toISOString()
+        }).catch(err => console.error("Viga andmebaasi kirjutamisel:", err));
+    }
         });
     }
 
@@ -1141,3 +1187,15 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+window.toggleShopNameField = function() {
+    const type = document.querySelector('input[name="name_type"]:checked').value;
+    const nameInput = document.getElementById('merchant-custom-name');
+    if (!nameInput) return;
+    
+    if (type === 'custom') {
+        nameInput.style.display = 'block';
+    } else {
+        nameInput.style.display = 'none';
+    }
+}
