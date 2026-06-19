@@ -300,6 +300,7 @@ function renderCatalog() {
                                 <option value="karp" ${savedUnit === 'karp' ? 'selected' : ''}>€/karp</option>
                                 <option value="purk" ${savedUnit === 'purk' ? 'selected' : ''}>€/purk</option>
                                 <option value="tükk" ${savedUnit === 'tükk' ? 'selected' : ''}>€/tk</option>
+                                <option value="kimp" ${savedUnit === 'kimp' ? 'selected' : ''}>€/kimp</option>
                                 <option value="pudel" ${savedUnit === 'pudel' ? 'selected' : ''}>€/pdl</option>
                             </select>
                         </div>
@@ -380,11 +381,12 @@ function findPassengerLocation() {
 }
 
 window.confirmProductsAndStartGeo = function() {
-    const selectedElements = document.querySelectorAll('.product-card.selected');
-    if (selectedElements.length === 0) {
-        alert("Palun vali vähemalt üks toode, mida müüa!");
-        return;
+    // FIX IPHONE'I JAOKS: Sunnime klaviatuuri sulguma, et viimane sisestatud hind salvestuks!
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
     }
+
+    const selectedElements = document.querySelectorAll('.product-card.selected');
 
     let inventorySummary = [];
     selectedElements.forEach(el => {
