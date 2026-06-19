@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -610,6 +610,8 @@ window.handleLogin = async function(role, providerName) {
         if (providerName === 'Google') {
             showNotification("Ühendun Google'iga...");
             try {
+                // Sunnib Firebase'i hoidma sisselogimise seisu kohalikus mälus, mis ei kuku partitioned keskkonnas kokku
+                await setPersistence(auth, browserLocalPersistence);
                 await signInWithPopup(auth, provider);
             } catch (error) {
                 console.error(error);
