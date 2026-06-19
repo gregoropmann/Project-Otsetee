@@ -338,7 +338,7 @@ function renderCatalog() {
                     <div class="product-label">${item}</div>
                     <div class="price-input-group">
                         <div class="pricing-fields">
-                            <input type="number" step="0.1" value="${savedPrice}" class="price-num-input" id="price-num-${globalId}">
+                            <input type="text" value="${savedPrice}" class="price-num-input" id="price-num-${globalId}" placeholder="nt. 5.0-10.0">
                             <select class="unit-select" id="unit-${globalId}">
                                 <option value="kg" ${savedUnit === 'kg' ? 'selected' : ''}>€/kg</option>
                                 <option value="karp" ${savedUnit === 'karp' ? 'selected' : ''}>€/karp</option>
@@ -1245,7 +1245,7 @@ function setupPaymentCheckboxListeners() {
             if (cb.checked) selected.push(cb.value);
         });
 
-        // Järjekord fikseeritud: cash, card, transfer (et "card+cash" ja "cash+card" ei tekiks eraldi väärtustena)
+        // Järjekord fikseeritud: cash, card, transfer (et \"card+cash\" ja \"cash+card\" ei tekiks eraldi väärtustena)
         const order = ["cash", "card", "transfer"];
         selected.sort((a, b) => order.indexOf(a) - order.indexOf(b));
 
