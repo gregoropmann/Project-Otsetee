@@ -246,9 +246,21 @@ function renderCatalog() {
         document.getElementById('permanent-only-fields').style.display = 'none';
     }
 
+    // --- UUENDATUD MAKSEVIISIDE KUVAMISE LOOGIKA (MÄRKERUUDUD) ---
     const savedPayment = localStorage.getItem('otset_payment_type') || 'both';
-    const paymentRad = document.querySelector(`input[name="payment_type"][value="${savedPayment}"]`);
-    if (paymentRad) paymentRad.checked = true;
+    const hiddenPaymentInput = document.getElementById('hidden-payment-type');
+    if (hiddenPaymentInput) {
+        hiddenPaymentInput.value = savedPayment;
+    }
+
+    const paymentCheckboxes = document.querySelectorAll('input[name="payment_method"]');
+    paymentCheckboxes.forEach(cb => {
+        if (savedPayment === 'both') {
+            cb.checked = true;
+        } else {
+            cb.checked = (cb.value === savedPayment);
+        }
+    });
 
     document.getElementById('merchant-phone').value = localStorage.getItem('otset_phone') || '';
     document.getElementById('merchant-hours').value = localStorage.getItem('otset_hours') || '';
@@ -416,7 +428,11 @@ window.confirmProductsAndStartGeo = function() {
     });
 
     const isPermanent = document.querySelector('input[name="sale_type"]:checked').value === 'permanent';
-    const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
+    
+    // --- UUENDATUD MAKSEVIISI LUGEMINE VARJATUD SISENDVÄLJAST ---
+    const hiddenPaymentInput = document.getElementById('hidden-payment-type');
+    const paymentType = hiddenPaymentInput ? hiddenPaymentInput.value : 'both';
+
     const phone = document.getElementById('merchant-phone').value;
     const hours = document.getElementById('merchant-hours').value;
 
@@ -682,7 +698,6 @@ function initMap() {
                 const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
                 const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
                 
-                // --- KORRIGEERITUD MAKSEVIISI SILT OSTJATELE ---
                 let paymentLabel = "Sularaha ja Kaart 💵💳";
                 if (data.payment_type === 'cash') paymentLabel = "Ainult sularaha 💵";
                 if (data.payment_type === 'card') paymentLabel = "Ainult kaart 💳";
@@ -830,7 +845,6 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
         myVerifiedBadge = `<div style="background: #FFD700; color: #000; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.75rem; margin-bottom: 8px; text-align: center; border: 1px solid #DAA520;">🌟 Sinu pood on KINNITATUD</div>`;
     }
 
-    // --- KORRIGEERITUD MAKSEVIISI SILT OMA MÄRGISELE ---
     let myPaymentLabel = "Sularaha ja Kaart 💵💳";
     if (paymentType === 'cash') myPaymentLabel = "Ainult sularaha 💵";
     if (paymentType === 'card') myPaymentLabel = "Ainult kaart 💳";
@@ -856,7 +870,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             <span style="color:#222;font-weight:600;">Sinu tooted:</span><br>
             ${prodListHTML}<br>
             <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Testi navigatsiooni</a><br>
-            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
+            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Wenn Punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
         </div>
     `;
 
@@ -1205,4 +1219,4 @@ window.toggleShopNameField = function() {
     } else {
         nameInput.style.display = 'none';
     }
-}
+};
