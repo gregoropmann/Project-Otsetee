@@ -571,7 +571,7 @@ window.handleLogin = async function(role, providerName) {
                 showNotification("Sisselogimine ebaõnnestus: " + error.message);
             }
         } else if (providerName === 'Apple') {
-            showNotification("Apple sisselogimine pole veel ühendatud.");
+            showNotification("Apple sisselogimine pole yet ühendatud.");
         }
     } else {
         localStorage.setItem('otset_loggedin', 'true');
@@ -682,11 +682,13 @@ function initMap() {
                 const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
                 const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
                 
+                // --- KORRIGEERITUD MAKSEVIISI SILT OSTJATELE ---
                 let paymentLabel = "Sularaha ja Kaart 💵💳";
                 if (data.payment_type === 'cash') paymentLabel = "Ainult sularaha 💵";
-                if (data.payment_type === 'card') paymentLabel = "Ainult kaart <code>💳</code>";
+                if (data.payment_type === 'card') paymentLabel = "Ainult kaart 💳";
+                if (data.payment_type === 'transfer') paymentLabel = "Pangaülekanne 📲🏦";
+                if (data.payment_type === 'both') paymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
 
-                // --- PARANDUS: Kontrollime teiste poodide puhul andmebaasi salvestatud nime tüüpi ---
                 let displayNameToBuyers = data.name || "Teeäärne Müüja";
                 if (data.name_type === 'custom' && data.custom_name && data.custom_name.trim() !== '') {
                     displayNameToBuyers = data.custom_name;
@@ -828,9 +830,12 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
         myVerifiedBadge = `<div style="background: #FFD700; color: #000; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.75rem; margin-bottom: 8px; text-align: center; border: 1px solid #DAA520;">🌟 Sinu pood on KINNITATUD</div>`;
     }
 
+    // --- KORRIGEERITUD MAKSEVIISI SILT OMA MÄRGISELE ---
     let myPaymentLabel = "Sularaha ja Kaart 💵💳";
     if (paymentType === 'cash') myPaymentLabel = "Ainult sularaha 💵";
-    if (paymentType === 'card') myPaymentLabel = "Ainult kaart <code>💳</code>";
+    if (paymentType === 'card') myPaymentLabel = "Ainult kaart 💳";
+    if (paymentType === 'transfer') myPaymentLabel = "Pangaülekanne 📲🏦";
+    if (paymentType === 'both') myPaymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
 
     const savedNameType = localStorage.getItem('otset_name_type') || 'google';
     const savedCustomName = localStorage.getItem('otset_custom_name') || '';
@@ -851,7 +856,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             <span style="color:#222;font-weight:600;">Sinu tooted:</span><br>
             ${prodListHTML}<br>
             <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Testi navigatsiooni</a><br>
-            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Wenn punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
+            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
         </div>
     `;
 
@@ -894,7 +899,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     if (auth.currentUser) {
         const merchantId = auth.currentUser.uid;
         setDoc(doc(db, "active_merchants", merchantId), {
-            name: googleName, // Salvestame igaks juhuks ka Google nime baasväljale
+            name: googleName, 
             name_type: savedNameType,
             custom_name: savedCustomName,
             lat: finalLat,
