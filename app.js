@@ -98,6 +98,7 @@ const agriProducts = {
 
 window.addEventListener('DOMContentLoaded', () => {
     renderQuickFilters(); 
+    setupPaymentCheckboxListeners(); // Algatab puhta JS kuulajad märkeruutudele
     onAuthStateChanged(auth, (user) => {
         if (user) {
             localStorage.setItem('otset_loggedin', 'true');
@@ -246,21 +247,25 @@ function renderCatalog() {
         document.getElementById('permanent-only-fields').style.display = 'none';
     }
 
-    // --- UUENDATUD MAKSEVIISIDE KUVAMISE LOOGIKA (MÄRKERUUDUD) ---
-    const savedPayment = localStorage.getItem('otset_payment_type') || 'both';
+    // --- UUENDATUD MAKSEVIISIDE KUVAMISE LOOGIKA (MÄRKERUUDUD + ALL VÄÄRTUS) ---
+    const savedPayment = localStorage.getItem('otset_payment_type') || 'all';
     const hiddenPaymentInput = document.getElementById('hidden-payment-type');
     if (hiddenPaymentInput) {
         hiddenPaymentInput.value = savedPayment;
     }
 
+    const mainAllCheckbox = document.getElementById('pay-all');
     const paymentCheckboxes = document.querySelectorAll('input[name="payment_method"]');
-    paymentCheckboxes.forEach(cb => {
-        if (savedPayment === 'both') {
-            cb.checked = true;
-        } else {
+    
+    if (savedPayment === 'all' || savedPayment === 'both') {
+        if (mainAllCheckbox) mainAllCheckbox.checked = true;
+        paymentCheckboxes.forEach(cb => cb.checked = true);
+    } else {
+        if (mainAllCheckbox) mainAllCheckbox.checked = false;
+        paymentCheckboxes.forEach(cb => {
             cb.checked = (cb.value === savedPayment);
-        }
-    });
+        });
+    }
 
     document.getElementById('merchant-phone').value = localStorage.getItem('otset_phone') || '';
     document.getElementById('merchant-hours').value = localStorage.getItem('otset_hours') || '';
@@ -429,9 +434,9 @@ window.confirmProductsAndStartGeo = function() {
 
     const isPermanent = document.querySelector('input[name="sale_type"]:checked').value === 'permanent';
     
-    // --- UUENDATUD MAKSEVIISI LUGEMINE VARJATUD SISENDVÄLJAST ---
+    // --- LUGEB MAKSEVIISI OTSE VARJATUD SISENDVÄLJAST ---
     const hiddenPaymentInput = document.getElementById('hidden-payment-type');
-    const paymentType = hiddenPaymentInput ? hiddenPaymentInput.value : 'both';
+    const paymentType = hiddenPaymentInput ? hiddenPaymentInput.value : 'all';
 
     const phone = document.getElementById('merchant-phone').value;
     const hours = document.getElementById('merchant-hours').value;
@@ -698,11 +703,12 @@ function initMap() {
                 const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
                 const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
                 
-                let paymentLabel = "Sularaha ja Kaart 💵💳";
+                // --- UUENDATUD TEKST OSTJALE (Käsitleb nii 'all' kui ka vanu 'both' punkte) ---
+                let paymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
                 if (data.payment_type === 'cash') paymentLabel = "Ainult sularaha 💵";
                 if (data.payment_type === 'card') paymentLabel = "Ainult kaart 💳";
                 if (data.payment_type === 'transfer') paymentLabel = "Pangaülekanne 📲🏦";
-                if (data.payment_type === 'both') paymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
+                if (data.payment_type === 'all' || data.payment_type === 'both') paymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
 
                 let displayNameToBuyers = data.name || "Teeäärne Müüja";
                 if (data.name_type === 'custom' && data.custom_name && data.custom_name.trim() !== '') {
@@ -808,7 +814,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
         localStorage.setItem('otset_custom_lng', finalLng);
     }
     const isPermanent = localStorage.getItem('otset_is_permanent') === 'true';
-    const paymentType = localStorage.getItem('otset_payment_type') || 'both';
+    const paymentType = localStorage.getItem('otset_payment_type') || 'all';
     const phone = localStorage.getItem('otset_phone') || '';
     const hours = localStorage.getItem('otset_hours') || '';
     
@@ -845,11 +851,11 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
         myVerifiedBadge = `<div style="background: #FFD700; color: #000; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.75rem; margin-bottom: 8px; text-align: center; border: 1px solid #DAA520;">🌟 Sinu pood on KINNITATUD</div>`;
     }
 
-    let myPaymentLabel = "Sularaha ja Kaart 💵💳";
+    let myPaymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
     if (paymentType === 'cash') myPaymentLabel = "Ainult sularaha 💵";
     if (paymentType === 'card') myPaymentLabel = "Ainult kaart 💳";
     if (paymentType === 'transfer') myPaymentLabel = "Pangaülekanne 📲🏦";
-    if (paymentType === 'both') myPaymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
+    if (paymentType === 'all' || paymentType === 'both') myPaymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
 
     const savedNameType = localStorage.getItem('otset_name_type') || 'google';
     const savedCustomName = localStorage.getItem('otset_custom_name') || '';
@@ -870,7 +876,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             <span style="color:#222;font-weight:600;">Sinu tooted:</span><br>
             ${prodListHTML}<br>
             <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Testi navigatsiooni</a><br>
-            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Wenn Punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
+            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
         </div>
     `;
 
@@ -1220,3 +1226,55 @@ window.toggleShopNameField = function() {
         nameInput.style.display = 'none';
     }
 };
+
+// --- UUS JA PUHAS JS FUNKTSIOON: MÄRKERUUTUDE LOOGIKA JA KUULAJAD ---
+function setupPaymentCheckboxListeners() {
+    const payAllBox = document.getElementById('pay-all');
+    const individualBoxes = document.querySelectorAll('input[name="payment_method"]');
+    const hiddenInput = document.getElementById('hidden-payment-type');
+
+    if (!payAllBox || individualBoxes.length === 0) return;
+
+    // Funktsioon, mis arvutab ja uuendab varjatud sisendvälja väärtust
+    function updateHiddenValue() {
+        let selected = [];
+        individualBoxes.forEach(cb => {
+            if (cb.checked) selected.push(cb.value);
+        });
+
+        if (selected.length === 3 || selected.length === 0) {
+            hiddenInput.value = "all";
+        } else if (selected.length === 1) {
+            hiddenInput.value = selected[0];
+        } else {
+            // Kui on valitud täpselt 2, saadame andmebaasi ikkagi "all"
+            hiddenInput.value = "all";
+        }
+    }
+
+    // Kui vajutatakse "Kõik 3 makseviisi" peale
+    payAllBox.addEventListener('change', function() {
+        individualBoxes.forEach(cb => {
+            cb.checked = payAllBox.checked;
+        });
+        updateHiddenValue();
+    });
+
+    // Kui vajutatakse mõne üksiku kasti peale
+    individualBoxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            let checkedCount = 0;
+            individualBoxes.forEach(box => {
+                if (box.checked) checkedCount++;
+            });
+
+            // Sünkroniseerime peamise "Kõik 3" kasti seisundi
+            if (checkedCount === 3) {
+                payAllBox.checked = true;
+            } else {
+                payAllBox.checked = false;
+            }
+            updateHiddenValue();
+        });
+    });
+}
