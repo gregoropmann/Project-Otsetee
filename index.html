@@ -134,21 +134,25 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px;">
-                <label>Toetatud makseviisid:</label>
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input type="radio" name="payment_type" value="both" checked> Sularaha, Kaart ja Ülekanne 💵💳📲
+                <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-charcoal); display: block; margin-bottom: 8px;">Toetatud makseviisid:</label>
+                
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                    <label style="font-size: 0.9rem; color: #4a4a4a; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" name="payment_method" value="cash" checked onchange="updatePaymentTypeFieldValue()"> Sularaha 💵
                     </label>
-                    <label class="radio-option">
-                        <input type="radio" name="payment_type" value="cash"> Ainult Sularaha 💵
+                    <label style="font-size: 0.9rem; color: #4a4a4a; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" name="payment_method" value="card" onchange="updatePaymentTypeFieldValue()"> Kaardimakse 💳
                     </label>
-                    <label class="radio-option">
-                        <input type="radio" name="payment_type" value="card"> Ainult Kaart 💳
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="payment_type" value="transfer"> Pangaülekanne 📲🏦
+                    <label style="font-size: 0.9rem; color: #4a4a4a; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" name="payment_method" value="transfer" onchange="updatePaymentTypeFieldValue()"> Pangaülekanne 📲🏦
                     </label>
                 </div>
+
+                <button type="button" onclick="selectAllPaymentMethods()" style="background: #F1F3F4; border: 1px solid #DADCE0; border-radius: 6px; padding: 6px 12px; font-size: 0.85rem; color: #2C2A29; cursor: pointer; font-weight: 500; width: 100%;">
+                    Vali kõik 3 makseviisi 💵💳📲
+                </button>
+
+                <input type="hidden" name="payment_type" id="hidden-payment-type" value="cash">
             </div>
 
             <div id="permanent-only-fields" style="display: none; flex-direction: column; gap: 12px;">
