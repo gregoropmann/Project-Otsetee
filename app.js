@@ -123,6 +123,11 @@ window.addEventListener('DOMContentLoaded', () => {
                         localStorage.setItem('otset_is_permanent', data.is_permanent ? 'true' : 'false');
                         localStorage.setItem('otset_phone', data.contact_phone || '');
                         localStorage.setItem('otset_hours', data.opening_hours || '');
+                        
+                        // Taastame pilvest laetud nime seaded telefonisse
+                        if (data.name_type) localStorage.setItem('otset_name_type', data.name_type);
+                        if (data.custom_name) localStorage.setItem('otset_custom_name', data.custom_name);
+
                         renderCatalog(); 
                         updateActionBarState();
                         setupWatchPosition(true);
@@ -221,7 +226,7 @@ window.toggleMetaFields = function() {
 }
 
 function renderCatalog() {
-    // --- LISATUD: Nime valiku ja kohandatud nime taastamine mälust ---
+    // --- LISATUD: Nime seadete sisselugemine ja taastamine mälust ---
     const savedNameType = localStorage.getItem('otset_name_type') || 'google';
     const nameTypeRad = document.querySelector(`input[name="name_type"][value="${savedNameType}"]`);
     if (nameTypeRad) nameTypeRad.checked = true;
@@ -231,7 +236,7 @@ function renderCatalog() {
         customNameInput.value = localStorage.getItem('otset_custom_name') || '';
         customNameInput.style.display = savedNameType === 'custom' ? 'block' : 'none';
     }
-    // -----------------------------------------------------------------
+
     const isPerm = localStorage.getItem('otset_is_permanent') === 'true';
     if (isPerm) {
         const rad = document.querySelector('input[name="sale_type"][value="permanent"]');
@@ -310,18 +315,18 @@ function renderCatalog() {
                                 <option value="kg" ${savedUnit === 'kg' ? 'selected' : ''}>€/kg</option>
                                 <option value="karp" ${savedUnit === 'karp' ? 'selected' : ''}>€/karp</option>
                                 <option value="purk" ${savedUnit === 'purk' ? 'selected' : ''}>€/purk</option>
-                                <option value="tükk" ${savedUnit === 'tükk' ? 'selected' : ''}>€/tk</option>
+                                <option value="tk" ${savedUnit === 'tk' || savedUnit === 'tükk' ? 'selected' : ''}>€/tk</option>
                                 <option value="kimp" ${savedUnit === 'kimp' ? 'selected' : ''}>€/kimp</option>
-                                <option value="pudel" ${savedUnit === 'pudel' ? 'selected' : ''}>€/pdl</option>
+                                <option value="pdl" ${savedUnit === 'pdl' || savedUnit === 'pudel' ? 'selected' : ''}>€/pdl</option>
                             </select>
                         </div>
                     </div>
                     <div class="stock-status-container" style="margin-top: 8px; display: ${isSelected ? 'flex' : 'none'};" id="stock-toggle-box-${globalId}">
-                        <input type="checkbox" class="stock-toggle-checkbox" id="stock-check-${globalId}" ${isItemOutOfStock ? 'checked' : ''} onchange="toggleItemStock(${globalId})">
-                        <label for="stock-check-${globalId}" style="color: #c62828; font-weight: 500;">Kaup hetkel otsas ❌</label>
+                        <input type="checkbox" class="stock-toggle-checkbox" id="stock-check-${globalId}" ${isItemOutOfStock ? 'checked' : ''} onchange="toggleItemStock('${globalId}')">
+                        <label for="stock-check-${globalId}" style="color: #c62828; font-weight: 500; cursor: pointer; user-select: none;">Kaup hetkel otsas ❌</label>
                     </div>
                 </div>
-                <button class="select-toggle-btn" onclick="toggleProductSelect(${globalId})">${isSelected ? 'Valitud' : 'Vali toode'}</button>
+                <button class="select-toggle-btn" onclick="toggleProductSelect('${globalId}')">${isSelected ? 'Valitud' : 'Vali toode'}</button>
             `;
             grid.appendChild(card);
         });
@@ -417,13 +422,7 @@ window.confirmProductsAndStartGeo = function() {
     const phone = document.getElementById('merchant-phone').value;
     const hours = document.getElementById('merchant-hours').value;
 
-    localStorage.setItem('otset_active_products', JSON.stringify(inventorySummary));
-    localStorage.setItem('otset_is_permanent', isPermanent ? 'true' : 'false');
-    localStorage.setItem('otset_payment_type', paymentType);
-    localStorage.setItem('otset_phone', phone);
-    localStorage.setItem('otset_hours', hours);
-
-    // --- LISATUD: Loe raadionupu ja tekstivälja väärtused ---
+    // --- LISATUD: Nime seadete ja väärtuste lugemine salvestamiseks ---
     const nameType = document.querySelector('input[name="name_type"]:checked').value;
     const customName = document.getElementById('merchant-custom-name').value.trim();
 
@@ -432,13 +431,10 @@ window.confirmProductsAndStartGeo = function() {
     localStorage.setItem('otset_payment_type', paymentType);
     localStorage.setItem('otset_phone', phone);
     localStorage.setItem('otset_hours', hours);
-    
-    // Salvestame valikud telefonisse mällu
+
+    // Salvestame nime eelistused seadme mällu
     localStorage.setItem('otset_name_type', nameType);
     localStorage.setItem('otset_custom_name', customName);
-    // -------------------------------------------------------
-
-    switchView('map-view');
 
     switchView('map-view');
     if (isSelling) {
@@ -509,7 +505,7 @@ window.handleSearch = function(event) {
                             className: 'preview-marker-icon'
                         });
                         previewMarker = L.marker([lat, lon], { icon: orangeIcon }).addTo(map);
-                        const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                        const mapsLink = `http://maps.google.com/?q=${lat},${lon}`;
                         previewMarker.bindPopup(`
                             <b>${placeName}</b><br>
                             Koordinaadid: ${lat.toFixed(5)}, ${lon.toFixed(5)}<br>
@@ -602,8 +598,11 @@ window.handleLogout = async function() {
     localStorage.removeItem('otset_hours');
     localStorage.removeItem('otset_verified');
     localStorage.removeItem('otset_payment_type');
+    
+    // Puhastame nime seaded mälust väljalogimisel
     localStorage.removeItem('otset_name_type');
     localStorage.removeItem('otset_custom_name');
+
     if (buyerCircle) { map.removeLayer(buyerCircle); buyerCircle = null; }
     if (geoWatchId) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
     if (activeMarker) { map.removeLayer(activeMarker); activeMarker = null; }
@@ -661,7 +660,7 @@ function initMap() {
                 }
             } else {
                 const prodHTML = buildProductsHTML(data.products);
-                const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}`;
+                const gMapsLink = `http://maps.google.com/?q=${data.lat},${data.lng}`;
                 
                 const allOOS = data.products && data.products.length > 0 && data.products.every(p => typeof p === 'object' && p.available === false);
                 
@@ -778,7 +777,6 @@ function setupWatchPosition(isRestoring) {
     );
 }
 
-// ─── UUENDATUD FUNKTSIOON (FIX: Popup aken ei sulgu salvestamisel) ───
 function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     let finalLat = lat;
     let finalLng = lng;
@@ -820,7 +818,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     }
 
     const prodListHTML = buildProductsHTML(parsedProducts);
-    const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${finalLat},${finalLng}`;
+    const gMapsLink = `http://maps.google.com/?q=${finalLat},${finalLng}`;
     const activeText = allOOS ? "<span style='color:red;'>AKTIIVNE (Kogu kaup otsas!)</span>" : "<span style='color:green;'>AKTIIVNE (Müük käib)</span>";
     
     let myVerifiedBadge = "";
@@ -833,10 +831,20 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     if (paymentType === 'cash') myPaymentLabel = "Ainult sularaha 💵";
     if (paymentType === 'card') myPaymentLabel = "Ainult kaart <code>💳</code>";
 
+    // --- PARANDATUD LOOGIKA: Otsustame, millist nime kaardipunktis kuvada ---
+    const savedNameType = localStorage.getItem('otset_name_type') || 'google';
+    const savedCustomName = localStorage.getItem('otset_custom_name') || '';
+    const googleName = (auth.currentUser ? auth.currentUser.displayName : "Teeäärne Müüja");
+    
+    let merchantName = googleName;
+    if (savedNameType === 'custom' && savedCustomName !== '') {
+        merchantName = savedCustomName;
+    }
+
     const popupContent = `
         <div style="max-height:240px; overflow-y:auto; font-size:0.85rem; min-width:180px;">
             ${myVerifiedBadge}
-            <b>Sinu Müügikoht on ${activeText}</b><br>
+            <b>${merchantName} (${activeText})</b><br>
             <b>Tüüp:</b> ${isPermanent ? 'Püsikoht' : 'Välkmüük'}<br>
             ${hours ? `<b>Avatud:</b> ${hours}<br>` : ''}
             <b>Maksmine:</b> ${myPaymentLabel}<br>
@@ -862,33 +870,17 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             localStorage.setItem('otset_custom_lat', currentPos.lat);
             localStorage.setItem('otset_custom_lng', currentPos.lng);
             if (auth.currentUser) {
-        const merchantId = auth.currentUser.uid;
-        const merchantNameFromGoogle = auth.currentUser.displayName || "Teeäärne Müüja";   
-        
-        // --- LISATUD: Dünaamiline nime valik vastavalt seadetele ---
-        const savedNameType = localStorage.getItem('otset_name_type') || 'google';
-        const savedCustomName = localStorage.getItem('otset_custom_name') || '';
-        
-        let finalMerchantName = merchantNameFromGoogle;
-        if (savedNameType === 'custom' && savedCustomName !== '') {
-            finalMerchantName = savedCustomName;
-        }
-        // -----------------------------------------------------------
-
-        setDoc(doc(db, "active_merchants", merchantId), {
-            name: finalMerchantName, // <--- Muudetud muutujaks finalMerchantName
-            lat: finalLat,
-            lng: finalLng,
-            products: parsedProducts,
-            is_permanent: isPermanent,
-            is_out_of_stock: allOOS,
-            contact_phone: phone,
-            opening_hours: hours,
-            verified: isVerifiedInCloud,
-            payment_type: paymentType,
-            updatedAt: new Date().toISOString()
-        }).catch(err => console.error("Viga andmebaasi kirjutamisel:", err));
-    }
+                try {
+                    await updateDoc(doc(db, "active_merchants", auth.currentUser.uid), {
+                        lat: currentPos.lat,
+                        lng: currentPos.lng,
+                        updatedAt: new Date().toISOString()
+                    });
+                    showNotification("Asukoht täpsustatud!");
+                } catch(err) {
+                    console.error(err);
+                }
+            }
         });
     }
 
@@ -901,9 +893,10 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
 
     if (auth.currentUser) {
         const merchantId = auth.currentUser.uid;
-        const merchantName = auth.currentUser.displayName || "Teeäärne Müüja";   
         setDoc(doc(db, "active_merchants", merchantId), {
             name: merchantName,
+            name_type: savedNameType,
+            custom_name: savedCustomName,
             lat: finalLat,
             lng: finalLng,
             products: parsedProducts,
@@ -977,6 +970,11 @@ function stopGeoTracking() {
         localStorage.removeItem('otset_payment_type');
         localStorage.removeItem('otset_phone');
         localStorage.removeItem('otset_hours');
+        
+        // Puhastame nime seaded müügi lõpetamisel
+        localStorage.removeItem('otset_name_type');
+        localStorage.removeItem('otset_custom_name');
+
         updateActionBarState();
         showNotification("Müük lõpetatud ja punkt kaardilt eemaldatud.");
     };
