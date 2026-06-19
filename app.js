@@ -300,6 +300,7 @@ function renderCatalog() {
                                 <option value="karp" ${savedUnit === 'karp' ? 'selected' : ''}>€/karp</option>
                                 <option value="purk" ${savedUnit === 'purk' ? 'selected' : ''}>€/purk</option>
                                 <option value="tükk" ${savedUnit === 'tükk' ? 'selected' : ''}>€/tk</option>
+                                <option value="kimp" ${savedUnit === 'kimp' ? 'selected' : ''}>€/kimp</option>
                                 <option value="pudel" ${savedUnit === 'pudel' ? 'selected' : ''}>€/pdl</option>
                             </select>
                         </div>
