@@ -91,6 +91,12 @@
             color: #B27B00;
             border: 1px solid #FFE0B2;
         }
+
+        .badge-payment {
+            background: #F1F3F4;
+            color: #5F6368;
+            border: 1px solid #DADCE0;
+        }
         
         .back-btn-container {
             margin-top: 35px;
@@ -127,7 +133,7 @@
 
             <h2>2. Google OAuth sisselogimine</h2>
             <div><span class="badge">Turvaline Autentimine</span></div>
-            <p>Müüjana sisse logides kasutatakse ametlikku Google'i süsteemi. This tähendab:</p>
+            <p>Müüjana sisse logides kasutatakse ametlikku Google'i süsteemi. See tähendab:</p>
             <ul>
                 <li><strong>Me ei näe ega salvesta kunagi Sinu parooli.</strong> Sisselogimine toimub täielikult Google'i enda kontrollitud turvaaknas.</li>
                 <li>Rakendus saab Google'ilt ainult Sinu profiili avaliku nime, et kuvada kaardil punkti juures ostjatele korrektset infot (nt. "Müüja: Jaan Maasikas").</li>
@@ -137,13 +143,13 @@
             <div><span class="badge badge-secure">Google Cloud Security</span></div>
             <p>Andmebaasina on kasutusel Google'i reaalaja platvorm <strong>Firebase Firestore</strong>, mis toimib järgmiselt:</p>
             <ul>
-                <li><strong>Müüjatele:</strong> Sinu müügikoha asukoht, telefoninumber ja lahtiolekuajad salvestatakse andmebaasi ainult siis, kui oled aktiivselt müüki alustanud. Niipea kui vajutad "Lõpeta müük" või logid välja, kustub välkmüügi punkt andmebaasist koheselt ja jäädavalt.</li>
+                <li><strong>Müüjatele:</strong> Sinu müügikoha asukoht, valitud makseviisid, telefoninumber ja lahtiolekuajad salvestatakse andmebaasi ainult siis, kui oled aktiivselt müüki alustanud. Niipea kui vajutad "Lõpeta müük" või logid välja, kustub välkmüügi punkt andmebaasist koheselt ja jäädavalt.</li>
                 <li><strong>Ostjatele:</strong> Kui kasutad nuppu "Minu asukoht", arvutab Sinu telefon asukoha kohapeal ainult kaardi nihutamiseks. Ostjate asukohti <strong>ei salvestata andmebaasi ega jälgita kunagi</strong>.</li>
             </ul>
 
             <h2>4. Serverivaba ja puhas kood</h2>
             <div><span class="badge">Reklaamivaba</span></div>
-            <p>Otset.ee on otseühendus tarbija ja tootja vahel. Meil ei ole tagalasse peidetud oma andmeserverit, mis koguks kasutajate ajalugu, profiile või liikumismustreid. Me ei kasuta jälitusküpsiseid ega jaga infot ühegi kolmanda osapoole või turundusfirmaga.</p>
+            <p>Otset.ee on otseühendus tarbija ja tootja vahel. Meil ei ole tagalasse peidetud oma andmeserverit, mis koguks kasutajate ajalugu, profiile või liikumismustreid. We ei kasuta jälitusküpsiseid ega jaga infot ühegi kolmanda osapoole või turundusfirmaga.</p>
 
             <h2>5. Kuldse märgise eluaegne säilivus</h2>
             <div><span class="badge badge-verified">🌟 Konto-põhine Tunnustus</span></div>
@@ -151,7 +157,15 @@
             <ul>
                 <li>Sinu investeering ja staatus on turvaliselt kaitstud. Kui Sa peatad püsikoha, logid välja, teed talvepausi või liigutad oma müügipunkti suvel täiesti uude kohta, <strong>ei lähe Sinu kuldne märgis kunagi kaduma</strong>.</li>
                 <li>Niipea kui logid uuesti sisse ja alustad müüki, tuvastab süsteem pilvest Sinu konto ID ja Sinu uus punkt muutub kaardil automaatselt ja sekundipealt jälle kuldseks!</li>
-                <li>Süsteem toimetab high-trust-society tasemel.</li>
+            </ul>
+
+            <h2>6. Paindlikud ja kaasaegsed makseviisid</h2>
+            <div><span class="badge badge-payment">📲 Sularaha, Kaart või Ülekanne</span></div>
+            <p>Selleks, et teeäärne ostlemine oleks mugav nii autojuhile kui talunikule, toetab platvorm nelja erinevat maksekombinatsiooni:</p>
+            <ul>
+                <li><strong>Sularaha, Kaardimaksed ja Pangaülekanne:</strong> Müüjana saad kaardile märkida täpselt need viisid, mida kohapeal aktsepteerid (sealhulgas kaasaegne pangaülekanne kohapeal nutitelefoniga).</li>
+                <li>Ostjad näevad märgistatud makseviise otse kaardipunkti infoaknas enne kohale sõitmist, mis hoiab ära olukorrad, kus sobiv maksevahend puudub.</li>
+                <li>Mingeid finantstehinguid ega pangakaartide andmeid Otset.ee platvormil ei vahendata ega salvestata – arveldamine toimub täielikult ja otse müüja ning ostja vahel.</li>
             </ul>
 
             <div class="back-btn-container">
