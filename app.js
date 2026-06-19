@@ -124,7 +124,6 @@ window.addEventListener('DOMContentLoaded', () => {
                         localStorage.setItem('otset_phone', data.contact_phone || '');
                         localStorage.setItem('otset_hours', data.opening_hours || '');
                         
-                        // Taastame pilvest laetud nime seaded telefonisse
                         if (data.name_type) localStorage.setItem('otset_name_type', data.name_type);
                         if (data.custom_name) localStorage.setItem('otset_custom_name', data.custom_name);
 
@@ -226,7 +225,6 @@ window.toggleMetaFields = function() {
 }
 
 function renderCatalog() {
-    // --- LISATUD: Nime seadete sisselugemine ja taastamine mälust ---
     const savedNameType = localStorage.getItem('otset_name_type') || 'google';
     const nameTypeRad = document.querySelector(`input[name="name_type"][value="${savedNameType}"]`);
     if (nameTypeRad) nameTypeRad.checked = true;
@@ -422,7 +420,6 @@ window.confirmProductsAndStartGeo = function() {
     const phone = document.getElementById('merchant-phone').value;
     const hours = document.getElementById('merchant-hours').value;
 
-    // --- LISATUD: Nime seadete ja väärtuste lugemine salvestamiseks ---
     const nameType = document.querySelector('input[name="name_type"]:checked').value;
     const customName = document.getElementById('merchant-custom-name').value.trim();
 
@@ -432,7 +429,6 @@ window.confirmProductsAndStartGeo = function() {
     localStorage.setItem('otset_phone', phone);
     localStorage.setItem('otset_hours', hours);
 
-    // Salvestame nime eelistused seadme mällu
     localStorage.setItem('otset_name_type', nameType);
     localStorage.setItem('otset_custom_name', customName);
 
@@ -599,7 +595,6 @@ window.handleLogout = async function() {
     localStorage.removeItem('otset_verified');
     localStorage.removeItem('otset_payment_type');
     
-    // Puhastame nime seaded mälust väljalogimisel
     localStorage.removeItem('otset_name_type');
     localStorage.removeItem('otset_custom_name');
 
@@ -691,10 +686,16 @@ function initMap() {
                 if (data.payment_type === 'cash') paymentLabel = "Ainult sularaha 💵";
                 if (data.payment_type === 'card') paymentLabel = "Ainult kaart <code>💳</code>";
 
+                // --- PARANDUS: Kontrollime teiste poodide puhul andmebaasi salvestatud nime tüüpi ---
+                let displayNameToBuyers = data.name || "Teeäärne Müüja";
+                if (data.name_type === 'custom' && data.custom_name && data.custom_name.trim() !== '') {
+                    displayNameToBuyers = data.custom_name;
+                }
+
                 const popupContent = `
                     <div style="font-size:0.85rem; min-width:180px;">
                         ${verifiedBadge}
-                        <b>${data.name}</b><br>
+                        <b>${displayNameToBuyers}</b><br>
                         ${typeLabel}<br>
                         ${hoursHTML}
                         ${phoneHTML}<br>
@@ -702,7 +703,7 @@ function initMap() {
                         <span style="color:#222;font-weight:600;">Müüdavad tooted:</span><br>
                         ${prodHTML}<br>
                         <a href="${gMapsLink}" target="_blank" class="nav-link-btn" onclick="setTimeout(openBuyerFeedback, 3000)">Sõida siia (Navigatsioon)</a>
-                        <button class="report-btn" onclick="reportMerchant('${id}', '${data.name}')" style="background:none; border:none; color:#D9534F; font-size:0.75rem; text-decoration:underline; cursor:pointer; margin-top:8px; width:100%; text-align:center;">
+                        <button class="report-btn" onclick="reportMerchant('${id}', '${displayNameToBuyers}')" style="background:none; border:none; color:#D9534F; font-size:0.75rem; text-decoration:underline; cursor:pointer; margin-top:8px; width:100%; text-align:center;">
                             ⚠️ Kohapeal pole kedagi / Vale info? Teata siin
                         </button>
                     </div>
@@ -831,13 +832,12 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     if (paymentType === 'cash') myPaymentLabel = "Ainult sularaha 💵";
     if (paymentType === 'card') myPaymentLabel = "Ainult kaart <code>💳</code>";
 
-    // --- PARANDATUD LOOGIKA: Otsustame, millist nime kaardipunktis kuvada ---
     const savedNameType = localStorage.getItem('otset_name_type') || 'google';
     const savedCustomName = localStorage.getItem('otset_custom_name') || '';
     const googleName = (auth.currentUser ? auth.currentUser.displayName : "Teeäärne Müüja");
     
     let merchantName = googleName;
-    if (savedNameType === 'custom' && savedCustomName !== '') {
+    if (savedNameType === 'custom' && savedCustomName.trim() !== '') {
         merchantName = savedCustomName;
     }
 
@@ -851,7 +851,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
             <span style="color:#222;font-weight:600;">Sinu tooted:</span><br>
             ${prodListHTML}<br>
             <a href="${gMapsLink}" target="_blank" class="nav-link-btn">Testi navigatsiooni</a><br>
-            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Kui punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
+            <span style="color:var(--wheat-gold); font-weight:bold;">Vihje: Wenn punkt on nihkes, lohista see näpuga õigesse teeotsa!</span>
         </div>
     `;
 
@@ -894,7 +894,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
     if (auth.currentUser) {
         const merchantId = auth.currentUser.uid;
         setDoc(doc(db, "active_merchants", merchantId), {
-            name: merchantName,
+            name: googleName, // Salvestame igaks juhuks ka Google nime baasväljale
             name_type: savedNameType,
             custom_name: savedCustomName,
             lat: finalLat,
@@ -971,7 +971,6 @@ function stopGeoTracking() {
         localStorage.removeItem('otset_phone');
         localStorage.removeItem('otset_hours');
         
-        // Puhastame nime seaded müügi lõpetamisel
         localStorage.removeItem('otset_name_type');
         localStorage.removeItem('otset_custom_name');
 
@@ -1088,13 +1087,18 @@ window.filterByProduct = function(productName) {
                     priceValue = parseFloat(priceMatch[1].replace(' €', '').split('/')[0]);
                 }
 
+                let currentShopName = data.name || "Teeäärne Müüja";
+                if (data.name_type === 'custom' && data.custom_name && data.custom_name.trim() !== '') {
+                    currentShopName = data.custom_name;
+                }
+
                 validShops.push({
                     id: merchantId,
                     marker: marker,
                     distance: distanceInMeters / 1000, 
                     price: priceValue,
                     productFullName: matchedProd.name,
-                    shopName: data.name
+                    shopName: currentShopName
                 });
             }
         }
