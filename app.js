@@ -98,7 +98,7 @@ const agriProducts = {
 
 window.addEventListener('DOMContentLoaded', () => {
     renderQuickFilters(); 
-    setupPaymentCheckboxListeners(); // Algatab puhta JS kuulajad märkeruutudele
+    setupPaymentCheckboxListeners();
     onAuthStateChanged(auth, (user) => {
         if (user) {
             localStorage.setItem('otset_loggedin', 'true');
@@ -251,7 +251,7 @@ function renderCatalog() {
     const savedPayment = localStorage.getItem('otset_payment_type') || 'all';
     const hiddenPaymentInput = document.getElementById('hidden-payment-type');
     if (hiddenPaymentInput) {
-        hiddenPaymentInput.value = savedPayment;
+        hiddenPaymentInput.value = savedPayment === 'both' ? 'all' : savedPayment;
     }
 
     const mainAllCheckbox = document.getElementById('pay-all');
@@ -266,6 +266,9 @@ function renderCatalog() {
             cb.checked = (cb.value === savedPayment);
         });
     }
+
+    // UUENDUS: Algatame sündmuskuulajad uuesti, et mälust kirjutatud linnukesed väärtust üle ei lööks
+    setupPaymentCheckboxListeners();
 
     document.getElementById('merchant-phone').value = localStorage.getItem('otset_phone') || '';
     document.getElementById('merchant-hours').value = localStorage.getItem('otset_hours') || '';
@@ -434,7 +437,7 @@ window.confirmProductsAndStartGeo = function() {
 
     const isPermanent = document.querySelector('input[name="sale_type"]:checked').value === 'permanent';
     
-    // --- LUGEB MAKSEVIISI OTSE VARJATUD SISENDVÄLJAST ---
+    // --- LUGEB MAKSEVIISI VARJATUD SISENDVÄLJAST ---
     const hiddenPaymentInput = document.getElementById('hidden-payment-type');
     const paymentType = hiddenPaymentInput ? hiddenPaymentInput.value : 'all';
 
@@ -703,12 +706,12 @@ function initMap() {
                 const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
                 const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
                 
-                // --- UUENDATUD TEKST OSTJALE (Käsitleb nii 'all' kui ka vanu 'both' punkte) ---
+                // --- KUVATAV TEKST OSTJALE MAP POPUP-IS ---
                 let paymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
                 if (data.payment_type === 'cash') paymentLabel = "Ainult sularaha 💵";
-                if (data.payment_type === 'card') paymentLabel = "Ainult kaart 💳";
-                if (data.payment_type === 'transfer') paymentLabel = "Pangaülekanne 📲🏦";
-                if (data.payment_type === 'all' || data.payment_type === 'both') paymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
+                else if (data.payment_type === 'card') paymentLabel = "Ainult kaart 💳";
+                else if (data.payment_type === 'transfer') paymentLabel = "Pangaülekanne 📲🏦";
+                else if (data.payment_type === 'all' || data.payment_type === 'both') paymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
 
                 let displayNameToBuyers = data.name || "Teeäärne Müüja";
                 if (data.name_type === 'custom' && data.custom_name && data.custom_name.trim() !== '') {
@@ -851,11 +854,12 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
         myVerifiedBadge = `<div style="background: #FFD700; color: #000; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.75rem; margin-bottom: 8px; text-align: center; border: 1px solid #DAA520;">🌟 Sinu pood on KINNITATUD</div>`;
     }
 
+    // --- SAA MÄRGISE MAKSEVIISI TEKST OMA ASUKOHA POPUP-IS ---
     let myPaymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
     if (paymentType === 'cash') myPaymentLabel = "Ainult sularaha 💵";
-    if (paymentType === 'card') myPaymentLabel = "Ainult kaart 💳";
-    if (paymentType === 'transfer') myPaymentLabel = "Pangaülekanne 📲🏦";
-    if (paymentType === 'all' || paymentType === 'both') myPaymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
+    else if (paymentType === 'card') myPaymentLabel = "Ainult kaart 💳";
+    else if (paymentType === 'transfer') myPaymentLabel = "Pangaülekanne 📲🏦";
+    else if (paymentType === 'all' || paymentType === 'both') myPaymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
 
     const savedNameType = localStorage.getItem('otset_name_type') || 'google';
     const savedCustomName = localStorage.getItem('otset_custom_name') || '';
@@ -1227,7 +1231,7 @@ window.toggleShopNameField = function() {
     }
 };
 
-// --- UUS JA PUHAS JS FUNKTSIOON: MÄRKERUUTUDE LOOGIKA JA KUULAJAD ---
+// --- TÄIUSTATUD JS FUNKTSIOON: MÄRKERUUTUDE LOOGIKA JA KUULAJAD ---
 function setupPaymentCheckboxListeners() {
     const payAllBox = document.getElementById('pay-all');
     const individualBoxes = document.querySelectorAll('input[name="payment_method"]');
@@ -1235,10 +1239,16 @@ function setupPaymentCheckboxListeners() {
 
     if (!payAllBox || individualBoxes.length === 0) return;
 
+    // Eemaldame vanad sündmuskuulajad elementide kloonimise teel, tagamaks konflikti vaba laadimise
+    const newPayAllBox = payAllBox.cloneNode(true);
+    payAllBox.parentNode.replaceChild(newPayAllBox, payAllBox);
+
     // Funktsioon, mis arvutab ja uuendab varjatud sisendvälja väärtust
     function updateHiddenValue() {
         let selected = [];
-        individualBoxes.forEach(cb => {
+        // Kuna kloonisime osad elemendid, haarame reaalajas värsked checkboxid
+        const currentBoxes = document.querySelectorAll('input[name="payment_method"]');
+        currentBoxes.forEach(cb => {
             if (cb.checked) selected.push(cb.value);
         });
 
@@ -1253,26 +1263,31 @@ function setupPaymentCheckboxListeners() {
     }
 
     // Kui vajutatakse "Kõik 3 makseviisi" peale
-    payAllBox.addEventListener('change', function() {
-        individualBoxes.forEach(cb => {
-            cb.checked = payAllBox.checked;
+    newPayAllBox.addEventListener('change', function() {
+        const currentBoxes = document.querySelectorAll('input[name="payment_method"]');
+        currentBoxes.forEach(cb => {
+            cb.checked = newPayAllBox.checked;
         });
         updateHiddenValue();
     });
 
     // Kui vajutatakse mõne üksiku kasti peale
     individualBoxes.forEach(cb => {
-        cb.addEventListener('change', function() {
+        const newCb = cb.cloneNode(true);
+        cb.parentNode.replaceChild(newCb, cb);
+
+        newCb.addEventListener('change', function() {
+            const currentBoxes = document.querySelectorAll('input[name="payment_method"]');
             let checkedCount = 0;
-            individualBoxes.forEach(box => {
+            currentBoxes.forEach(box => {
                 if (box.checked) checkedCount++;
             });
 
             // Sünkroniseerime peamise "Kõik 3" kasti seisundi
             if (checkedCount === 3) {
-                payAllBox.checked = true;
+                newPayAllBox.checked = true;
             } else {
-                payAllBox.checked = false;
+                newPayAllBox.checked = false;
             }
             updateHiddenValue();
         });
