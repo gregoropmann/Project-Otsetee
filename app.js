@@ -47,6 +47,21 @@ const markerIcons = {
 
 const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
 
+// Teisendab salvestatud payment_type väärtuse (nt "cash", "card+transfer", "all") loetavaks Eesti keelseks sildiks
+function getPaymentLabel(paymentType) {
+    const labels = { cash: "Sularaha 💵", card: "Kaardimakse 💳", transfer: "Pangaülekanne 📲🏦" };
+
+    if (!paymentType || paymentType === 'all' || paymentType === 'both') {
+        return "Sularaha, Kaart ja Ülekanne 💵💳📲";
+    }
+
+    const parts = paymentType.split('+').filter(p => labels[p]);
+    if (parts.length === 0) return "Sularaha, Kaart ja Ülekanne 💵💳📲";
+    if (parts.length === 3) return "Sularaha, Kaart ja Ülekanne 💵💳📲";
+
+    return parts.map(p => labels[p]).join(' + ');
+}
+
 const agriProducts = {
     "Mesi ja Mesindustooted": [
         "Õiemesi", "Kanarbikumesi", "Metsamesi", "Kärjemesi", "Taruvaik", "Suir", 
@@ -247,20 +262,20 @@ function renderCatalog() {
         document.getElementById('permanent-only-fields').style.none = 'none';
     }
 
-    // --- UUENDATUD MAKSEVIISIDE KUVAMISE LOOGIKA (AINULT ERALDI VALIKUD) ---
+    // --- UUENDATUD MAKSEVIISIDE KUVAMISE LOOGIKA (ERALDI VALIKUD + KOMBINATSIOONID) ---
     const savedPayment = localStorage.getItem('otset_payment_type') || 'all';
     const hiddenPaymentInput = document.getElementById('hidden-payment-type');
     if (hiddenPaymentInput) {
         hiddenPaymentInput.value = savedPayment === 'both' ? 'all' : savedPayment;
     }
 
+    const savedPaymentParts = (savedPayment === 'all' || savedPayment === 'both')
+        ? ["cash", "card", "transfer"]
+        : savedPayment.split('+');
+
     const paymentCheckboxes = document.querySelectorAll('input[name="payment_method"]');
     paymentCheckboxes.forEach(cb => {
-        if (savedPayment === 'all' || savedPayment === 'both') {
-            cb.checked = true;
-        } else {
-            cb.checked = (cb.value === savedPayment);
-        }
+        cb.checked = savedPaymentParts.includes(cb.value);
     });
 
     setupPaymentCheckboxListeners();
@@ -700,11 +715,7 @@ function initMap() {
                 const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
                 const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
                 
-                let paymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
-                if (data.payment_type === 'cash') paymentLabel = "Ainult sularaha 💵";
-                else if (data.payment_type === 'card') paymentLabel = "Ainult kaart 💳";
-                else if (data.payment_type === 'transfer') paymentLabel = "Pangaülekanne 📲🏦";
-                else if (data.payment_type === 'all' || data.payment_type === 'both') paymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
+                let paymentLabel = getPaymentLabel(data.payment_type);
 
                 let displayNameToBuyers = data.name || "Teeäärne Müüja";
                 if (data.name_type === 'custom' && data.custom_name && data.custom_name.trim() !== '') {
@@ -847,11 +858,7 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
         myVerifiedBadge = `<div style="background: #FFD700; color: #000; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.75rem; margin-bottom: 8px; text-align: center; border: 1px solid #DAA520;">🌟 Sinu pood on KINNITATUD</div>`;
     }
 
-    let myPaymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
-    if (paymentType === 'cash') myPaymentLabel = "Ainult sularaha 💵";
-    else if (paymentType === 'card') myPaymentLabel = "Ainult kaart 💳";
-    else if (paymentType === 'transfer') myPaymentLabel = "Pangaülekanne 📲🏦";
-    else if (paymentType === 'all' || paymentType === 'both') myPaymentLabel = "Sularaha, Kaart ja Ülekanne 💵💳📲";
+    let myPaymentLabel = getPaymentLabel(paymentType);
 
     const savedNameType = localStorage.getItem('otset_name_type') || 'google';
     const savedCustomName = localStorage.getItem('otset_custom_name') || '';
@@ -1238,11 +1245,16 @@ function setupPaymentCheckboxListeners() {
             if (cb.checked) selected.push(cb.value);
         });
 
-        // Kui on valitud mitu asja või mitte ühtegi, saadetakse andmebaasi "all"
-        if (selected.length === 3 || selected.length === 0 || selected.length === 2) {
+        // Järjekord fikseeritud: cash, card, transfer (et "card+cash" ja "cash+card" ei tekiks eraldi väärtustena)
+        const order = ["cash", "card", "transfer"];
+        selected.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+
+        if (selected.length === 3 || selected.length === 0) {
+            // Kõik valitud (või mitte ühtegi valitud, vaikeväärtus) = "all"
             hiddenInput.value = "all";
-        } else if (selected.length === 1) {
-            hiddenInput.value = selected[0];
+        } else {
+            // 1 või 2 valitud: eraldi väärtus iga kombinatsiooni jaoks, nt "cash", "card+transfer"
+            hiddenInput.value = selected.join("+");
         }
     }
 
