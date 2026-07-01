@@ -613,6 +613,9 @@ window.handleLogin = async function(role, providerName) {
                 // Sunnib Firebase'i hoidma sisselogimise seisu kohalikus mälus, mis ei kuku partitioned keskkonnas kokku
                 await setPersistence(auth, browserLocalPersistence);
                 await signInWithPopup(auth, provider);
+                // onAuthStateChanged ei pruugi pärast popup'i kohe käivituda, seega läheme kaardile kindluse mõttes ka siin
+                switchView('map-view');
+                updateActionBarState();
             } catch (error) {
                 console.error(error);
                 showNotification("Sisselogimine ebaõnnestus: " + error.message);
