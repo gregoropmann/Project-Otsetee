@@ -2,7 +2,7 @@
 
 #### Otseteel ei leia Sa kunagi reklaame.
 
-#### Otset.ee projekt ei ole seotud Otsetee.ee OÜ-ga (14241428) 
+#### Otset.ee projektil puudub igasugune seos Otsetee.ee OÜ-ga (14241428) 
 
 # Projekt Otsetee: Nutikas ja ohutu tee värske toiduni
 
