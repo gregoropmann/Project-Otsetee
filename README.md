@@ -2,7 +2,7 @@
 
 #### Otseteel ei leia Sa kunagi reklaame.
 
-#### Otset.ee projektil puudub igasugune seos Otsetee.ee OÜ-ga (14241428) 
+#### Otset.ee projekt on täielikult eraldiseisev algatus ning sellel puudub igasugune seos ettevõttega Otsetee.ee OÜ (registrikood 14241428). 
 
 # Projekt Otsetee: Nutikas ja ohutu tee värske toiduni
 
