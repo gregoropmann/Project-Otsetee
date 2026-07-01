@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projektist - Otset.ee</title>
-    <meta name="description" content="Otset.ee on tasuta kogukondlik hobiplatvorm, mis viib kokku kohalikud tootjad ja tarbijad, muutes Eesti maanteed turvalisemaks.">
+    <title>Projektist - Otset.ee</title>   
+    <link rel="stylesheet" href="style.css"> 
     
     <script type="application/ld+json">
     {
@@ -21,23 +21,196 @@
       }
     }
     </script>
+
+    <style>
+        html, body {
+            overflow: auto !important;
+            overflow-y: auto !important;
+            height: auto !important;
+            max-height: none !important;
+            color: #2C2A29;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 0;
+            margin: 0;
+            background: linear-gradient(rgba(250, 248, 245, 0.88), rgba(250, 248, 245, 0.88)), 
+                        url('assets/pold.webp') no-repeat center center fixed;
+            background-size: cover;
+        }
+        
+        .info-wrapper {
+            padding: 20px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .info-container {
+            max-width: 700px; /* Veidi laiem tekstimahukuse tõttu */
+            margin: 40px auto 60px auto;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            box-sizing: border-box;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Selge välistus-kast lehe alguses */
+        .disclaimer-box {
+            background: #FFF5F5;
+            border: 1px solid #FFDada;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            color: #C62828;
+            line-height: 1.4;
+        }
+
+        .logo-small {
+            display: block;
+            max-width: 180px;
+            margin: 0 auto 20px auto;
+        }
+        
+        h1 {
+            color: #4F77AA;
+            margin-top: 0;
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        h2 {
+            font-size: 1.3rem;
+            color: #2C2A29;
+            margin-top: 40px;
+            border-left: 5px solid #E5A93C;
+            padding-left: 15px;
+            font-weight: 700;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin-top: 20px;
+            color: #4F77AA;
+        }
+        
+        p, li {
+            line-height: 1.7;
+            font-size: 1rem;
+            color: #444;
+        }
+        
+        .mission-box {
+            background: #F0F4F8;
+            padding: 25px;
+            border-radius: 16px;
+            margin-top: 40px;
+            font-style: italic;
+            border-bottom: 3px solid #4F77AA;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .badge-problem { background: #FEEBEB; color: #D32F2F; }
+        .badge-solution { background: #E7F5ED; color: #2E7D32; }
+        .badge-link { background: #F1F3F4; color: #5F6368; border: 1px solid #DADCE0; text-decoration: none; margin-right: 5px; margin-top: 5px;}
+        .badge-link:hover { background: #E8EAED; }
+
+        .back-btn-container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            padding: 14px 35px;
+            background-color: #4F77AA;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(79, 119, 170, 0.3);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(79, 119, 170, 0.4);
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #777;
+            border-top: 1px solid #EEE;
+            padding-top: 20px;
+        }
+
+        footer a { color: #4F77AA; text-decoration: none; }
+    </style>
 </head>
 <body>
 
-    <main>
-        <p style="font-weight: bold; color: #d32f2f;">
-            Otset.ee projekt on täielikult eraldiseisev algatus ning sellel puudub igasugune seos ettevõttega Otsetee.ee OÜ (registrikood 14241428).
-        </p>
+    <div class="info-wrapper">
+        <div class="info-container">
+            
+            <div class="disclaimer-box">
+                <strong>NB!</strong> Otset.ee projekt on täielikult eraldiseisev kogukondlik algatus ning sellel puudub igasugune seos ettevõttega <strong>Otsetee.ee OÜ</strong> (reg. kood 14241428).
+            </div>
 
-        <h1>Projekt Otsetee: Nutikas ja ohutu tee värske toiduni</h1>
-        
-        <p>Igal suvel täituvad Eesti teeperved isetehtud siltidega...</p>
-        
-        </main>
+            <img src="assets/otsetee.png" alt="Otsetee logo" class="logo-small">
+            
+            <h1>Nutikas ja ohutu tee värske toiduni</h1>
+            
+            <p>Igal suvel täituvad Eesti teeperved isetehtud siltidega, mis kutsuvad möödasõitjaid maasikaid ostma, talupoodi sisse põikama või värsket suitsukala proovima. Kohaliku toidu väärtustamine on imeline, kuid füüsiliste siltide püstitamine riigiteede äärde peidab endas tõsiseid väljakutseid.</p>
 
-    <footer>
-        <p>© 2026 · Otsetee & <a href="https://gregoropmann.github.io/aboutme/">Gregor Opmann</a></p>
-    </footer>
+            <div><span class="badge badge-problem">Probleem</span></div>
+            <h2>Füüsiliste siltide oht ja bürokraatia</h2>
+            <p>Transpordiameti andmetel seab loata ja valesti paigaldatud teeperve reklaam ohtu liiklusohutuse. Sildid hajutavad autojuhtide tähelepanu ja võivad põhjustada äkilisi manöövreid.</p>
+            
+            <p>Seadus nõuab teekaitsevööndisse siltide paigaldamiseks ametlikku kooskõlastust. Paljude väiketootjate jaoks on see aga liigne bürokraatia – loa ooteaja peale võib lühike maasikahooaeg juba läbi saada.</p>
 
+            <div><span class="badge badge-solution">Lahendus</span></div>
+            <h2>Otsetee viib sildid teepervelt nutitelefoni</h2>
+            <p>Projekt Otsetee sündis täpselt selle konflikti lahendamiseks. Meie eesmärk on asendada ohtlikud ja segadust tekitavad puidust sildid ühe kaasaegse digitaalse kaardiga.</p>
+
+            <h3>100% Ohutu liiklejatele</h3>
+            <p>Autojuhid näevad müügipunkte rakendusest juba enne teeotsa. Ei mingeid ootamatuid pidurdamisi – vaid sujuv ja planeeritud peatuse tegemine.</p>
+
+            <h3>0% Bürokraatiat talunikele</h3>
+            <p>Müüjad ei pea taotlema lube ega ootama nädalaid. Nad saavad oma müügipunkti ja tooted märkida kaardile sekunditega – täpselt siis, kui kaup on valmis.</p>
+
+            <div class="mission-box">
+                <strong>Otsetee missioon:</strong> Me usume, et teeäärne kaubandus on Eesti maaelu ja suve pärl. Otsetee annab kohalikele tootjatele digitaalse hääle ja ostjatele mugava teejuhi, muutes samal ajal meie maanteed kõigi jaoks turvalisemaks.
+            </div>
+
+            <h2>Kasulikud lingid</h2>
+            <div style="margin-top:15px;">
+                <a href="https://taluliit.ee" target="_blank" class="badge badge-link">Eestimaa Talupidajate Keskliit</a>
+                <a href="https://youtu.be/2uNxruqqIjY" target="_blank" class="badge badge-link">TV3 Uudiste reportaaž</a>
+                <a href="https://arileht.delfi.ee/artikkel/120590879/vaikekaupmees-ei-tohi-reklaamsilte-niisama-tee-aarde-panna" target="_blank" class="badge badge-link">Delfi: Siltide ohtlikkus</a>
+            </div>
+
+            <div class="back-btn-container">
+                <a href="index.html" class="back-btn">← Tagasi kaardile</a>
+            </div>
+
+            <footer>
+                <p>© 2026 · Otsetee & <a href="https://gregoropmann.github.io/aboutme/" target="_blank">Gregor Opmann</a></p>
+            </footer>
+        </div>
+    </div>
 </body>
 </html>
