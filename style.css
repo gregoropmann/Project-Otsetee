@@ -487,6 +487,12 @@ body, html {
     background-color: #388E3C !important;
 }
 
+/* --- Kaardimarkerite emoji-badge stiil (loodud L.divIcon poolt inline'is, aga varu ka siin) --- */
+.leaflet-div-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
 /* ==========================================================================
    MOBIILI JA ARVUTI UNIVERSAALNE RESPONSIVE DISAIN (ALUMISED LISAAKTSIOONID)
    ========================================================================== */
@@ -548,4 +554,3 @@ body, html {
     object-fit: contain;
     margin: 0 auto;
 }
-
