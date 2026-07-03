@@ -68,14 +68,14 @@ function createMarkerIcon(type, emojis) {
     };
 
     const emojiBadges = emojis.map(e =>
-        `<div style="width:20px;height:20px;background:#fff;border-radius:50%;
-                display:flex;align-items:center;justify-content:center;font-size:11px;
+        `<div style="width:26px;height:26px;background:#fff;border-radius:50%;
+                display:flex;align-items:center;justify-content:center;font-size:15px;
                 box-shadow:0 2px 4px rgba(0,0,0,0.25);">${e}</div>`
     ).join('');
 
     return L.divIcon({
         html: `
-            <div style="position:relative;width:34px;height:52px;">
+            <div style="position:relative;width:40px;height:58px;">
                 <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);
                             display:flex;gap:2px;white-space:nowrap;">
                     ${emojiBadges}
@@ -87,9 +87,9 @@ function createMarkerIcon(type, emojis) {
             </div>
         `,
         className: '',
-        iconSize: [34, 52],
-        iconAnchor: [17, 50],
-        popupAnchor: [0, -50]
+        iconSize: [40, 58],
+        iconAnchor: [20, 56],
+        popupAnchor: [0, -56]
     });
 }
 
