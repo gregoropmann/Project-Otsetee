@@ -27,23 +27,71 @@ let isSelling = false;
 let userRole = 'buyer'; 
 let merchantMarkers = {}; 
 
-const markerIcons = {
-    temporary: L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-    }),
-    permanent: L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-    }),
-    outofstock: L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-    })
+// Ühine tooteemoji sõnastik - kasutab nii kiirfiltrid kui ka kaardimarkerid
+const productEmojis = {
+    "Maasikad": "🍓", "Aedmaasikad": "🍓", "Metsmaasikad": "🍓",
+    "Herned": "🫛", "Hernekaunad": "🫛",
+    "Mesi": "🍯", "Õiemesi": "🍯", "Metsamesi": "🍯", "Kanarbikumesi": "🍯",
+    "Kala": "🐟", "Suitsulõhe": "🐟", "Suitsuangerjas": "🐟", "Ahven": "🐟",
+    "Munad": "🥚", "Maamunad": "🥚", "Vutimunad": "🥚",
+    "Kartul": "🥔", "Värske kartul": "🥔",
+    "Küüslauk": "🧄", "Mugulsibul": "🧅", "Peipsi sibul": "🧅",
+    "Suitsusink": "🥩", "Liha": "🥩", "Värske kurk": "🥒", "Hapukurk": "🥒",
+    "Eesti tomat": "🍅", "Kirsstomatid": "🍅", "Kukeseened": "🍄", "Seened": "🍄",
+    "Käsitööleib": "🍞", "Leib": "🍞", "Õunad": "🍎", "Kodumaised õunad": "🍎",
+    "Piim": "🥛", "Juust": "🧀", "Kirsid": "🍒", "Vaarikad": "🍇", "Mustikad": "🫐"
 };
+
+function getEmojiForProduct(name) {
+    if (!name) return '🌾';
+    for (const [key, value] of Object.entries(productEmojis)) {
+        if (name.toLowerCase().includes(key.toLowerCase())) return value;
+    }
+    return '🌾';
+}
+
+// Tagastab kuni 3 unikaalset emojit müüja saadaolevatest toodetest, kaardimarkeri jaoks
+function getTopEmojis(products, max = 3) {
+    if (!products || products.length === 0) return ['🌾'];
+    const available = products.filter(p => (typeof p === 'object' ? p.available !== false : true));
+    const list = available.length > 0 ? available : products; // kui kõik otsas, näita ikkagi midagi
+    const emojis = list.map(p => getEmojiForProduct(typeof p === 'object' ? p.name : p));
+    return [...new Set(emojis)].slice(0, max);
+}
+
+// Loob kohandatud teardrop-markeri koos kuni 3 tooteemojiga selle kohal
+function createMarkerIcon(type, emojis) {
+    const colors = {
+        temporary: '#4CAF50',   // --buyer-green
+        permanent: '#4F77AA',   // --sinilill-blue
+        outofstock: '#9E9E9E'
+    };
+
+    const emojiBadges = emojis.map(e =>
+        `<div style="width:20px;height:20px;background:#fff;border-radius:50%;
+                display:flex;align-items:center;justify-content:center;font-size:11px;
+                box-shadow:0 2px 4px rgba(0,0,0,0.25);">${e}</div>`
+    ).join('');
+
+    return L.divIcon({
+        html: `
+            <div style="position:relative;width:34px;height:52px;">
+                <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);
+                            display:flex;gap:2px;white-space:nowrap;">
+                    ${emojiBadges}
+                </div>
+                <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%) rotate(-45deg);
+                            width:26px;height:26px;background:${colors[type]};
+                            border-radius:50% 50% 50% 0;box-shadow:0 3px 8px rgba(0,0,0,0.3);
+                            border:2.5px solid #fff;"></div>
+            </div>
+        `,
+        className: '',
+        iconSize: [34, 52],
+        iconAnchor: [17, 50],
+        popupAnchor: [0, -50]
+    });
+}
 
 const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
 
@@ -192,20 +240,6 @@ function renderQuickFilters() {
     if (!container) return;
 
     const popularProducts = ["Maasikad", "Herned", "Mesi", "Kala", "Munad", "Kartul", "Küüslauk", "Suitsusink", "Leib"];
-    
-    const emojis = {
-        "Maasikad": "🍓", "Aedmaasikad": "🍓", "Metsmaasikad": "🍓",
-        "Herned": "🫛", "Hernekaunad": "🫛",
-        "Mesi": "🍯", "Õiemesi": "🍯", "Metsamesi": "🍯", "Kanarbikumesi": "🍯",
-        "Kala": "🐟", "Suitsulõhe": "🐟", "Suitsuangerjas": "🐟", "Ahven": "🐟",
-        "Munad": "🥚", "Maamunad": "🥚", "Vutimunad": "🥚",
-        "Kartul": "🥔", "Värske kartul": "🥔",
-        "Küüslauk": "🧄", "Mugulsibul": "🧅", "Peipsi sibul": "🧅",
-        "Suitsusink": "🥩", "Liha": "🥩", "Värske kurk": "🥒", "Hapukurk": "🥒",
-        "Eesti tomat": "🍅", "Kirsstomatid": "🍅", "Kukeseened": "🍄", "Seened": "🍄",
-        "Käsitööleib": "🍞", "Leib": "🍞", "Õunad": "🍎", "Kodumaised õunad": "🍎", 
-        "Piim": "🥛", "Juust": "🧀", "Kirsid": "🍒", "Vaarikad": "🍇", "Mustikad": "🫐"
-    };
 
     let allItemsSet = new Set();
     for (const [category, items] of Object.entries(agriProducts)) {
@@ -228,14 +262,7 @@ function renderQuickFilters() {
         const btn = document.createElement('button');
         btn.className = 'filter-btn';
         
-        let emoji = '🍃';
-        for (const [key, value] of Object.entries(emojis)) {
-            if (product.toLowerCase().includes(key.toLowerCase())) {
-                emoji = value;
-                break;
-            }
-        }
-
+        const emoji = getEmojiForProduct(product);
         btn.innerHTML = `${emoji} ${product}`;
         btn.onclick = () => filterByProduct(product);
         container.appendChild(btn);
@@ -709,7 +736,8 @@ function initMap() {
                 
                 const allOOS = data.products && data.products.length > 0 && data.products.every(p => typeof p === 'object' && p.available === false);
                 
-                let currentIcon = markerIcons.temporary;
+                const markerEmojis = getTopEmojis(data.products);
+                let markerType = 'temporary';
                 let typeLabel = "<span style='color:green;font-weight:bold;'>VÄLKMÜÜK (Live kohapeal)</span>";
                 
                 let verifiedBadge = "";
@@ -719,15 +747,17 @@ function initMap() {
 
                 if (data.is_permanent) {
                     if (allOOS) {
-                        currentIcon = markerIcons.outofstock;
+                        markerType = 'outofstock';
                         typeLabel = "<span style='color:red;font-weight:bold;'>PÜSIKOHT (Kogu kaup otsas!)</span>";
                     } else {
-                        currentIcon = markerIcons.permanent;
+                        markerType = 'permanent';
                         typeLabel = "<span style='color:blue;font-weight:bold;'>PÜSIKOHT (Avatud / Saadaval)</span>";
                     }
                 } else if (allOOS) {
-                    currentIcon = markerIcons.outofstock;
+                    markerType = 'outofstock';
                 }
+
+                const currentIcon = createMarkerIcon(markerType, markerEmojis);
 
                 const phoneHTML = data.contact_phone ? `<br><b>Telefon:</b> ${data.contact_phone}` : '';
                 const hoursHTML = data.opening_hours ? `<br><b>Avatud:</b> ${data.opening_hours}` : '';
@@ -858,12 +888,14 @@ function updateLocationProcess(lat, lng, accuracy, isRestoring) {
 
     const allOOS = parsedProducts.length > 0 && parsedProducts.every(p => typeof p === 'object' && p.available === false);
 
-    let myIcon = markerIcons.temporary;
-    if(isPermanent) {
-        myIcon = allOOS ? markerIcons.outofstock : markerIcons.permanent;
+    const myEmojis = getTopEmojis(parsedProducts);
+    let myMarkerType = 'temporary';
+    if (isPermanent) {
+        myMarkerType = allOOS ? 'outofstock' : 'permanent';
     } else if (allOOS) {
-        myIcon = markerIcons.outofstock;
+        myMarkerType = 'outofstock';
     }
+    const myIcon = createMarkerIcon(myMarkerType, myEmojis);
 
     const prodListHTML = buildProductsHTML(parsedProducts);
     const gMapsLink = `http://maps.google.com/?q=${finalLat},${finalLng}`;
