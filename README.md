@@ -1,4 +1,4 @@
-#### [otset.ee on $300 — GoDaddy](https://buymeacoffee.com/gregoropmann)
+#### [Toeta Otseteed](https://buymeacoffee.com/gregoropmann)
 
 #### Otseteel ei leia Sa kunagi reklaame.
 
