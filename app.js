@@ -177,7 +177,7 @@ const agriProducts = {
 const profanityWordList = [
     "kurat", "perse", "persse", "türa", "tõra", "munn", "vittu", "vitt",
     "sitt", "sitapea", "lits", "mölakas", "debiil", "tola",
-    "fuck", "shit", "bitch", "asshole", "cunt", "dick", "bastard"
+    "fuck", "shit", "bitch", "asshole", "cunt", "dick", "bastard", "roppustest"
 ];
 
 // Tagastab esimese leitud roppuse antud tekstist, või null kui puhas.
