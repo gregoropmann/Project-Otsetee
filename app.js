@@ -159,6 +159,115 @@ const agriProducts = {
     ]
 };
 
+// ============================================================
+// ROPENDAMISE FILTER JA KASUTAJA BLOKEERIMISE SÜSTEEM
+// ------------------------------------------------------------
+// NB: See on kliendipoolne ESMANE kontroll (kiire tagasiside kasutajale
+// enne serverisse saatmist). Kuna tegu on JS-koodiga, mis jookseb kasutaja
+// enda brauseris, saab motiveeritud kasutaja sellest teoreetiliselt mööda
+// hiilida (nt saates andmed otse Firestore'i API kaudu). Päris turvaline
+// jõustamine (mida ei saa mööda hiilida) peab lõpuks toimuma Firestore
+// Security Rules + Cloud Function tasandil, mis kontrollib sama loogikat
+// serveris ja on ainuke, kes tohib kirjutada `isBanned` ja `ban_logs` välju.
+// ============================================================
+
+// Laienda seda nimekirja vastavalt vajadusele, või asenda päris
+// moderatsiooniteenusega (nt Google Perspective API), et vältida
+// valepositiive ja katta rohkem sõnu/kirjapilte.
+const profanityWordList = [
+    "kurat", "perse", "persse", "türa", "tõra", "munn", "vittu", "vitt",
+    "sitt", "sitapea", "lits", "mölakas", "debiil", "tola",
+    "fuck", "shit", "bitch", "asshole", "cunt", "dick", "bastard"
+];
+
+// Tagastab esimese leitud roppuse antud tekstist, või null kui puhas.
+// \b piirid aitavad vältida valepositiive (nt sõna sees peidus alamsõnad).
+function findProfanity(text) {
+    if (!text) return null;
+    const lower = String(text).toLowerCase();
+    for (const word of profanityWordList) {
+        const pattern = new RegExp(`\\b${word}\\w*\\b`, 'i');
+        if (pattern.test(lower)) return word;
+    }
+    return null;
+}
+
+// Kontrollib mitut väljade objekti { väljaNimi: tekst } korraga.
+// Tagastab esimese rikkumise { field, word, text } või null kui kõik puhas.
+function scanFieldsForProfanity(fields) {
+    for (const [fieldName, value] of Object.entries(fields)) {
+        const found = findProfanity(value);
+        if (found) {
+            return { field: fieldName, word: found, text: value };
+        }
+    }
+    return null;
+}
+
+// Sulgeb konto jäädavalt: kustutab aktiivse müügimarkeri, logib rikkumise
+// ban_logs kollektsiooni, märgib kasutaja users/{uid} dokumendis bännituks,
+// logib ta välja ja kuvab teate.
+async function banUserForProfanity(violation) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const uid = user.uid;
+    const username = user.displayName || user.email || uid;
+
+    try {
+        await deleteDoc(doc(db, "active_merchants", uid)).catch(() => {});
+
+        await setDoc(doc(collection(db, "ban_logs")), {
+            username: username,
+            userId: uid,
+            field: violation.field,
+            detectedProfanity: violation.word,
+            fullInputText: violation.text,
+            timestamp: new Date().toISOString()
+        });
+
+        await setDoc(doc(db, "users", uid), {
+            username: username,
+            isBanned: true,
+            banReason: violation.field,
+            bannedAt: new Date().toISOString()
+        }, { merge: true });
+    } catch (err) {
+        console.error("Viga konto sulgemisel:", err);
+    }
+
+    if (activeMarker) { map.removeLayer(activeMarker); activeMarker = null; }
+    if (accuracyCircle) { map.removeLayer(accuracyCircle); accuracyCircle = null; }
+    if (geoWatchId) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
+
+    try { await signOut(auth); } catch (e) { console.error(e); }
+    localStorage.clear();
+
+    switchView('login-view');
+    showNotification(
+        `Konto on jäädavalt suletud ropu keelekasutuse tõttu: "${violation.text}". Kui arvad, et see on eksitus, võta ühendust: otsetee.tugi@example.com`,
+        0
+    );
+}
+
+// Kontrollib, kas antud kasutaja on users/{uid} dokumendi järgi bännitud.
+// Kui jah, logib ta kohe välja ja tagastab true.
+async function enforceBanStatus(uid) {
+    try {
+        const userSnap = await getDoc(doc(db, "users", uid));
+        if (userSnap.exists() && userSnap.data().isBanned === true) {
+            localStorage.clear();
+            await signOut(auth);
+            switchView('login-view');
+            showNotification("Sinu konto on jäädavalt suletud ropu keelekasutuse tõttu. Kui arvad, et see on eksitus, võta ühendust: otsetee.tugi@example.com", 0);
+            return true;
+        }
+    } catch (err) {
+        console.error("Viga bänni staatuse kontrollimisel:", err);
+    }
+    return false;
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     renderQuickFilters(); 
     setupPaymentCheckboxListeners();
@@ -169,6 +278,13 @@ window.addEventListener('DOMContentLoaded', () => {
                 userRole = localStorage.getItem('otset_role') || 'merchant';          
                 switchView('map-view');
                 if (userRole === 'merchant') {
+                    enforceBanStatus(user.uid).then((isBanned) => {
+                        if (isBanned) return;
+                        // Taga, et users/{uid} dokument eksisteerib (kasutajanime jaoks ban_logs'is)
+                        setDoc(doc(db, "users", user.uid), {
+                            username: user.displayName || user.email || user.uid
+                        }, { merge: true }).catch(() => {});
+                    });
                     getDoc(doc(db, "active_merchants", user.uid)).then((docSnap) => {
                         if (docSnap.exists()) {
                             const data = docSnap.data();
@@ -471,6 +587,7 @@ window.confirmProductsAndStartGeo = function() {
     }
 
     let inventorySummary = [];
+    let priceFieldsToScan = {};
     selectedElements.forEach(el => {
         const id = el.id.replace('prod-card-', '');
         const name = el.getAttribute('data-name');
@@ -482,6 +599,7 @@ window.confirmProductsAndStartGeo = function() {
             name: `${name} (${price} €/${unit})`,
             available: !isItemOutOfStock
         });
+        priceFieldsToScan[`price_${name}`] = price;
     });
 
     const isPermanent = document.querySelector('input[name="sale_type"]:checked').value === 'permanent';
@@ -494,6 +612,18 @@ window.confirmProductsAndStartGeo = function() {
 
     const nameType = document.querySelector('input[name="name_type"]:checked').value;
     const customName = document.getElementById('merchant-custom-name').value.trim();
+
+    // --- ROPENDAMISE KONTROLL enne salvestamist ---
+    // Kontrollib müüja nime, infot (avatud/kellaajad) ja toodete hinnaväljasid.
+    const violation = scanFieldsForProfanity({
+        merchantName: customName,
+        info: hours,
+        ...priceFieldsToScan
+    });
+    if (violation) {
+        banUserForProfanity(violation);
+        return; // Katkesta kohe - ei salvestata ega jätkata müügikoha loomist
+    }
 
     localStorage.setItem('otset_active_products', JSON.stringify(inventorySummary));
     localStorage.setItem('otset_is_permanent', isPermanent ? 'true' : 'false');
