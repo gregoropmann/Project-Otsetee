@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { loadBannedWords, analyzeAndSanitize, autoReportProfanity } from "./filter.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBo648Em9A94sabAg0M-MXAlFUbXGjUr-Y",
@@ -160,6 +161,7 @@ const agriProducts = {
 };
 
 window.addEventListener('DOMContentLoaded', () => {
+    await loadBannedWords();
     renderQuickFilters(); 
     setupPaymentCheckboxListeners();
     onAuthStateChanged(auth, (user) => {
@@ -494,6 +496,31 @@ window.confirmProductsAndStartGeo = function() {
 
     const nameType = document.querySelector('input[name="name_type"]:checked').value;
     const customName = document.getElementById('merchant-custom-name').value.trim();
+
+    // --- PROFANITY FILTER INTEGRATION ---
+    if (nameType === 'custom' && customName !== '') {
+        const { cleanedText, isFlagged, matchedWords } = analyzeAndSanitize(customName);
+
+        if (isFlagged) {
+            // Silently log to Firestore
+            autoReportProfanity(
+                db, 
+                auth.currentUser, 
+                customName, 
+                matchedWords, 
+                'merchant_custom_name'
+            );
+
+            showNotification("Ebasobivad sõnad asendati tärnidega (*).");
+        }
+
+        // Replace raw input with cleaned text
+        customName = cleanedText;
+    }
+
+    // Continue with existing code using cleaned customName...
+    localStorage.setItem('otset_name_type', nameType);
+    localStorage.setItem('otset_custom_name', customName);
 
     localStorage.setItem('otset_active_products', JSON.stringify(inventorySummary));
     localStorage.setItem('otset_is_permanent', isPermanent ? 'true' : 'false');
