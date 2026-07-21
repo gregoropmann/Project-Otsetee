@@ -38,46 +38,68 @@ body, html {
     flex-direction: column;
 }
 
+/* ==========================================================================
+   LOGIN VIEW & LANDING PAGE
+   ========================================================================== */
+
 #login-view {
     justify-content: center;
     align-items: center;
     padding: 20px;
-    background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url("assets/pold.webp") center/cover no-repeat;
+    background: radial-gradient(circle, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 100%), 
+                url("assets/pold.webp") center/cover no-repeat;
     background-color: var(--sinilill-blue);
 }
 
 .login-card {
-    background: var(--card-white);
-    padding: 40px 30px;
-    border-radius: 24px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 40px 32px;
+    border-radius: 28px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.05);
     width: 100%;
     max-width: 380px;
     text-align: center;
 }
 
 .brand-title {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
 }
 
+.logo-small {
+    display: block;
+    max-width: 200px;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    margin: 0 auto;
+}
 
 .brand-subtitle {
-    font-size: 0.95rem;
-    color: #707070;
-    margin-bottom: 35px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #444;
+    background: rgba(79, 119, 170, 0.08);
+    padding: 8px 14px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 28px;
+    line-height: 1.3;
 }
 
 .oauth-btn {
     width: 100%;
     padding: 14px;
-    border-radius: 14px;
-    border: 1px solid #E0E0E0;
+    border-radius: 50px;
+    border: 1px solid rgba(0,0,0,0.08);
     background: white;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     display: flex;
@@ -85,12 +107,26 @@ body, html {
     justify-content: center;
     gap: 10px;
     margin-bottom: 12px;
-    transition: background 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.oauth-btn:hover { background: #F9F9F9; }
-.oauth-btn.apple { background: #000000; color: white; border: none; }
-        
+.oauth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    background: #F9F9F9;
+}
+
+.oauth-btn:active {
+    transform: translateY(0);
+}
+
+.oauth-btn.apple { 
+    background: #000000; 
+    color: white; 
+    border: none; 
+}
+
 .oauth-btn.buyer {
     background: var(--buyer-green);
     color: white;
@@ -104,16 +140,48 @@ body, html {
     display: flex;
     align-items: center;
     text-align: center;
-    font-size: 0.85rem;
-    color: #aaa;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    font-weight: 600;
 }
 .divider::before, .divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #E0E0E0;
 }
-.divider:not(:empty)::before { margin-right: .25em; }
-.divider:not(:empty)::after { margin-left: .25em; }
+.divider:not(:empty)::before { margin-right: .5em; }
+.divider:not(:empty)::after { margin-left: .5em; }
+
+/* Login Footer Links Grid */
+.login-footer-links {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.login-footer-links a {
+    color: #555;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+}
+
+.login-footer-links a:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--text-charcoal);
+}
+
+/* ==========================================================================
+   MAP VIEW & INTERFACE
+   ========================================================================== */
 
 #map-container {
     flex: 1;
@@ -134,7 +202,7 @@ body, html {
 .search-bar {
     width: 100%;
     padding: 14px 16px;
-    border-radius: 14px;
+    border-radius: 16px;
     border: none;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
@@ -217,7 +285,79 @@ body, html {
 .btn-danger { background-color: var(--danger-red); color: white; }
 .btn-success { background-color: var(--buyer-green); color: white; }
 .btn-warning { background-color: #757575; color: white; }
-        
+
+/* Quick Filter Buttons */
+.quick-filters {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; 
+}
+
+.quick-filters::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-charcoal);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:active {
+    background: var(--sinilill-blue);
+    color: white;
+    transform: scale(0.95);
+}
+
+/* Leaflet Overrides */
+.leaflet-popup-content-wrapper {
+    border-radius: 16px !important;
+    padding: 6px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+}
+
+.leaflet-popup-content {
+    margin: 12px 14px !important;
+    line-height: 1.5 !important;
+}
+
+.leaflet-div-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.nav-link-btn { 
+    display: block;
+    margin-top: 10px; 
+    padding: 10px 12px;
+    background-color: var(--buyer-green) !important; 
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+    transition: background 0.2s;
+}
+
+.nav-link-btn:active { background-color: #388E3C !important; }
+
+/* ==========================================================================
+   PRODUCT SELECTION & SETTINGS VIEW
+   ========================================================================== */
+
 #product-selection-view {
     background-color: var(--summer-cream);
     padding: 20px;
@@ -281,6 +421,7 @@ body, html {
 }
 
 .category-block { margin-bottom: 24px; }
+
 .category-name {
     font-size: 1.05rem;
     font-weight: 700;
@@ -363,6 +504,31 @@ body, html {
     border-color: var(--wheat-gold);
 }
 
+.product-card.out-of-stock-status {
+    border-left: 4px solid #D32F2F !important;
+    background-color: #FFEBEE !important;
+    opacity: 0.85;
+}
+.product-card.out-of-stock-status .product-label {
+    text-decoration: line-through;
+    color: #c62828;
+}
+
+.stock-toggle-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #D32F2F;
+}
+
+.stock-status-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #444;
+}
+
 .sticky-footer {
     position: sticky;
     bottom: 0;
@@ -372,6 +538,10 @@ body, html {
     border-top: 1px solid rgba(0,0,0,0.05);
     z-index: 10;
 }
+
+/* ==========================================================================
+   NOTIFICATIONS & MODALS
+   ========================================================================== */
 
 .notification-container {
     position: absolute;
@@ -403,101 +573,11 @@ body, html {
 .notification-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .notif-btn { padding: 10px 18px; border: none; border-radius: 10px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
 .preview-marker-icon { filter: hue-rotate(140deg) saturate(2); }
-.nav-link-btn { display: block; margin-top: 8px; padding: 10px 12px; background: #4285F4; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem; text-align: center;}
-
-.product-card.out-of-stock-status {
-    border-left: 4px solid #D32F2F !important;
-    background-color: #FFEBEE !important;
-    opacity: 0.85;
-}
-.product-card.out-of-stock-status .product-label {
-    text-decoration: line-through;
-    color: #c62828;
-}
-.stock-toggle-checkbox {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    accent-color: #D32F2F;
-}
-.stock-status-container {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    color: #444;
-}
-
-/* --- Uued stiilid "Leia lähim" tootefiltrite nupuribale --- */
-.quick-filters {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-    overflow-x: auto;
-    padding-bottom: 6px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; 
-}
-
-.quick-filters::-webkit-scrollbar {
-    display: none; 
-}
-
-.filter-btn {
-    flex: 0 0 auto;
-    padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(0,0,0,0.05);
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-charcoal);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.filter-btn:active {
-    background: var(--sinilill-blue);
-    color: white;
-    transform: scale(0.95);
-}
-
-/* --- Leaflet Popupite iluravi --- */
-.leaflet-popup-content-wrapper {
-    border-radius: 16px !important;
-    padding: 6px !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
-}
-
-.leaflet-popup-content {
-    margin: 12px 14px !important;
-    line-height: 1.5 !important;
-}
-
-.nav-link-btn {
-    margin-top: 10px;
-    background-color: var(--buyer-green) !important;
-    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
-    transition: background 0.2s;
-}
-
-.nav-link-btn:active {
-    background-color: #388E3C !important;
-}
-
-/* --- Kaardimarkerite emoji-badge stiil (loodud L.divIcon poolt inline'is, aga varu ka siin) --- */
-.leaflet-div-icon {
-    background: transparent !important;
-    border: none !important;
-}
 
 /* ==========================================================================
-   MOBIILI JA ARVUTI UNIVERSAALNE RESPONSIVE DISAIN (ALUMISED LISAAKTSIOONID)
+   RESPONSIVE UTILITIES
    ========================================================================== */
 
-/* Baaskonteiner alumistele nuppudele */
 .login-footer-row {
     display: flex;
     gap: 10px;
@@ -505,13 +585,11 @@ body, html {
     width: 100%;
 }
 
-/* Ühildame uued lisategevused täielikult Sinu .oauth-btn loogikaga */
 .login-footer-row .oauth-btn {
     margin-bottom: 0 !important;
     text-decoration: none;
 }
 
-/* Spetsiaalsed värvitoonid uutele nuppudele */
 .oauth-btn.btn-coffee {
     background-color: #FFDD00 !important;
     border-color: #FFDD00 !important;
@@ -526,7 +604,6 @@ body, html {
 }
 .oauth-btn.btn-feedback:hover { background-color: #E5E5E5 !important; }
 
-/* KUI ON MOBIIL (või kitsas ekraan): nupud lähevad üksteise alla, et tekst ära mahuks */
 @media (max-width: 360px) {
     .login-footer-row {
         flex-direction: column;
@@ -534,23 +611,13 @@ body, html {
     }
 }
 
-/* KUI ON ARVUTI (või laiem ekraan): nupud on perfektselt kõrvuti reas ja jagavad ruumi võrdselt */
 @media (min-width: 361px) {
     .login-footer-row {
         flex-direction: row;
     }
     .login-footer-row .oauth-btn {
         flex: 1;
-        font-size: 0.85rem; /* Pisut väiksem font hoiab ära teksti murdumise kahes reale */
+        font-size: 0.85rem;
         padding: 12px 6px;
     }
-}
-
-.logo-small {
-    display: block;
-    max-width: 200px;
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-    margin: 0 auto;
 }
