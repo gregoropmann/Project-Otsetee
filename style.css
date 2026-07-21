@@ -8,9 +8,10 @@
     --border-gray: #EAEAEA;
     --buyer-green: #4CAF50;
     
-    --glass-bg: rgba(255, 255, 255, 0.75);
+    /* Modern Glassmorphism Tokens */
+    --glass-bg: rgba(255, 255, 255, 0.72);
     --glass-border: rgba(255, 255, 255, 0.6);
-    --glass-blur: blur(16px);
+    --glass-blur: blur(20px) saturate(180%);
     --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
@@ -42,6 +43,10 @@ body, html {
     display: flex;
     flex-direction: column;
 }
+
+/* ==========================================================================
+   LOGIN VIEW & LANDING PAGE (ULTRA GLASSMORPHISM)
+   ========================================================================== */
 
 #login-view {
     justify-content: center;
@@ -203,6 +208,10 @@ body, html {
     color: var(--text-charcoal);
 }
 
+/* ==========================================================================
+   MAP VIEW & FLOATING OVERLAYS
+   ========================================================================== */
+
 #map-container {
     flex: 1;
     width: 100%;
@@ -224,7 +233,7 @@ body, html {
     padding: 14px 18px;
     border-radius: 20px;
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.72);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: var(--glass-shadow);
@@ -235,7 +244,7 @@ body, html {
 }
 
 .search-bar:focus {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.9);
 }
 
 .custom-zoom-controls {
@@ -251,7 +260,7 @@ body, html {
 .zoom-btn {
     width: 46px;
     height: 46px;
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.72);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
@@ -283,12 +292,13 @@ body, html {
     max-width: 460px;
 }
 
-.action-bar {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
+/* High-specificity rules for the bottom action bar */
+.map-overlay .action-bar {
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.05) !important;
     padding: 12px;
     border-radius: 24px;
     display: flex;
@@ -310,14 +320,15 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.btn-primary { background-color: var(--sinilill-blue); color: white; }
-.btn-accent { background-color: var(--wheat-gold); color: white; }
-.btn-danger { background-color: var(--danger-red); color: white; }
-.btn-success { background-color: var(--buyer-green); color: white; }
-.btn-warning { background-color: #757575; color: white; }
+/* Slightly semi-transparent button colors so glass effect shines through */
+.btn-primary { background-color: rgba(79, 119, 170, 0.92); color: white; }
+.btn-accent { background-color: rgba(229, 169, 60, 0.92); color: white; }
+.btn-danger { background-color: rgba(217, 83, 79, 0.92); color: white; }
+.btn-success { background-color: rgba(76, 175, 80, 0.92); color: white; }
+.btn-warning { background-color: rgba(117, 117, 117, 0.92); color: white; }
 
 .btn:active {
     transform: scale(0.96);
@@ -338,7 +349,7 @@ body, html {
 .filter-btn {
     flex: 0 0 auto;
     padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.6);
@@ -357,12 +368,14 @@ body, html {
     transform: scale(0.95);
 }
 
+/* Leaflet Popups */
 .leaflet-popup-content-wrapper {
     border-radius: 20px !important;
     padding: 6px !important;
     box-shadow: var(--glass-shadow) !important;
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
 }
 
 .leaflet-popup-content {
@@ -391,6 +404,10 @@ body, html {
 }
 
 .nav-link-btn:active { background-color: #388E3C !important; }
+
+/* ==========================================================================
+   PRODUCT SELECTION & SETTINGS VIEW
+   ========================================================================== */
 
 #product-selection-view {
     background-color: var(--summer-cream);
@@ -574,6 +591,10 @@ body, html {
     z-index: 10;
 }
 
+/* ==========================================================================
+   NOTIFICATIONS & MODALS
+   ========================================================================== */
+
 .notification-container {
     position: absolute;
     top: 90px;
@@ -604,6 +625,10 @@ body, html {
 .notification-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .notif-btn { padding: 10px 18px; border: none; border-radius: 10px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
 .preview-marker-icon { filter: hue-rotate(140deg) saturate(2); }
+
+/* ==========================================================================
+   RESPONSIVE UTILITIES
+   ========================================================================== */
 
 .login-footer-row {
     display: flex;
