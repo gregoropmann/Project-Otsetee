@@ -494,8 +494,8 @@ window.confirmProductsAndStartGeo = function() {
     const nameType = document.querySelector('input[name="name_type"]:checked').value;
     let customName = document.getElementById('merchant-custom-name').value.trim();
 
-    if (customName.length > 50) {
-        customName = customName.slice(0, 50);
+    if (customName.length > 30) {
+        customName = customName.slice(0, 30);
     }
 
     // --- PROFANITY FILTER INTEGRATION ---
