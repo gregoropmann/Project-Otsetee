@@ -51,20 +51,18 @@ function getEmojiForProduct(name) {
     return '🌾';
 }
 
-// Tagastab kuni 3 unikaalset emojit müüja saadaolevatest toodetest, kaardimarkeri jaoks
 function getTopEmojis(products, max = 3) {
     if (!products || products.length === 0) return ['🌾'];
     const available = products.filter(p => (typeof p === 'object' ? p.available !== false : true));
-    const list = available.length > 0 ? available : products; // kui kõik otsas, näita ikkagi midagi
+    const list = available.length > 0 ? available : products;
     const emojis = list.map(p => getEmojiForProduct(typeof p === 'object' ? p.name : p));
     return [...new Set(emojis)].slice(0, max);
 }
 
-// Loob kohandatud teardrop-markeri koos kuni 3 tooteemojiga selle kohal
 function createMarkerIcon(type, emojis) {
     const colors = {
-        temporary: '#4CAF50',   // --buyer-green
-        permanent: '#4F77AA',   // --sinilill-blue
+        temporary: '#4CAF50',
+        permanent: '#4F77AA',
         outofstock: '#9E9E9E'
     };
 
@@ -96,7 +94,6 @@ function createMarkerIcon(type, emojis) {
 
 const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
 
-// Teisendab salvestatud payment_type väärtuse (nt "cash", "card+transfer", "all") loetavaks Eesti keelseks sildiks
 function getPaymentLabel(paymentType) {
     const labels = { cash: "Sularaha 💵", card: "Kaardimakse 💳", transfer: "Pangaülekanne 📲🏦" };
 
@@ -160,8 +157,10 @@ const agriProducts = {
     ]
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+    // Lae sõnastik sisse enne koodi käivitumist
     await loadBannedWords();
+
     renderQuickFilters(); 
     setupPaymentCheckboxListeners();
     onAuthStateChanged(auth, (user) => {
@@ -208,7 +207,6 @@ window.addEventListener('DOMContentLoaded', () => {
                         }
                     }).catch((err) => {
                         console.error("Viga andmete lugemisel või õigustes:", err);
-                        // Kui andmebaasist lugemine ebaõnnestub, tagame et vaade ja kaart ikkagi töötaksid
                         renderCatalog();
                         updateActionBarState();
                         setTimeout(() => {
@@ -300,10 +298,9 @@ function renderCatalog() {
     } else {
         const rad = document.querySelector('input[name="sale_type"][value="temporary"]');
         if(rad) rad.checked = true;
-        document.getElementById('permanent-only-fields').style.none = 'none';
+        document.getElementById('permanent-only-fields').style.display = 'none';
     }
 
-    // --- UUENDATUD MAKSEVIISIDE KUVAMISE LOOGIKA (ERALDI VALIKUD + KOMBINATSIOONID) ---
     const savedPayment = localStorage.getItem('otset_payment_type') || 'all';
     const hiddenPaymentInput = document.getElementById('hidden-payment-type');
     if (hiddenPaymentInput) {
@@ -495,14 +492,13 @@ window.confirmProductsAndStartGeo = function() {
     const hours = document.getElementById('merchant-hours').value;
 
     const nameType = document.querySelector('input[name="name_type"]:checked').value;
-    const customName = document.getElementById('merchant-custom-name').value.trim();
+    let customName = document.getElementById('merchant-custom-name').value.trim();
 
     // --- PROFANITY FILTER INTEGRATION ---
     if (nameType === 'custom' && customName !== '') {
         const { cleanedText, isFlagged, matchedWords } = analyzeAndSanitize(customName);
 
         if (isFlagged) {
-            // Silently log to Firestore
             autoReportProfanity(
                 db, 
                 auth.currentUser, 
@@ -510,17 +506,10 @@ window.confirmProductsAndStartGeo = function() {
                 matchedWords, 
                 'merchant_custom_name'
             );
-
             showNotification("Ebasobivad sõnad asendati tärnidega (*).");
         }
-
-        // Replace raw input with cleaned text
         customName = cleanedText;
     }
-
-    // Continue with existing code using cleaned customName...
-    localStorage.setItem('otset_name_type', nameType);
-    localStorage.setItem('otset_custom_name', customName);
 
     localStorage.setItem('otset_active_products', JSON.stringify(inventorySummary));
     localStorage.setItem('otset_is_permanent', isPermanent ? 'true' : 'false');
@@ -664,10 +653,8 @@ window.handleLogin = async function(role, providerName) {
         if (providerName === 'Google') {
             showNotification("Ühendun Google'iga...");
             try {
-                // Sunnib Firebase'i hoidma sisselogimise seisu kohalikus mälus, mis ei kuku partitioned keskkonnas kokku
                 await setPersistence(auth, browserLocalPersistence);
                 await signInWithPopup(auth, provider);
-                // onAuthStateChanged ei pruugi pärast popup'i kohe käivituda, seega läheme kaardile kindluse mõttes ka siin
                 switchView('map-view');
                 updateActionBarState();
             } catch (error) {
@@ -709,7 +696,7 @@ window.handleLogout = async function() {
     if (previewMarker) { map.removeLayer(previewMarker); previewMarker = null; }
     try {
         if (!isPerm && auth.currentUser) {
-            await deleteDoc(doc(doc(db, "active_merchants", auth.currentUser.uid)));
+            await deleteDoc(doc(db, "active_merchants", auth.currentUser.uid));
         }
         await signOut(auth);
         if(isPerm) {
@@ -1306,14 +1293,12 @@ window.toggleShopNameField = function() {
     }
 };
 
-// --- KORRIGEERITUD MÄRKERUUTUDE SEOTUS: KUSTUTATUD KÕIK 3 NUPP ---
 function setupPaymentCheckboxListeners() {
     const individualBoxes = document.querySelectorAll('input[name="payment_method"]');
     const hiddenInput = document.getElementById('hidden-payment-type');
 
     if (individualBoxes.length === 0 || !hiddenInput) return;
 
-    // Funktsioon, mis arvutab ja uuendab varjatud sisendvälja väärtust reaalajas klikkimisel
     function updateHiddenValue() {
         let selected = [];
         const currentBoxes = document.querySelectorAll('input[name="payment_method"]');
@@ -1321,20 +1306,16 @@ function setupPaymentCheckboxListeners() {
             if (cb.checked) selected.push(cb.value);
         });
 
-        // Järjekord fikseeritud: cash, card, transfer (et \"card+cash\" ja \"cash+card\" ei tekiks eraldi väärtustena)
         const order = ["cash", "card", "transfer"];
         selected.sort((a, b) => order.indexOf(a) - order.indexOf(b));
 
         if (selected.length === 3 || selected.length === 0) {
-            // Kõik valitud (või mitte ühtegi valitud, vaikeväärtus) = "all"
             hiddenInput.value = "all";
         } else {
-            // 1 või 2 valitud: eraldi väärtus iga kombinatsiooni jaoks, nt "cash", "card+transfer"
             hiddenInput.value = selected.join("+");
         }
     }
 
-    // Seome kuulajad puhtalt igale üksikule kastile ilma topelt konfliktideta
     individualBoxes.forEach(cb => {
         const newCb = cb.cloneNode(true);
         cb.parentNode.replaceChild(newCb, cb);
