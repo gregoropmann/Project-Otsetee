@@ -7,6 +7,13 @@
     --danger-red: #D9534F;
     --border-gray: #EAEAEA;
     --buyer-green: #4CAF50;
+    
+    /* Modern Glassmorphism Design Tokens */
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-bg-hover: rgba(255, 255, 255, 0.88);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-blur: blur(20px);
+    --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 * {
@@ -39,29 +46,31 @@ body, html {
 }
 
 /* ==========================================================================
-   LOGIN VIEW & LANDING PAGE
+   LOGIN VIEW & LANDING PAGE (ULTRA GLASSMORPHISM)
    ========================================================================== */
 
 #login-view {
     justify-content: center;
     align-items: center;
     padding: 20px;
-    background: radial-gradient(circle, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 100%), 
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.45) 100%), 
                 url("assets/pold.webp") center/cover no-repeat;
     background-color: var(--sinilill-blue);
 }
 
+/* High-Impact Frosted Glass Container */
 .login-card {
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    padding: 40px 32px;
-    border-radius: 28px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.05);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    padding: 42px 32px;
+    border-radius: 32px;
+    box-shadow: var(--glass-shadow);
     width: 100%;
     max-width: 380px;
     text-align: center;
+    transition: transform 0.3s ease;
 }
 
 .brand-title {
@@ -74,47 +83,56 @@ body, html {
 
 .logo-small {
     display: block;
-    max-width: 200px;
+    max-width: 190px;
     width: 100%;
     height: auto;
     object-fit: contain;
     margin: 0 auto;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 .brand-subtitle {
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: #444;
-    background: rgba(79, 119, 170, 0.08);
-    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 8px 16px;
     border-radius: 20px;
     display: inline-block;
     margin-bottom: 28px;
-    line-height: 1.3;
+    line-height: 1.35;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
 
+/* Glassmorphic OAuth Pill Buttons */
 .oauth-btn {
     width: 100%;
     padding: 14px;
     border-radius: 50px;
-    border: 1px solid rgba(0,0,0,0.08);
-    background: white;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     font-size: 0.95rem;
     font-weight: 600;
+    color: var(--text-charcoal);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
     margin-bottom: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .oauth-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    background: #F9F9F9;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .oauth-btn:active {
@@ -122,41 +140,52 @@ body, html {
 }
 
 .oauth-btn.apple { 
-    background: #000000; 
+    background: rgba(0, 0, 0, 0.9); 
     color: white; 
-    border: none; 
+    border: 1px solid rgba(255, 255, 255, 0.2); 
+}
+
+.oauth-btn.apple:hover {
+    background: #000000;
 }
 
 .oauth-btn.buyer {
     background: var(--buyer-green);
     color: white;
     border: none;
-    margin-top: 10px;
+    margin-top: 8px;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
 }
-.oauth-btn.buyer:hover { background: #43A047; }
+
+.oauth-btn.buyer:hover { 
+    background: #43A047;
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
 
 .divider {
-    margin: 20px 0;
+    margin: 22px 0;
     display: flex;
     align-items: center;
     text-align: center;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #888;
-    font-weight: 600;
+    letter-spacing: 1.2px;
+    color: #666;
+    font-weight: 700;
 }
+
 .divider::before, .divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #E0E0E0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
-.divider:not(:empty)::before { margin-right: .5em; }
-.divider:not(:empty)::after { margin-left: .5em; }
 
-/* Login Footer Links Grid */
+.divider:not(:empty)::before { margin-right: 0.6em; }
+.divider:not(:empty)::after { margin-left: 0.6em; }
+
+/* Frosted Footer Links */
 .login-footer-links {
-    margin-top: 24px;
+    margin-top: 26px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -164,23 +193,27 @@ body, html {
 }
 
 .login-footer-links a {
-    color: #555;
+    color: #333;
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
-    padding: 6px 12px;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.04);
+    padding: 7px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     transition: all 0.2s ease;
 }
 
 .login-footer-links a:hover {
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.85);
+    transform: translateY(-1px);
     color: var(--text-charcoal);
 }
 
 /* ==========================================================================
-   MAP VIEW & INTERFACE
+   MAP VIEW & FLOATING GLASS OVERLAYS
    ========================================================================== */
 
 #map-container {
@@ -201,15 +234,21 @@ body, html {
 
 .search-bar {
     width: 100%;
-    padding: 14px 16px;
-    border-radius: 16px;
-    border: none;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 14px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
     font-size: 1rem;
     color: var(--text-charcoal);
     outline: none;
+    transition: background 0.2s;
+}
+
+.search-bar:focus {
+    background: rgba(255, 255, 255, 0.95);
 }
 
 .custom-zoom-controls {
@@ -225,23 +264,27 @@ body, html {
 .zoom-btn {
     width: 46px;
     height: 46px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(4px);
-    border: none;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--text-charcoal);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: var(--glass-shadow);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     user-select: none;
-    transition: background 0.2s;
+    transition: all 0.2s;
 }
 
-.zoom-btn:active { background: #EAEAEA; }
+.zoom-btn:active { 
+    background: rgba(255, 255, 255, 0.95);
+    transform: scale(0.95);
+}
 
 .map-overlay {
     position: absolute;
@@ -254,11 +297,13 @@ body, html {
 }
 
 .action-bar {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     padding: 14px;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-radius: 24px;
+    box-shadow: var(--glass-shadow);
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
@@ -267,14 +312,14 @@ body, html {
 .btn {
     flex: 1;
     min-width: 90px;
-    padding: 12px 8px;
+    padding: 12px 10px;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
     text-align: center;
-    transition: background 0.2s, color 0.2s;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -286,7 +331,12 @@ body, html {
 .btn-success { background-color: var(--buyer-green); color: white; }
 .btn-warning { background-color: #757575; color: white; }
 
-/* Quick Filter Buttons */
+.btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+}
+
+/* Quick Filter Pill Buttons */
 .quick-filters {
     display: flex;
     gap: 8px;
@@ -301,15 +351,16 @@ body, html {
 
 .filter-btn {
     flex: 0 0 auto;
-    padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(0,0,0,0.05);
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-charcoal);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -320,11 +371,13 @@ body, html {
     transform: scale(0.95);
 }
 
-/* Leaflet Overrides */
+/* Leaflet Popup Restyling */
 .leaflet-popup-content-wrapper {
-    border-radius: 16px !important;
+    border-radius: 20px !important;
     padding: 6px !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+    box-shadow: var(--glass-shadow) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
 }
 
 .leaflet-popup-content {
@@ -344,11 +397,11 @@ body, html {
     background-color: var(--buyer-green) !important; 
     color: white;
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 12px;
     font-weight: bold;
     font-size: 0.85rem;
     text-align: center;
-    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
     transition: background 0.2s;
 }
 
@@ -377,13 +430,14 @@ body, html {
 
 .meta-settings-card {
     background: var(--card-white);
-    padding: 16px;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 18px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    border: 1px solid rgba(0,0,0,0.04);
 }
 
 .form-group {
@@ -399,9 +453,9 @@ body, html {
 }
 
 .form-input {
-    padding: 10px;
+    padding: 10px 12px;
     border: 1px solid #CCC;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 0.95rem;
 }
 
@@ -552,9 +606,9 @@ body, html {
     width: calc(100% - 32px);
     max-width: 360px;
     background: white;
-    padding: 16px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    padding: 18px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     display: flex;
     flex-direction: column;
     gap: 12px;
