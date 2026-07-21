@@ -19,7 +19,9 @@
     <link rel="shortcut icon" href="assets/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Otsetee" />
-    <link rel="stylesheet" href="style.css?ver=3.0">
+    
+    <link rel="stylesheet" href="style.css?ver=3.1">
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="application/ld+json">
@@ -41,7 +43,9 @@
 <body>
     <div id="login-view" class="view active">
         <div class="login-card">
-<div class="brand-title"><img src="assets/otsetee_logo-tp.png" alt="Otsetee logo transparent" class="logo-small"></div>
+            <div class="brand-title">
+                <img src="assets/otsetee_logo-tp.png" alt="Otsetee logo transparent" class="logo-small">
+            </div>
 
             <div class="brand-subtitle" id="brand-subtitle">Otsetee värske toiduni maanteel</div>
 
@@ -84,7 +88,7 @@
             <input type="text" id="location-search" class="search-bar" placeholder="Otsi asukohta või teeotsa..." onkeypress="handleSearch(event)">
             
             <div class="quick-filters" id="quick-filters-container">
-                </div>
+            </div>
         </div>
 
         <div id="map-container"></div>
@@ -96,7 +100,7 @@
             <div class="action-bar">
                 <button id="action-btn" class="btn btn-accent" onclick="handleActionBarClick()">Alusta Müüki</button>
                 <button id="stock-btn" class="btn btn-warning" style="display: none;" onclick="toggleStockState()">Kaup OTSAS</button>
-                <button id="verify-btn" class="btn btn-accent" style="display: none; background-color: #E5A93C; color: white;" onclick="askForSupportAndVerify()">⭐ Tõsta usaldusväärsust</button>
+                <button id="verify-btn" class="btn btn-accent" style="display: none;" onclick="askForSupportAndVerify()">⭐ Tõsta usaldusväärsust</button>
                 <button id="edit-products-btn" class="btn btn-primary" style="display: none;" onclick="switchView('product-selection-view')">Seaded</button>
                 <button class="btn btn-primary" style="flex: 0.6; min-width: 70px;" onclick="handleLogout()">Logi välja</button>
             </div>
@@ -110,20 +114,21 @@
         </div>
         <div class="meta-settings-card">
             <div class="meta-input-group" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
-    <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-charcoal);">Müügikoha/Poe nimi kaardil:</label>
-    
-    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 5px;">
-        <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-            <input type="radio" name="name_type" value="google" checked onchange="toggleShopNameField()"> Google'i nimi
-        </label>
-        <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-            <input type="radio" name="name_type" value="custom" onchange="toggleShopNameField()"> Erimi/Poenimi
-        </label>
-    </div>
+                <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-charcoal);">Müügikoha/Poe nimi kaardil:</label>
+                
+                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 5px;">
+                    <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="name_type" value="google" checked onchange="toggleShopNameField()"> Google'i nimi
+                    </label>
+                    <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="name_type" value="custom" onchange="toggleShopNameField()"> Erimi/Poenimi
+                    </label>
+                </div>
 
-    <input type="text" id="merchant-custom-name" maxlength="30" placeholder="Sisesta oma poe või talu nimi"
-           style="display: none; width: 100%; padding: 10px; border: 1px solid var(--border-gray); border-radius: 8px; font-size: 0.9rem;">
-</div>
+                <input type="text" id="merchant-custom-name" maxlength="30" placeholder="Sisesta oma poe või talu nimi"
+                       style="display: none; width: 100%; padding: 10px; border: 1px solid var(--border-gray); border-radius: 8px; font-size: 0.9rem;">
+            </div>
+            
             <div class="form-group">
                 <label>Müügikoha tüüp:</label>
                 <div class="radio-group">
@@ -140,10 +145,6 @@
                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-charcoal); display: block; margin-bottom: 8px;">Toetatud makseviisid:</label>
                 
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
-                    <!-- <label style="font-size: 0.9rem; color: #2C2A29; font-weight: bold; display: flex; align-items: center; gap: 8px; cursor: pointer; padding-bottom: 4px; border-bottom: 1px solid #eee;">
-                        <input type="checkbox" id="pay-all" value="all" checked> Kõik 3 makseviisi 💵💳📲
-                    </label> -->
-
                     <label style="font-size: 0.9rem; color: #4a4a4a; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-left: 5px;">
                         <input type="checkbox" name="payment_method" value="cash" checked> Sularaha 💵
                     </label>
