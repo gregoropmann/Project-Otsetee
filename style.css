@@ -8,12 +8,10 @@
     --border-gray: #EAEAEA;
     --buyer-green: #4CAF50;
     
-    /* Modern Glassmorphism Design Tokens */
     --glass-bg: rgba(255, 255, 255, 0.75);
-    --glass-bg-hover: rgba(255, 255, 255, 0.88);
     --glass-border: rgba(255, 255, 255, 0.6);
-    --glass-blur: blur(20px);
-    --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.06);
+    --glass-blur: blur(16px);
+    --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -45,10 +43,6 @@ body, html {
     flex-direction: column;
 }
 
-/* ==========================================================================
-   LOGIN VIEW & LANDING PAGE (ULTRA GLASSMORPHISM)
-   ========================================================================== */
-
 #login-view {
     justify-content: center;
     align-items: center;
@@ -58,7 +52,6 @@ body, html {
     background-color: var(--sinilill-blue);
 }
 
-/* High-Impact Frosted Glass Container */
 .login-card {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
@@ -88,7 +81,7 @@ body, html {
     height: auto;
     object-fit: contain;
     margin: 0 auto;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    mix-blend-mode: multiply;
 }
 
 .brand-subtitle {
@@ -107,7 +100,6 @@ body, html {
     box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
 
-/* Glassmorphic OAuth Pill Buttons */
 .oauth-btn {
     width: 100%;
     padding: 14px;
@@ -183,7 +175,6 @@ body, html {
 .divider:not(:empty)::before { margin-right: 0.6em; }
 .divider:not(:empty)::after { margin-left: 0.6em; }
 
-/* Frosted Footer Links */
 .login-footer-links {
     margin-top: 26px;
     display: flex;
@@ -211,10 +202,6 @@ body, html {
     transform: translateY(-1px);
     color: var(--text-charcoal);
 }
-
-/* ==========================================================================
-   MAP VIEW & FLOATING GLASS OVERLAYS
-   ========================================================================== */
 
 #map-container {
     flex: 1;
@@ -297,13 +284,13 @@ body, html {
 }
 
 .action-bar {
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
-    padding: 14px;
-    border-radius: 24px;
     box-shadow: var(--glass-shadow);
+    padding: 12px;
+    border-radius: 24px;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
@@ -314,7 +301,7 @@ body, html {
     min-width: 90px;
     padding: 12px 10px;
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
@@ -323,6 +310,7 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .btn-primary { background-color: var(--sinilill-blue); color: white; }
@@ -331,12 +319,10 @@ body, html {
 .btn-success { background-color: var(--buyer-green); color: white; }
 .btn-warning { background-color: #757575; color: white; }
 
-.btn:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.05);
+.btn:active {
+    transform: scale(0.96);
 }
 
-/* Quick Filter Pill Buttons */
 .quick-filters {
     display: flex;
     gap: 8px;
@@ -371,7 +357,6 @@ body, html {
     transform: scale(0.95);
 }
 
-/* Leaflet Popup Restyling */
 .leaflet-popup-content-wrapper {
     border-radius: 20px !important;
     padding: 6px !important;
@@ -406,10 +391,6 @@ body, html {
 }
 
 .nav-link-btn:active { background-color: #388E3C !important; }
-
-/* ==========================================================================
-   PRODUCT SELECTION & SETTINGS VIEW
-   ========================================================================== */
 
 #product-selection-view {
     background-color: var(--summer-cream);
@@ -593,10 +574,6 @@ body, html {
     z-index: 10;
 }
 
-/* ==========================================================================
-   NOTIFICATIONS & MODALS
-   ========================================================================== */
-
 .notification-container {
     position: absolute;
     top: 90px;
@@ -627,10 +604,6 @@ body, html {
 .notification-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .notif-btn { padding: 10px 18px; border: none; border-radius: 10px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
 .preview-marker-icon { filter: hue-rotate(140deg) saturate(2); }
-
-/* ==========================================================================
-   RESPONSIVE UTILITIES
-   ========================================================================== */
 
 .login-footer-row {
     display: flex;
