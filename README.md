@@ -5,6 +5,7 @@
 #### Otset.ee projekt on täielikult eraldiseisev algatus ning sellel puudub igasugune seos ettevõttega Otsetee.ee OÜ (registrikood 14241428). 
 
 
+
 # Projekt Otsetee: Nutikas ja ohutu tee värske toiduni
 
 Igal suvel täituvad Eesti teeperved isetehtud siltidega, mis kutsuvad möödasõitjaid maasikaid ostma, talupoodi sisse põikama või värsket suitsukala proovima. Kohaliku toidu väärtustamine on imeline, kuid füüsiliste siltide püstitamine riigiteede äärde peidab endas tõsiseid väljakutseid.
