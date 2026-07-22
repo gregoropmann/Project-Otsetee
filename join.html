@@ -73,6 +73,38 @@
             line-height: 1.5;
         }
 
+        /* Enne / Pärast visual kast */
+        .comparison-box {
+            background: #F4F7FA;
+            border: 1px dashed var(--sinilill-blue);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            margin: 25px 0;
+            font-size: 0.9rem;
+        }
+
+        .comparison-old {
+            color: #888;
+            text-decoration: line-through;
+            word-break: break-all;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .comparison-arrow {
+            font-size: 1.1rem;
+            margin: 4px 0;
+            display: block;
+        }
+
+        .comparison-new {
+            color: var(--sinilill-blue);
+            font-weight: 800;
+            font-size: 1.15rem;
+            display: block;
+        }
+
         /* Hinnakasti stiil */
         .price-card {
             background: linear-gradient(135deg, #ffffff, #fdfbf7);
@@ -121,6 +153,12 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(33, 161, 222, 0.45);
             background-color: #1b8ec5;
+        }
+
+        .sub-btn-note {
+            font-size: 0.82rem;
+            color: #777;
+            margin-top: 12px;
         }
 
         /* Funktsioonide nimekiri */
@@ -215,14 +253,21 @@
                 <p class="hero-p">Muuda oma pikad ja keerulised veebiaadressid lühikeseks, meeldejäävaks ja usaldusväärseks Eesti lingiks.</p>
             </div>
 
+            <div class="comparison-box">
+                <span class="comparison-old">https://instagram.com/p/Cxyz12345/minu-talukaup</span>
+                <span class="comparison-arrow">👇</span>
+                <span class="comparison-new">maasikad.otset.ee</span>
+            </div>
+
             <div class="price-card">
                 <div style="font-size: 0.9rem; font-weight: 600; color: var(--wheat-gold); text-transform: uppercase; letter-spacing: 0.5px;">Aastatellimus</div>
                 <div class="amount">7€ <span class="period">/ aasta</span></div>
                 <p style="font-size: 0.88rem; color: #666; margin-bottom: 20px;">Sisaldab 7-päevast tasuta prooviperioodi ja kiiret automaatset veebisuunamist.</p>
                 
                 <a href="https://www.buymeacoffee.com/gregoropmann/membership" target="_blank" class="bmac-custom-btn">
-                    <span>🕶️</span> join otset.ee domain
+                    <span>🚀</span> Alusta 7-päevast tasuta proovi
                 </a>
+                <div class="sub-btn-note">⚡ Seadistus võtab aega alla 1 minuti – tehnilisi teadmisi pole vaja!</div>
             </div>
 
             <div class="features">
