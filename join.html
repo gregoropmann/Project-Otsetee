@@ -98,29 +98,30 @@
             font-weight: normal;
         }
 
-        /* CTA Nupp */
-        .btn-primary {
-            display: inline-block;
+        /* BMAC Nupu ümbris ja pildi parandus (clipping fix) */
+        .bmac-button-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 15px;
             width: 100%;
-            max-width: 320px;
-            padding: 16px 24px;
-            background-color: var(--sinilill-blue);
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(79, 119, 170, 0.3);
-            box-sizing: border-box;
-            border: none;
-            cursor: pointer;
         }
 
-        .btn-primary:hover {
-            opacity: 0.95;
+        .bmac-button-wrapper a {
+            display: inline-block;
+            max-width: 100%;
+            transition: transform 0.2s ease;
+        }
+
+        .bmac-button-wrapper a:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(79, 119, 170, 0.4);
+        }
+
+        .bmac-button-wrapper img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
         }
 
         /* Funktsioonide nimekiri */
@@ -212,34 +213,36 @@
             <div class="header">
                 <span class="badge-tag">🚀 Otset.ee Ökosüsteem</span>
                 <h1>Sinu oma `.otset.ee` alamdomeen</h1>
-                <p class="hero-p">Tõsta oma veebileht, e-pood või portfoolio esile meeldejääva ja usaldusväärse Eesti aadressiga.</p>
+                <p class="hero-p">Muuda oma pikad ja keerulised veebiaadressid lühikeseks, meeldejäävaks ja usaldusväärseks Eesti lingiks.</p>
             </div>
 
             <div class="price-card">
                 <div style="font-size: 0.9rem; font-weight: 600; color: var(--wheat-gold); text-transform: uppercase; letter-spacing: 0.5px;">Aastatellimus</div>
                 <div class="amount">7€ <span class="period">/ aasta</span></div>
-                <p style="font-size: 0.88rem; color: #666; margin-bottom: 20px;">Ei mingeid peidetud tasusid. Automaatne HTTPS sertifikaat hinnas.</p>
+                <p style="font-size: 0.88rem; color: #666; margin-bottom: 20px;">Sisaldab 7-päevast tasuta prooviperioodi ja kiiret automaatset veebisuunamist.</p>
                 
-                <a href="https://www.buymeacoffee.com/gregoropmann/membership" target="_blank">
-    <img src="https://img.buymeacoffee.com/button-api/?text=join otset.ee domain&emoji=🕶️&slug=gregoropmann&button_colour=21a1de&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" alt="Join otset.ee domain" />
-</a>
+                <div class="bmac-button-wrapper">
+                    <a href="https://www.buymeacoffee.com/gregoropmann/membership" target="_blank">
+                        <img src="https://img.buymeacoffee.com/button-api/?text=join otset.ee domain&emoji=🕶️&slug=gregoropmann&button_colour=21a1de&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" alt="Join otset.ee domain" />
+                    </a>
+                </div>
 
             </div>
 
             <div class="features">
                 <div class="feature-item">
-                    <div class="feature-icon">🔒</div>
+                    <div class="feature-icon">🚀</div>
                     <div class="feature-text">
-                        <h3>Tasuta HTTPS / SSL krüpteering</h3>
-                        <p>Sinu alamdomeenile aktiveeritakse automaatselt ametlik turvasertifikaat (roheline tabalukk).</p>
+                        <h3>Välkkiire URL-suunamine (301 Redirect)</h3>
+                        <p>Külastajad, kes sisestavad brauserisse <code>sinunimi.otset.ee</code>, suunatakse viivitamatult sinu olemasolevale veebilehele või e-poodi.</p>
                     </div>
                 </div>
 
                 <div class="feature-item">
-                    <div class="feature-icon">⚡</div>
+                    <div class="feature-icon">🔗</div>
                     <div class="feature-text">
-                        <h3>Lihtne CNAME suunamine</h3>
-                        <p>Ühenda alamdomeen otse oma olemasoleva veebilehe, GitHub Pagesi, Shopify või Notioniga.</p>
+                        <h3>Sobib mis tahes platvormile</h3>
+                        <p>Suuna alamdomeen oma Facebooki lehele, Google Mapsi asukohale, e-poele, Instagramile või isiklikule veebisaidile.</p>
                     </div>
                 </div>
 
@@ -247,7 +250,7 @@
                     <div class="feature-icon">🎯</div>
                     <div class="feature-text">
                         <h3>Lühike ja professionaalne</h3>
-                        <p>Sobib ideaalselt kohalikele tootjatele, teeperve-müüjatele ja isiklikele portfooliotele (nt <code>sinunimi.otset.ee</code>).</p>
+                        <p>Lihtne jagada visiitkaartidel, sotsiaalmeedias või teeperve siltidel (nt <code>maasikad.otset.ee</code>).</p>
                     </div>
                 </div>
             </div>
@@ -255,18 +258,18 @@
             <h2>Korduma kippuvad küsimused</h2>
 
             <div class="faq-item">
-                <h4>Kuidas seadistamine käib?</h4>
-                <p>Pärast makse sooritamist täidad lihtsa vormi, kuhu sisestad soovitud alamdomeeni nime ning oma lehe praeguse aadressi. Me seadistame CNAME suunamise vähemalt mõne tunniga.</p>
+                <h4>Kuidas suunamise seadistamine käib?</h4>
+                <p>Pärast liitumist või tasuta katseaja alustamist täidad lihtsa vormi, kuhu sisestad soovitud alamdomeeni (nt <code>pood</code>) ning oma praeguse veebiaadressi. Aktiveerime suunamise kiiresti!</p>
             </div>
 
             <div class="faq-item">
-                <h4>Kas ma saan alamdomeeni igal ajal muuta?</h4>
-                <p>Jah! Kui muudad oma veebilehe majutajat või asukohta, teavita meid ja uuendame suunamist tasuta.</p>
+                <h4>Kas ma saan sihtkoha aadressi hiljem muuta?</h4>
+                <p>Jah! Kui muudad oma veebilehe asukohta või platvormi, teavita meid ja uuendame suunamissihtkohta tasuta.</p>
             </div>
 
             <div class="faq-item">
                 <h4>Mis saab siis, kui ma ei soovi tellimust pikendada?</h4>
-                <p>Tühista oma tellimus enne uut aastat Buy Me a Coffee keskkonnas. Pärast perioodi lõppu alamdomeen eemaldatakse ilma lisatasudeta.</p>
+                <p>Võid tellimuse igal ajal Buy Me a Coffee keskkonnas tühistada. Pärast tasulise perioodi või katseaja lõppu suunamine lihtsalt eemaldatakse.</p>
             </div>
 
             <footer>
