@@ -33,14 +33,18 @@ const productEmojis = {
     "Maasikad": "🍓", "Aedmaasikad": "🍓", "Metsmaasikad": "🍓",
     "Herned": "🫛", "Hernekaunad": "🫛",
     "Mesi": "🍯", "Õiemesi": "🍯", "Metsamesi": "🍯", "Kanarbikumesi": "🍯",
-    "Kala": "🐟", "Suitsulõhe": "🐟", "Suitsuangerjas": "🐟", "Ahven": "🐟",
+    "Kala": "🐟", "Suitsukala": "🐟", "Suitsulõhe": "🐟", "Suitsuangerjas": "🐟", "Ahven": "🐟",
     "Munad": "🥚", "Maamunad": "🥚", "Vutimunad": "🥚",
     "Kartul": "🥔", "Värske kartul": "🥔",
     "Küüslauk": "🧄", "Mugulsibul": "🧅", "Peipsi sibul": "🧅",
     "Suitsusink": "🥩", "Liha": "🥩", "Värske kurk": "🥒", "Hapukurk": "🥒",
     "Eesti tomat": "🍅", "Kirsstomatid": "🍅", "Kukeseened": "🍄", "Seened": "🍄",
     "Käsitööleib": "🍞", "Leib": "🍞", "Õunad": "🍎", "Kodumaised õunad": "🍎",
-    "Piim": "🥛", "Juust": "🧀", "Kirsid": "🍒", "Vaarikad": "🍇", "Mustikad": "🫐"
+    "Piim": "🥛", "Juust": "🧀", "Kirsid": "🍒", "Vaarikad": "🍇", "Mustikad": "🫐",
+    "Spargel": "🥦",
+    "Püsililled": "🌸", "Põõsad": "🪴", "Lilled": "💐", "Istikud": "🌱",
+    "Õlipirukad": "🥧", "Pirukad": "🥧", "Purgitooted": "🫙", "Moos": "🫙",
+    "Lõikelauad": "🪵", "Puidust": "🪵"
 };
 
 function getEmojiForProduct(name) {
@@ -108,7 +112,7 @@ function getPaymentLabel(paymentType) {
     return parts.map(p => labels[p]).join(' + ');
 }
 
-Const agriProducts = {
+const agriProducts = {
     "Mesi ja Mesindustooted": [
         "Õiemesi", "Kanarbikumesi", "Metsamesi", "Kärjemesi", "Taruvaik", "Suir", 
         "Mesilasvaha", "Sulatatud mesi maitsetaimedega", "Suhkrustunud mesi"
