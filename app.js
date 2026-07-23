@@ -108,7 +108,7 @@ function getPaymentLabel(paymentType) {
     return parts.map(p => labels[p]).join(' + ');
 }
 
-const agriProducts = {
+Const agriProducts = {
     "Mesi ja Mesindustooted": [
         "Õiemesi", "Kanarbikumesi", "Metsamesi", "Kärjemesi", "Taruvaik", "Suir", 
         "Mesilasvaha", "Sulatatud mesi maitsetaimedega", "Suhkrustunud mesi"
@@ -116,7 +116,7 @@ const agriProducts = {
     "Kala ja Kalatooted": [
         "Suitsuangerjas", "Suitsulest", "Suitsurääbis", "Kuivatatud särg", "Värske koha", 
         "Värske ahven", "Marineeritud silmud", "Suitsulõhe", "Värske haug", "Kohafilee", 
-        "Soolasiig", "Jõevähid"
+        "Soolasiig", "Jõevähid", "Suitsukala"
     ],
     "Marjad": [
         "Metsmaasikad", "Aedmaasikad", "Vaarikad", "Mustikad", "Pohlad", "Jõhvikad", 
@@ -128,7 +128,7 @@ const agriProducts = {
         "Peipsi sibul", "Porgand", "Hernekaunad", "Tilli-rohelise kimp", 
         "Värske kapsas", "Hapukapsas", "Punane peet", "Värske kurk", "Eesti tomat", 
         "Kirsstomatid", "Suvikõrvits", "Kõrvits", "Kukeseened", 
-        "Puravakud", "Austerservikud", "Roheline sibul"
+        "Puravakud", "Austerservikud", "Roheline sibul", "Spargel"
     ],
     "Puuviljad ja Marjaaiad": [
         "Kodumaised õunad", "Ploomid", "Kirsid", "Hapukirsid", "Pirnid", "Kreegid"
@@ -142,20 +142,22 @@ const agriProducts = {
         "Grillvorstid", "Soolapekk", "Värske sealiha", "Lamba suitsuliha"
     ],
     "Küpsetised ja Omatoodang": [
-        "Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook", 
-        "Kodune kali", "Mahl (õuna/sõstra)", "Moos", "Ebaküdooniasiirup", 
-        "Kuivatatud õunaviilud", "Karask", "Kohupiimakook"
+        "Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Kodused õlipirukad", 
+        "Rabarberikook", "Kodune kali", "Mahl (õuna/sõstra)", "Moos", "Ebaküdooniasiirup", 
+        "Kuivatatud õunaviilud", "Karask", "Kohupiimakook", "Purgitooted"
     ],
     "Istikud, Taimed ja Lilled": [
         "Tomatiistikud", "Kurgiistikud", "Maasikataimed", "Maitsetaimede potid", 
-        "Suvelillede amplid", "Lõikelilled", "Viljapuude istikud"
+        "Suvelillede amplid", "Lõikelilled", "Viljapuude istikud", "Püsililled", 
+        "Põõsad"
     ],
     "Saun, Käsitöö ja Kodu": [
         "Kase-saunavihad", "Tamme-saunavihad", "Käsitööseebid", "Saunamesi", 
         "Kootud villased sokid", "Käsitöövaibad", "Küttepuud (kotis)", "Kaminapuud (lepp)", 
-        "Puidust köögiriistad", "Punutud korvid", "Vahaküünlad"
+        "Puidust köögiriistad", "Punutud korvid", "Vahaküünlad", "Lõikelauad"
     ]
 };
+
 
 window.addEventListener('DOMContentLoaded', async () => {
     // Lae sõnastik sisse enne koodi käivitumist
