@@ -33,18 +33,14 @@ const productEmojis = {
     "Maasikad": "🍓", "Aedmaasikad": "🍓", "Metsmaasikad": "🍓",
     "Herned": "🫛", "Hernekaunad": "🫛",
     "Mesi": "🍯", "Õiemesi": "🍯", "Metsamesi": "🍯", "Kanarbikumesi": "🍯",
-    "Kala": "🐟", "Suitsukala": "🐟", "Suitsulõhe": "🐟", "Suitsuangerjas": "🐟", "Ahven": "🐟",
+    "Kala": "🐟", "Suitsulõhe": "🐟", "Suitsuangerjas": "🐟", "Ahven": "🐟",
     "Munad": "🥚", "Maamunad": "🥚", "Vutimunad": "🥚",
     "Kartul": "🥔", "Värske kartul": "🥔",
     "Küüslauk": "🧄", "Mugulsibul": "🧅", "Peipsi sibul": "🧅",
     "Suitsusink": "🥩", "Liha": "🥩", "Värske kurk": "🥒", "Hapukurk": "🥒",
     "Eesti tomat": "🍅", "Kirsstomatid": "🍅", "Kukeseened": "🍄", "Seened": "🍄",
     "Käsitööleib": "🍞", "Leib": "🍞", "Õunad": "🍎", "Kodumaised õunad": "🍎",
-    "Piim": "🥛", "Juust": "🧀", "Kirsid": "🍒", "Vaarikad": "🍇", "Mustikad": "🫐",
-    "Spargel": "🥦",
-    "Püsililled": "🌸", "Põõsad": "🪴", "Lilled": "💐", "Istikud": "🌱",
-    "Õlipirukad": "🥧", "Pirukad": "🥧", "Purgitooted": "🫙", "Moos": "🫙",
-    "Lõikelauad": "🪵", "Puidust": "🪵"
+    "Piim": "🥛", "Juust": "🧀", "Kirsid": "🍒", "Vaarikad": "🍇", "Mustikad": "🫐"
 };
 
 function getEmojiForProduct(name) {
@@ -120,7 +116,7 @@ const agriProducts = {
     "Kala ja Kalatooted": [
         "Suitsuangerjas", "Suitsulest", "Suitsurääbis", "Kuivatatud särg", "Värske koha", 
         "Värske ahven", "Marineeritud silmud", "Suitsulõhe", "Värske haug", "Kohafilee", 
-        "Soolasiig", "Jõevähid", "Suitsukala"
+        "Soolasiig", "Jõevähid"
     ],
     "Marjad": [
         "Metsmaasikad", "Aedmaasikad", "Vaarikad", "Mustikad", "Pohlad", "Jõhvikad", 
@@ -132,7 +128,7 @@ const agriProducts = {
         "Peipsi sibul", "Porgand", "Hernekaunad", "Tilli-rohelise kimp", 
         "Värske kapsas", "Hapukapsas", "Punane peet", "Värske kurk", "Eesti tomat", 
         "Kirsstomatid", "Suvikõrvits", "Kõrvits", "Kukeseened", 
-        "Puravakud", "Austerservikud", "Roheline sibul", "Spargel"
+        "Puravakud", "Austerservikud", "Roheline sibul"
     ],
     "Puuviljad ja Marjaaiad": [
         "Kodumaised õunad", "Ploomid", "Kirsid", "Hapukirsid", "Pirnid", "Kreegid"
@@ -146,22 +142,20 @@ const agriProducts = {
         "Grillvorstid", "Soolapekk", "Värske sealiha", "Lamba suitsuliha"
     ],
     "Küpsetised ja Omatoodang": [
-        "Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Kodused õlipirukad", 
-        "Rabarberikook", "Kodune kali", "Mahl (õuna/sõstra)", "Moos", "Ebaküdooniasiirup", 
-        "Kuivatatud õunaviilud", "Karask", "Kohupiimakook", "Purgitooted"
+        "Koduõlu", "Käsitööleib", "Peenleib", "Sibulapirukad", "Rabarberikook", 
+        "Kodune kali", "Mahl (õuna/sõstra)", "Moos", "Ebaküdooniasiirup", 
+        "Kuivatatud õunaviilud", "Karask", "Kohupiimakook"
     ],
     "Istikud, Taimed ja Lilled": [
         "Tomatiistikud", "Kurgiistikud", "Maasikataimed", "Maitsetaimede potid", 
-        "Suvelillede amplid", "Lõikelilled", "Viljapuude istikud", "Püsililled", 
-        "Põõsad"
+        "Suvelillede amplid", "Lõikelilled", "Viljapuude istikud"
     ],
     "Saun, Käsitöö ja Kodu": [
         "Kase-saunavihad", "Tamme-saunavihad", "Käsitööseebid", "Saunamesi", 
         "Kootud villased sokid", "Käsitöövaibad", "Küttepuud (kotis)", "Kaminapuud (lepp)", 
-        "Puidust köögiriistad", "Punutud korvid", "Vahaküünlad", "Lõikelauad"
+        "Puidust köögiriistad", "Punutud korvid", "Vahaküünlad"
     ]
 };
-
 
 window.addEventListener('DOMContentLoaded', async () => {
     // Lae sõnastik sisse enne koodi käivitumist
