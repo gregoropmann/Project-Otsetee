@@ -40,7 +40,53 @@ const productEmojis = {
     "Suitsusink": "🥩", "Liha": "🥩", "Värske kurk": "🥒", "Hapukurk": "🥒",
     "Eesti tomat": "🍅", "Kirsstomatid": "🍅", "Kukeseened": "🍄", "Seened": "🍄",
     "Käsitööleib": "🍞", "Leib": "🍞", "Õunad": "🍎", "Kodumaised õunad": "🍎",
-    "Piim": "🥛", "Juust": "🧀", "Kirsid": "🍒", "Vaarikad": "🍇", "Mustikad": "🫐"
+    "Piim": "🥛", "Juust": "🧀", "Kirsid": "🍒", "Vaarikad": "🍇", "Mustikad": "🫐",
+
+    // --- Mesi ja Mesindustooted ---
+    "Taruvaik": "🐝", "Suir": "🐝",
+
+    // --- Kala ja Kalatooted ---
+    "Suitsulest": "🐟", "Suitsurääbis": "🐟", "Kuivatatud särg": "🐟",
+    "Värske koha": "🐟", "Marineeritud silmud": "🐟", "Värske haug": "🐟",
+    "Kohafilee": "🐟", "Soolasiig": "🐟", "Jõevähid": "🦞",
+
+    // --- Marjad ---
+    "Pohlad": "🫐", "Jõhvikad": "🫐", "Murakad": "🫐", "Mustad sõstrad": "🫐",
+    "Punased sõstrad": "🫐", "Tikrid": "🫐", "Arooniad": "🫐",
+    "Astelpajumarjad": "🟠", "Ebaküdooniad": "🍐",
+
+    // --- Köögiviljad, Juurikad ja Seened ---
+    "Meresoolakurk": "🥒", "Porgand": "🥕", "Tilli-rohelise kimp": "🌿",
+    "Värske kapsas": "🥬", "Hapukapsas": "🥬", "Punane peet": "🟣",
+    "Suvikõrvits": "🥒", "Kõrvits": "🎃", "Puravakud": "🍄",
+    "Austerservikud": "🍄", "Roheline sibul": "🧅", "Spargel": "🌱",
+
+    // --- Puuviljad ja Marjaaiad ---
+    "Ploomid": "🟣", "Pirnid": "🍐", "Kreegid": "🍑",
+
+    // --- Piim, Juust ja Munad ---
+    "Sõir": "🧀", "Maavõi": "🧈", "Hapukoor": "🥛",
+
+    // --- Liha ja Lihatooted ---
+    "Suitsuvorst": "🌭", "Metssea vorst": "🌭", "Kodune sült": "🥩",
+    "Grillvorstid": "🌭", "Soolapekk": "🥓",
+
+    // --- Küpsetised ja Omatoodang ---
+    "Koduõlu": "🍺", "Sibulapirukad": "🥧", "Kodused õlipirukad": "🥧",
+    "Rabarberikook": "🍰", "Kodune kali": "🥤", "Mahl (õuna/sõstra)": "🧃",
+    "Moos": "🍓", "Ebaküdooniasiirup": "🍯", "Kuivatatud õunaviilud": "🍎",
+    "Karask": "🍞", "Purgitooted": "🫙",
+
+    // --- Istikud, Taimed ja Lilled ---
+    "Tomatiistikud": "🌱", "Kurgiistikud": "🌱", "Maasikataimed": "🌱",
+    "Maitsetaimede potid": "🌿", "Suvelillede amplid": "🌸", "Lõikelilled": "💐",
+    "Viljapuude istikud": "🌳", "Püsililled": "🌷", "Põõsad": "🌳",
+
+    // --- Saun, Käsitöö ja Kodu ---
+    "Kase-saunavihad": "🌿", "Tamme-saunavihad": "🌿", "Käsitööseebid": "🧼",
+    "Kootud villased sokid": "🧦", "Käsitöövaibad": "🧶", "Küttepuud": "🪵",
+    "Kaminapuud": "🪵", "Puidust köögiriistad": "🍴", "Punutud korvid": "🧺",
+    "Vahaküünlad": "🕯️", "Lõikelauad": "🔪"
 };
 
 function getEmojiForProduct(name) {
