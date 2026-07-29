@@ -777,7 +777,22 @@ function initMap() {
     const savedLat = localStorage.getItem('otset_custom_lat');
     const savedLng = localStorage.getItem('otset_custom_lng');
     const centerPoint = (savedLat && savedLng) ? [parseFloat(savedLat), parseFloat(savedLng)] : [58.2522, 26.4719];
-    map = L.map('map-container', { zoomControl: false }).setView(centerPoint, 12); 
+    
+    // --- 1. Defineeri maailma piirid (-90 kuni 90 laiuskraadi, -180 kuni 180 pikkuskraadi) ---
+    const worldBounds = [
+        [-90, -180],
+        [90, 180]
+    ];
+
+    // --- 2. Initsialiseeri kaart koos piirangutega ---
+    map = L.map('map-container', { 
+        zoomControl: false,
+        minZoom: 3,                   // Takistab liiga kaugele vähendamist
+        maxBounds: worldBounds,       // Hoiab kaardi fikseeritult 1 maailmakaardi piires
+        maxBoundsViscosity: 1.0,      // Keelab kaardist täielikult "välja" lohistamise
+        worldCopyJump: false          // Ei korda kaarti horisontaalselt
+    }).setView(centerPoint, 12); 
+
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
