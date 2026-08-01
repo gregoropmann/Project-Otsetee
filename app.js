@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+Import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import { loadBannedWords, analyzeAndSanitize, autoReportProfanity } from "./filter.js";
@@ -777,22 +777,21 @@ function initMap() {
     const savedLat = localStorage.getItem('otset_custom_lat');
     const savedLng = localStorage.getItem('otset_custom_lng');
     const centerPoint = (savedLat && savedLng) ? [parseFloat(savedLat), parseFloat(savedLng)] : [58.2522, 26.4719];
+    
+    // --- 1. Defineeri maailma piirid (-90 kuni 90 laiuskraadi, -180 kuni 180 pikkuskraadi) ---
+    const worldBounds = [
+        [-90, -180],
+        [90, 180]
+    ];
 
-// --- 1. Define specific Baltic bounds (Estonia, South Finland, North Latvia) ---
-// Format: [[South Lat, West Lng], [North Lat, East Lng]]
-const balticBounds = [
-    [56.8, 20.8], // Southwest corner (Latvia/Baltic Sea)
-    [60.6, 28.5]  // Northeast corner (Finland/Gulf of Finland)
-];
-
-// --- 2. Initialize map with strict limits ---
-map = L.map('map-container', { 
-    zoomControl: false,
-    minZoom: 6,                     // Set a high enough zoom so users can't zoom out past the box
-    maxBounds: balticBounds,        // Strict locking to these coordinates
-    maxBoundsViscosity: 1.0,        // Completely solid boundary (no bounce-back)
-    worldCopyJump: false
-}).setView(centerPoint, 12); 
+    // --- 2. Initsialiseeri kaart koos piirangutega ---
+    map = L.map('map-container', { 
+        zoomControl: false,
+        minZoom: 3,                   // Takistab liiga kaugele vähendamist
+        maxBounds: worldBounds,       // Hoiab kaardi fikseeritult 1 maailmakaardi piires
+        maxBoundsViscosity: 1.0,      // Keelab kaardist täielikult "välja" lohistamise
+        worldCopyJump: false          // Ei korda kaarti horisontaalselt
+    }).setView(centerPoint, 12); 
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: '© OpenStreetMap contributors'
