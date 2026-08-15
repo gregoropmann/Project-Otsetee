@@ -712,7 +712,7 @@ window.handleLogin = async function(role, providerName) {
                 showNotification("Sisselogimine ebaõnnestus: " + error.message);
             }
         } else if (providerName === 'Apple') {
-            showNotification("Apple sisselogimine pole yet ühendatud.");
+            showNotification("Apple sisselogimine pole veel toetatud.");
         }
     } else {
         localStorage.setItem('otset_loggedin', 'true');
