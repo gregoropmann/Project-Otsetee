@@ -793,9 +793,10 @@ function initMap() {
         worldCopyJump: false          // Ei korda kaarti horisontaalselt
     }).setView(centerPoint, 12); 
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+}).addTo(map);
 
     onSnapshot(collection(db, "active_merchants"), (snapshot) => {
         snapshot.docChanges().forEach((change) => {
